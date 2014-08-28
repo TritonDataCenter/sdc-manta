@@ -1,0 +1,5 @@
+{
+	"name": "ssh_private_key",
+	"path" : "/root/.ssh/id_rsa",
+	"master": true
+}

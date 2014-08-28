@@ -1,0 +1,4 @@
+{
+	"name": "skate-stor-instance",
+	"path": "/opt/smartdc/manta-deployment/skate/templates/skate-stor-instance.json.in"
+}

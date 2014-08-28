@@ -1,0 +1,12 @@
+/node_modules
+/tmp
+build
+docs/*.json
+docs/*.html
+cscope.in.out
+cscope.po.out
+cscope.out
+proto/
+sdc-manta-pkg-*
+/webrev
+abandoned

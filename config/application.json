@@ -1,0 +1,8 @@
+{
+	"name": "manta",
+	"params": {
+		"delegate_dataset": true
+	},
+	"metadata": {
+	}
+}

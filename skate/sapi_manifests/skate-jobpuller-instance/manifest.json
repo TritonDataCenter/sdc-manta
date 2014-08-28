@@ -1,0 +1,4 @@
+{
+	"name": "skate-jobpuller-instance",
+	"path": "/opt/smartdc/manta-deployment/skate/templates/skate-jobpuller-instance.json.in"
+}

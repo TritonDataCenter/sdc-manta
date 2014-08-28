@@ -1,0 +1,5 @@
+{
+	"name": "ssh_public_key",
+	"path" : "/root/.ssh/id_rsa.pub",
+	"master": true
+}

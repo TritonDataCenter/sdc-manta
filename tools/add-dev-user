@@ -1,0 +1,121 @@
+#!/bin/bash
+#
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+#
+
+#
+# Copyright (c) 2014, Joyent, Inc.
+#
+
+#
+# add-dev-user LOGIN: add an unprivileged user to SDC for testing Manta.
+# The user is based on the template user "poseidon" and inherits that email
+# address (plus a unique suffix) and its most recently added ssh key.
+#
+
+#
+# Returns true iff the user "$1" (a login) already exists.
+#
+function user_exists
+{
+	test -n "$(sdc-ldap search -b ou=users,o=smartdc \
+	    "(&(objectclass=sdcperson)(login=$1))")"
+}
+
+#
+# Returns the key fingerprint for user "$1" (a login)
+#
+function user_key
+{
+	sdc-ldap search -b "$(sdc-ldap search login=$1 | \
+            head -1 | cut -c5-)" objectclass=sdckey | \
+            awk '/^fingerprint:/{ print $2; }' | tail -1
+}
+
+#
+# Prints the MANTA environment variables for user "$1" (a login)
+#
+function user_env
+{
+	echo "MANTA_USER=$1"
+	echo "MANTA_KEY_ID=$(user_key $1)"
+}
+
+#
+# Add a user with login "$1" based on $templateuser (a global).
+#
+function user_add
+{
+	local uuid awkfile tmpfile email key
+
+	uuid="$(uuid)"
+	awkfile="/var/tmp/$(basename $0).$$.awk"
+	tmpfile="/var/tmp/$(basename $0).$$"
+
+	cat > $awkfile << EOF
+\$1 == "email:"{
+	split(\$2, a, "@");
+	if (a[2] != "joyent.com" && a[2] != "gmail.com") {
+		print "don't know how to update domain " a[2];
+		exit 1
+	}
+	
+	printf("%s+%s@%s\n", a[1], "${uuid:0:8}", a[2]);
+	exit 0
+}
+EOF
+	email="$(sdc-ldap search -b 'ou=users,o=smartdc' \
+	    login=$templateuser | awk -f $awkfile)"
+	rm -f $awkfile
+	echo "using email address $email" >&2
+
+	key="$(user_key $templateuser)"
+	echo "using key $key" >&2
+
+	cat > $tmpfile <<-EOF
+	dn: uuid=$uuid, ou=users, o=smartdc
+	changetype: add
+	email: $email
+	login: $1
+	userpassword: secret123
+	uuid: $uuid
+	approved_for_provisioning: true
+	objectclass: sdcperson
+
+	dn: fingerprint=$key, uuid=$uuid, ou=users, o=smartdc
+	changetype: add
+	EOF
+
+	sdc-ldap search "(&(objectclass=sdckey)(fingerprint=$key))" | \
+	    egrep '^(fingerprint|name|objectclass|openssh:|pkcs:):' \
+	    >> $tmpfile
+	if ! sdc-ldap add -f $tmpfile; then
+		echo "failed; see $tmpfile for input" >&2
+		exit 1
+	fi
+
+	rm -f $tmpfile
+}
+
+if [[ -z "$1" ]]; then
+	echo "usage: $0 LOGIN" >&2
+	exit 2
+fi
+
+login="$1"
+templateuser="poseidon"
+
+#
+# If this user exists already, just print out the corresponding MANTA
+# environment variables.  Otherwise, create the user and then print out the
+# environment variables.
+#
+if user_exists "$login"; then
+	echo "user \"$login\" already exists" >&2
+else
+	user_add "$login" || exit 1
+fi
+
+user_env "$login"

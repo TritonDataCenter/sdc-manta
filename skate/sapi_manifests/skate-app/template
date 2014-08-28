@@ -1,0 +1,39 @@
+{
+  "name": "skate",
+  "owner_uuid": "{{{ufds_admin_uuid}}}",
+  "params": {
+    "delegate_dataset": true
+  },
+  "metadata": {
+    "REGION": "{{{datacenter_name}}}",
+    "DNS_DOMAIN": "{{{datacenter_name}}}.{{{dns_domain}}}",
+    "MANTA_SERVICE": "skate.{{{datacenter_name}}}.{{{dns_domain}}}",
+    "AUTH_SERVICE": "{{{MAHI_SERVICE}}}",
+    "ELECTRIC_MORAY": "{{{MORAY_SERVICE}}}",
+    "POSEIDON_UUID": "{{{ufds_admin_uuid}}}",
+    "IMGAPI_SERVICE": "{{{IMGAPI_SERVICE}}}",
+    "MEDUSA_REFLECTOR": "skate-medusa.{{{datacenter_name}}}.{{{dns_domain}}}",
+    "MANTA_URL": "https://skate.{{{datacenter_name}}}.{{{dns_domain}}}",
+    "MANTA_REJECT_UNAUTHORIZED": false,
+    "MANTA_TLS_INSECURE": "1",
+    "MUSKIE_MULTI_DC": false,
+    "ADMIN_USERNAME": "{{{ufds_admin_login}}}",
+    "ADMIN_KEY_ID": "{{{SDC_KEY_ID}}}",
+    "ZK_SERVERS": [
+      {
+        "host": "{{{binder_admin_ips}}}",
+        "port": 2181,
+        "num": 1,
+        "last": true
+      }
+    ],
+    "MARLIN_MORAY_SHARD": "{{{MORAY_SERVICE}}}",
+    "STORAGE_MORAY_SHARD": "{{{MORAY_SERVICE}}}",
+    "INDEX_MORAY_SHARDS": [
+      {
+        "host": "{{{MORAY_SERVICE}}}",
+        "last": true
+      }
+    ]
+  }
+}

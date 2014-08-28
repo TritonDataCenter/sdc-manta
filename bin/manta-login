@@ -1,0 +1,77 @@
+#!/bin/bash
+#
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+#
+
+#
+# Copyright (c) 2014, Joyent, Inc.
+#
+
+#
+# Login to a manta zone.
+#
+
+if [[ -n "$TRACE" ]]; then
+    export PS4='[\D{%FT%TZ}] ${BASH_SOURCE}:${LINENO}: ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+    set -o xtrace
+fi
+set -o pipefail
+
+
+#---- support stuff
+
+function fatal {
+    echo "$0: fatal error: $*"
+    exit 1
+}
+
+function usage {
+    echo "Usage: manta-login <service> [choice]"
+    echo "       manta-login <uuid> [choice]"
+    echo "       manta-login <uuid-prefix> [choice]"
+    echo "       manta-login <any substring> [choice]"
+}
+
+
+#---- mainline
+
+if [[ -z "$1" ]]; then
+    usage
+    exit 2
+elif [[ "$1" == "-h" || "$1" == "--help" ]]; then
+    usage
+    exit 0
+fi
+
+IFS=$'\n'
+results=($(manta-adm show -H -o service,shard,zonename,gz_admin_ip | \
+    grep $1 | sort))
+if [[ ${#results[@]} -gt 1 ]]; then
+    c=0
+    if [[ -n $2 ]]; then
+        echo "$2"
+        choice=$2
+    else
+        for i in ${results[@]}; do
+            echo $c":  " $i
+            c=$(expr $c + 1)
+        done
+        printf "Choose a number: "
+        read choice
+    fi
+    server=$(echo ${results[$choice]} | awk '{print $4}')
+    zone=$(echo ${results[$choice]} | awk '{print $3}')
+else
+    server=$(echo $results | awk '{print $4}')
+    zone=$(echo $results | awk '{print $3}')
+fi
+
+if [[ -z "$server" ]]; then
+    fatal "no match for \"$1\""
+elif [[ "$server" == "-" ]]; then
+    fatal "don't have an IP for the zone's server (is it in a different DC?)"
+fi
+
+ssh -t root@$server zlogin $zone

@@ -1,0 +1,63 @@
+#!/bin/bash
+#
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+#
+
+#
+# Copyright (c) 2014, Joyent, Inc.
+#
+
+#
+# deploy-coal: deploys a manta install on a coal-* system
+#
+
+set -o errexit
+set -o xtrace
+
+# Make 1 DNS/ZK servers
+manta-deploy nameservice
+
+#
+# Deploy 2 postgres shards
+#
+for i in $(seq 1 2); do
+	manta-deploy postgres -z 1
+done
+for i in $(seq 1 2); do
+	manta-deploy postgres -z 2
+done
+
+manta-deploy moray -z 1
+manta-deploy moray -z 2
+
+manta-shardadm set -i "1.moray 2.moray"
+manta-shardadm set -m "1.moray"
+manta-shardadm set -s "1.moray"
+
+manta-deploy electric-moray
+
+for i in $(seq 1 2); do
+	manta-deploy storage
+done
+
+manta-deploy authcache
+
+manta-deploy webapi
+
+manta-deploy loadbalancer
+
+manta-deploy jobsupervisor
+
+manta-deploy jobpuller
+
+manta-deploy medusa
+
+manta-deploy ops
+
+for i in $(seq 1 2); do
+	manta-deploy marlin
+done
+
+manta-marlin

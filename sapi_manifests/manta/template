@@ -1,0 +1,48 @@
+{
+        "amon": {
+                "url": "http://{{{AMON_SERVICE}}}"
+        },
+        "cnapi": {
+                "url": "http://{{{CNAPI_SERVICE}}}"
+        },
+        "imgapi": {
+                "url": "http://{{{IMGAPI_SERVICE}}}"
+        },
+        "remote_imgapi": {
+                "url": "https://updates.joyent.com"
+        },
+        "napi": {
+                "url": "http://{{{NAPI_SERVICE}}}"
+        },
+        "sapi": {
+                "url": "http://{{{SAPI_SERVICE}}}"
+        },
+        "ufds": {
+                "url": "ldaps://{{{UFDS_SERVICE}}}",
+                "bindDN": "{{{ufds_ldap_root_dn}}}",
+                "bindPassword": "{{{ufds_ldap_root_pw}}}",
+                "cache": {
+                        "size": 1000,
+                        "expiry": 300
+                }
+        },
+        "vmapi": {
+                "url": "http://{{{VMAPI_SERVICE}}}"
+        },
+        "user": "poseidon",
+        "dns_domain": "{{dns_domain}}",
+        "region_name": "{{region_name}}",
+        "datacenter_name": "{{datacenter_name}}",
+        "levels": {
+          "alert": [
+            {{#MANTAMON_ALERT}}
+              "{{contact}}"{{^last}},{{/last}}
+            {{/MANTAMON_ALERT}}
+          ],
+          "info": [
+            {{#MANTAMON_INFO}}
+              "{{contact}}"{{^last}},{{/last}}
+            {{/MANTAMON_INFO}}
+          ]
+        }
+}

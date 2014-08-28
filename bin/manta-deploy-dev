@@ -1,0 +1,113 @@
+#!/bin/bash
+#
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+#
+
+#
+# Copyright (c) 2014, Joyent, Inc.
+#
+
+#
+# deploy-dev: deploys a manta install on a coal or lab system
+#
+
+#
+# fail ERRMESSAGE: prints the error message to stderr and exits
+#
+function fail
+{
+	echo "$(basename $0): $@" >&2
+	exit 1
+}
+
+#
+# confirm MESSAGE: prompt the user with MESSAGE and returns success only ifi
+# they reply with "y" or "Y".
+#
+function confirm
+{
+	# Skip all confirmations if "-y" was given on the command line.
+	[[ "$mdl_override" == "true" ]] && return
+
+	# Prompt the user with the message we were given.
+	read -p "$@" -n 1
+
+	# Print a newline, regardless of what they typed.
+	echo
+
+	# Return success iff the user typed "y" or "Y".
+	[[ $REPLY =~ ^[Yy]$ ]]
+}
+
+mdl_tmpdir="${TMPDIR:-/var/tmp}"
+mdl_conffile="$mdl_tmpdir/lab-config.json"
+mdl_override="false"		# override confirmation prompts
+mdl_topo_size=			# number of fash virtual nodes
+mdl_index_shards=		# manatee shards to use for indexing tier
+mdl_genconfig=			# manta-adm genconfig kind
+
+if [[ "$1" == "-y" ]]; then
+	shift
+	mdl_override="true"
+	echo "note: bypassing confirmations" >&2
+fi
+
+case "$1" in
+	coal)
+		mdl_genconfig="coal"
+		mdl_topo_size=1000000
+		mdl_index_shards="1.moray"
+		;;
+	lab)
+		mdl_genconfig="lab"
+		mdl_topo_size=10000000
+		mdl_index_shards="1.moray 2.moray"
+		;;
+	*)
+		echo "usage: $(basename $0) [-y] coal | lab" >&2
+		exit 2
+		;;
+esac
+
+echo "index shards:   $mdl_index_shards" >&2
+echo "fash vnodes:    $mdl_topo_size" >&2
+echo "genconfig mode: $mdl_genconfig" >&2
+
+set -o errexit
+set -o xtrace
+
+manta-shardadm set -i "$mdl_index_shards"
+manta-shardadm set -m "1.moray"
+manta-shardadm set -s "1.moray"
+
+set +o errexit
+manta-create-topology.sh -v $mdl_topo_size -p 2020
+case "$?" in
+	3)
+		echo "hash ring already exists"
+		;;
+	0)
+		echo "successfully generated hash ring"
+		;;
+	*)
+		fail "could not generate hash ring"
+esac
+set -o errexit
+
+manta-adm genconfig $mdl_genconfig > $mdl_conffile
+manta-adm update -y $mdl_conffile nameservice
+
+set +o xtrace
+cat <<-EOF
+Nameservice zones deployed.  You should check that they came up properly
+by running "svcs -Zxv" in the global zone.  You should only proceed once
+those zones are up and running.
+EOF
+confirm "Are you ready to proceed? (y/N) " || fail "aborted by user"
+
+set -o xtrace
+manta-adm update -y $mdl_conffile
+manta-marlin
+set +o xtrace

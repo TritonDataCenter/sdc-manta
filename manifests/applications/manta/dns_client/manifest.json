@@ -1,0 +1,5 @@
+{
+    "name": "dns_client",
+    "path": "/etc/resolv.conf",
+	"master": true
+}

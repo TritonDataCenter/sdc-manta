@@ -1,0 +1,20 @@
+{
+	"sapi": {
+		"url": "{{SAPI_URL}}"
+	},
+	"manta_url": "{{MANTA_URL}}",
+	"manta": {
+		"url": "{{MANTA_URL}}",
+		"user": "{{ADMIN_USERNAME}}",
+		"sign": {
+			"key": "/root/.ssh/id_rsa",
+			"keyId": "{{ADMIN_KEY_ID}}"
+		},
+		"retry": {
+			"attempts": 5,
+			"minTimeout": 1000
+		},
+		"connectTimeout": 1000,
+		"rejectUnauthorized": {{MANTA_REJECT_UNAUTHORIZED}}
+	}
+}

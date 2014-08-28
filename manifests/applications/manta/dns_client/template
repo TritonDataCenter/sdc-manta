@@ -1,0 +1,7 @@
+domain {{REGION}}.{{DNS_DOMAIN}}
+{{#ZK_SERVERS}}
+nameserver {{host}}
+{{/ZK_SERVERS}}
+{{#SDC_NAMESERVERS}}
+nameserver {{host}}
+{{/SDC_NAMESERVERS}}

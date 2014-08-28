@@ -1,0 +1,6 @@
+{
+	"params": {
+		"networks": [ "external", "manta", "admin" ],
+		"ram": 512
+	}
+}

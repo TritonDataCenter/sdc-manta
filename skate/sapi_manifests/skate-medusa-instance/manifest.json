@@ -1,0 +1,4 @@
+{
+	"name": "skate-medusa-instance",
+	"path": "/opt/smartdc/manta-deployment/skate/templates/skate-medusa-instance.json.in"
+}

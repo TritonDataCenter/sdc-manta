@@ -1,0 +1,27 @@
+{
+  "params": {
+    "alias": "skate-ops.{{{datacenter_name}}}.{{{dns_domain}}}",
+    "tags": {
+      "skate_role": "ops",
+      "manta_role": "ops"
+    }
+  },
+  "metadata": {
+    "SERVICE_NAME": "skate-ops.{{{datacenter_name}}}.{{{dns_domain}}}",
+    "SHARD": "1",
+    "SAPI_URL": "http://{{{SAPI_SERVICE}}}",
+    "UFDS_URL": "ldaps://{{{UFDS_SERVICE}}}",
+    "UFDS_ROOT_DN": "{{{ufds_ldap_root_dn}}}",
+    "UFDS_ROOT_PW": "{{{ufds_ldap_root_pw}}}",
+    "SDC_NAMESERVERS": [
+      {
+        "host": "{{{binder_admin_ips}}}",
+        "port": 2181,
+        "num": 1,
+        "last": true
+      }
+    ],
+    "user-script": "#!/usr/bin/bash\n\nset -o xtrace\n\n#\n# To use the same convention as SDC instances, the presence of the\n# /var/svc/.ran-user-script file indicates that the instance has already been\n# setup (i.e. the instance has booted previously).\n#\n# Upon first boot, run the setup.sh script if present.  On all boots including\n# the first one, run the configure.sh script if present.\n#\nSENTINEL=/var/svc/.ran-user-script\n\nDIR=/opt/smartdc/boot\n\n\nif [[ ! -e ${SENTINEL} ]]; then\n\tif [[ -f ${DIR}/setup.sh ]]; then\n\t\t${DIR}/setup.sh\n\tfi\n\n\ttouch ${SENTINEL}\nfi\n\nif [[ -f ${DIR}/configure.sh ]]; then\n\t${DIR}/configure.sh\nfi\n",
+    "DATACENTER": "{{{datacenter_name}}}"
+  }
+}

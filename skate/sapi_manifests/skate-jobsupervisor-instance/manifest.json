@@ -1,0 +1,4 @@
+{
+	"name": "skate-jobsupervisor-instance",
+	"path": "/opt/smartdc/manta-deployment/skate/templates/skate-jobsupervisor-instance.json.in"
+}

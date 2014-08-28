@@ -1,0 +1,5 @@
+{
+    "name": "common",
+    "path": "/opt/smartdc/common/etc/config.json",
+	"master": true
+}
