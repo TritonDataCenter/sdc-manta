@@ -92,7 +92,6 @@ release: all deps docs $(SMF_MANIFESTS)
 		$(TOP)/sapi_manifests \
 		$(TOP)/scripts \
 		$(TOP)/tools \
-		$(TOP)/ufds \
 		$(INSTDIR)
 	@mkdir $(PROTO)/site
 	@mkdir $(INSTDIR)/etc
