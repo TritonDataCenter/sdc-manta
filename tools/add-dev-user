@@ -30,8 +30,8 @@ function user_exists
 function user_key
 {
 	sdc-ldap search -b "$(sdc-ldap search login=$1 | \
-            head -1 | cut -c5-)" objectclass=sdckey | \
-            awk '/^fingerprint:/{ print $2; }' | tail -1
+	    head -1 | cut -c5-)" objectclass=sdckey | \
+	    awk '/^fingerprint:/{ print $2; }' | tail -1
 }
 
 #
@@ -61,7 +61,7 @@ function user_add
 		print "don't know how to update domain " a[2];
 		exit 1
 	}
-	
+
 	printf("%s+%s@%s\n", a[1], "${uuid:0:8}", a[2]);
 	exit 0
 }
@@ -69,9 +69,20 @@ EOF
 	email="$(sdc-ldap search -b 'ou=users,o=smartdc' \
 	    login=$templateuser | awk -f $awkfile)"
 	rm -f $awkfile
+	if [[ -z "$email" ]]; then
+	    email="$1@localhost"
+	fi
 	echo "using email address $email" >&2
 
-	key="$(user_key $templateuser)"
+	if [[ -n "$2" ]]; then
+	    public_key="$2"
+	    tmp_file=/var/tmp/add-dev-user.$$
+	    echo "$public_key" >$tmp_file
+	    key=$(ssh-keygen -l -f $tmp_file | awk '{print $2}')
+	    rm $tmp_file
+	else
+	    key="$(user_key $templateuser)"
+	fi
 	echo "using key $key" >&2
 
 	cat > $tmpfile <<-EOF
@@ -84,9 +95,23 @@ EOF
 	approved_for_provisioning: true
 	objectclass: sdcperson
 
-	dn: fingerprint=$key, uuid=$uuid, ou=users, o=smartdc
-	changetype: add
-	EOF
+EOF
+
+	if [[ -n "$public_key" ]]; then
+	    cat >> $tmpfile <<-EOF
+		dn: fingerprint=$key, uuid=$uuid, ou=users, o=smartdc
+		changetype: add
+		name: id_rsa
+		fingerprint: $key
+		openssh: $public_key
+		objectclass: sdckey
+EOF
+	else
+	    cat >> $tmpfile <<-EOF
+		dn: fingerprint=$key, uuid=$uuid, ou=users, o=smartdc
+		changetype: add
+EOF
+	fi
 
 	sdc-ldap search "(&(objectclass=sdckey)(fingerprint=$key))" | \
 	    egrep '^(fingerprint|name|objectclass|openssh:|pkcs:):' \
@@ -100,11 +125,12 @@ EOF
 }
 
 if [[ -z "$1" ]]; then
-	echo "usage: $0 LOGIN" >&2
+	echo "usage: $0 LOGIN <SSH_PUBLIC_KEY>" >&2
 	exit 2
 fi
 
 login="$1"
+public_key="$2"
 templateuser="poseidon"
 
 #
@@ -115,7 +141,7 @@ templateuser="poseidon"
 if user_exists "$login"; then
 	echo "user \"$login\" already exists" >&2
 else
-	user_add "$login" || exit 1
+	user_add "$login" "$public_key" || exit 1
 fi
 
 user_env "$login"
