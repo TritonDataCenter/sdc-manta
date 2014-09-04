@@ -12,7 +12,7 @@
         "cmdln": "1.1.1",
         "fash": "2.3.1",
         "hogan.js": "2.0.0",
-        "imgapi-cli": "git+ssh://git@git.joyent.com:imgapi-cli.git#cd37eda",
+        "imgapi-cli": "git+ssh://git@github.com:joyent/sdc-imgapi-cli.git#cd37eda",
         "jsprim": "0.5.1",
         "mantamon": "git+ssh://git@github.com:joyent/mantamon.git#master",
         "node-uuid": "1.4.0",
