@@ -46,7 +46,7 @@ set -o errexit
 if [[ ! -d $WRKDIR/imgapi-cli ]]; then
     mkdir -p $WRKDIR
     cd $WRKDIR
-    git clone git@git.joyent.com:imgapi-cli.git
+    git clone git@github.com:joyent/sdc-imgapi-cli.git
     cd $WRKDIR/imgapi-cli
     make all
 fi

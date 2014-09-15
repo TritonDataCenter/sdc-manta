@@ -15,11 +15,11 @@ markdown2extras: wiki-tables, code-friendly
 # Manta Deployment
 
 This repository contains the manta deployment tools.  These tools use SAPI (see
-https://mo.joyent.com/docs/sapi/master) to deploy and configure the manta object
+http://github.com/joyent/sdc-sapi) to deploy and configure the manta object
 storage service.  This document assumes familiarity with the SAPI object model,
 so go read the SAPI docs if you haven't already.
 
 # Deploying Manta
 
 The Manta deployment documentation has moved to
-[manta.git](https://mo.joyent.com/docs/manta/master/manta-ops.html).
+[manta](http://github.com/joyent/manta).
