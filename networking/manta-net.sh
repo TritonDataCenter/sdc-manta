@@ -693,6 +693,12 @@ EOF
 	sdc-oneachnode -n $server 'svccfg import \
 	    /opt/custom/smf/manta-nic.xml' \
 	    || fatal "failed to import service manifest"
+
+	# Update sysinfo
+	sdc-oneachnode -n $server 'sysinfo -fu' \
+	    || fatal "failed to have server update sysinfo"
+	sdc-cnapi /servers/$server/sysinfo-refresh -X POST \
+	    || fatal "failed to refresh sysinfo in cnapi"
 }
 
 #
