@@ -19,7 +19,7 @@ BASH_FILES	 = scripts/user-script.sh  \
 		   tools/add-dev-user      \
 		   bin/manta-deploy-lab \
 		   networking/manta-net.sh
-DOC_FILES	 = $(shell find docs -name '*.restdown' | cut -d '/' -f 2)
+DOC_FILES	 = $(shell find docs -name '*.md' | cut -d '/' -f 2)
 JS_FILES	:= $(shell find cmd lib test -name '*.js')
 JSON_FILES	 = package.json \
 		   $(shell find networking/configs \
