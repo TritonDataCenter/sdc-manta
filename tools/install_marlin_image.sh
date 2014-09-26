@@ -24,16 +24,17 @@ if [[ $# -ne 1 ]]; then
 fi
 
 WRKDIR=/var/tmp/install_marlin_image
-MARLIN_UUID=1757ab74-b3ed-11e2-b40f-c7adac046f18
-
-IMGADM=$WRKDIR/imgapi-cli/bin/updates-imgadm
+IMGADM=$WRKDIR/sdc-imgapi-cli/bin/updates-imgadm
 JSON=$WRKDIR/json/bin/json
-MANIFEST=${MARLIN_UUID}.imgmanifest
 NODE=$1
+MARLIN_UUID=bb9264e2-f134-11e3-9ec7-478da02d1a13
+MARLIN_MANIFEST=${MARLIN_UUID}.imgmanifest
 
 # Allow callers to pass additional flags to ssh and scp
 [[ -n ${SSH} ]] || SSH=ssh
 [[ -n ${SCP} ]] || SCP=scp
+
+ADMIN_UUID=$(${SSH} $NODE 'bash /lib/sdc/config.sh -json | json ufds_admin_uuid' 2>/dev/null)
 
 set +o errexit
 ${SSH} ${NODE} "/opt/smartdc/bin/sdc-imgadm get ${MARLIN_UUID}"
@@ -43,35 +44,48 @@ if [[ $? -eq 0 ]]; then
 fi
 set -o errexit
 
-if [[ ! -d $WRKDIR/imgapi-cli ]]; then
+# Setup
+if [[ ! -d $WRKDIR/sdc-imgapi-cli ]]; then
     mkdir -p $WRKDIR
     cd $WRKDIR
     git clone git@github.com:joyent/sdc-imgapi-cli.git
-    cd $WRKDIR/imgapi-cli
+    cd $WRKDIR/sdc-imgapi-cli
     make all
 fi
+
 if [[ ! -d $WRKDIR/json ]]; then
     mkdir -p $WRKDIR
     cd $WRKDIR
     git clone git://github.com/trentm/json.git
 fi
 
-# Download the marlin manifest and image, if necessary.
-[[ -d $WRKDIR/images ]] || mkdir -p $WRKDIR/images
-cd $WRKDIR/images
-[[ -f ${MANIFEST} ]] || ${IMGADM} get ${MARLIN_UUID} > ${MANIFEST}
-[[ -f "$(ls $MARLIN_UUID-file.*)" ]] || ${IMGADM} get-file ${MARLIN_UUID} -O
+function download_and_install_image_files {
+    local UUID=$1
+    local MANIFEST=${UUID}.imgmanifest
 
-# Use the target SDC's admin uuid as the marlin image owner.
-ADMIN_UUID=$(${SSH} $NODE 'bash /lib/sdc/config.sh -json | json ufds_admin_uuid' 2>/dev/null)
-json -f $MANIFEST -e "this.owner = '$ADMIN_UUID'" > $MANIFEST.tmp
-mv $MANIFEST.tmp $MANIFEST
+    [[ -d $WRKDIR/images ]] || mkdir -p $WRKDIR/images
+    cd $WRKDIR/images
+    [[ -f ${MANIFEST} ]] || ${IMGADM} get ${UUID} > ${MANIFEST}
+    [[ -f "$(ls ${UUID}-file.*)" ]] || ${IMGADM} get-file ${UUID} -O
 
-# Copy the files over and import into IMGAPI.
-${SCP} ${MANIFEST} ${NODE}:/var/tmp/
-${SCP} ${MARLIN_UUID}-file.* ${NODE}:/var/tmp/
-${SSH} ${NODE} \
-    "/opt/smartdc/bin/sdc-imgadm import \
-        -m /var/tmp/${MANIFEST} \
-        -f /var/tmp/${MARLIN_UUID}-file.* \
-    && rm /var/tmp/${MANIFEST} /var/tmp/${MARLIN_UUID}-file.*"
+    # Check for the base image
+    ORIGIN=$(json -f ${MANIFEST} origin)
+    if [[ -n ${ORIGIN} ]]; then
+        download_and_install_image_files ${ORIGIN}
+    fi
+
+    # Use the target SDC's admin uuid as the marlin image owner.
+    json -f $MANIFEST -e "this.owner = '$ADMIN_UUID'" > $MANIFEST.tmp
+    mv $MANIFEST.tmp $MANIFEST
+
+    # Copy the files over and import into IMGAPI.
+    ${SCP} ${MANIFEST} ${NODE}:/var/tmp/
+    ${SCP} ${UUID}-file.* ${NODE}:/var/tmp/
+    ${SSH} ${NODE} \
+        "/opt/smartdc/bin/sdc-imgadm import \
+            -m /var/tmp/${MANIFEST} \
+            -f /var/tmp/${UUID}-file.* \
+        && rm /var/tmp/${MANIFEST} /var/tmp/${UUID}-file.*"
+}
+
+download_and_install_image_files ${MARLIN_UUID}
