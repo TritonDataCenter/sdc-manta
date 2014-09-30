@@ -124,7 +124,7 @@ cat <<HERE > $RING_IMAGE_MANIFEST
     "uuid": "$IMAGE_UUID",
     "owner": "$POSEIDON_UUID",
     "name": "manta-hash-ring",
-    "version": "$(date +%Y%m%dT%H%m%SZ)-$VNODES-$MANIFEST_PNODES",
+    "version": "$(date +%Y%m%dT%H%m%SZ)",
     "state": "active",
     "public": false,
     "published_at": "$(node -e 'console.log(new Date().toISOString())')",
@@ -148,4 +148,3 @@ curl --connect-timeout 10 -fsS -i -H accept:application/json \
     --url "$SAPI_URL/applications/$MANTA_APPLICATION" \
     -X PUT -d \
     "{ \"action\": \"update\", \"metadata\": { \"HASH_RING_IMAGE\": \"$IMAGE_UUID\", \"HASH_RING_IMGAPI_SERVICE\": \"$SDC_IMGADM_URL\" } }"
-
