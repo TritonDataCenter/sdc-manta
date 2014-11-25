@@ -57,7 +57,7 @@ fi
 case "$1" in
 	coal)
 		mdl_genconfig="coal"
-		mdl_topo_size=1000000
+		mdl_topo_size=100000
 		mdl_index_shards="1.moray"
 		;;
 	lab)
