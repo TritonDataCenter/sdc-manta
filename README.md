@@ -5,7 +5,7 @@
 -->
 
 <!--
-    Copyright (c) 2014, Joyent, Inc.
+    Copyright (c) 2015, Joyent, Inc.
 -->
 
 # sdc-manta
@@ -17,35 +17,33 @@ contribution guidelines, issues, and general documentation, visit the main
 This repository contains all the deployment tools necessary to manage a Manta
 within an SDC deployment.
 
+
 # Overview
 
-This repository contains the manta deployment tools.  These tools use SAPI (see
-http://github.com/joyent/sdc-sapi) to deploy and configure the manta object
-storage service.  This document assumes familiarity with the SAPI object model,
-so go read the SAPI docs if you haven't already.
+This repository contains the manta deployment tools.  The documentation for
+using these tools is part of the [Manta Operator's
+Guide](https://joyent.github.io/manta).
+
+These tools use SAPI (see http://github.com/joyent/sdc-sapi) to deploy and
+configure the manta object storage service.  For details on the SAPI object
+model, see the SAPI documentation.
+
+**Note:** historically, this repository included scripts used to set up various
+Manta component zones.  This code (and its documentation) now lives in the
+[manta-scripts](https://github.com/joyent/manta-scripts) repo.
 
 
 # Repository
 
-    bin/            Commands available in $PATH.
-    boot/           Configuration scripts on zone setup.
-    cmd/            Top-level commands.
+See [eng.git](https://github.com/joyent/eng) for common directories.
+Directories specific to this repo include:
+
     config/         Configuration which describes the manta deployment.
-    deps/           Git submodules and/or committed 3rd-party deps should go
-                    here. See "node_modules/" for node.js deps.
-    docs/           Project docs (restdown)
-    lib/            Source files.
     manifests/      Service-wide configuration manifests.
-    networking/     Scripts and configuration for SDC networking.
-    node_modules/   Node.js deps, either populated at build time or committed.
+    networking/     Scripts and configuration for Manta networking.
     sapi_manifests/ SAPI manifests for zone configuration.
     scripts/        The user-script for all manta instances.
     skate/          A prototype for a mini-Manta in SDC.
-    test/           Tests.
-    tools/          Miscellaneous dev/upgrade/deployment tools and data.
-    Makefile
-    package.json    npm module info
-    README.md
 
 
 # Development
