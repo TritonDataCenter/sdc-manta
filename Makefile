@@ -22,8 +22,7 @@ BASH_FILES	 = scripts/user-script.sh  \
 DOC_FILES	 = $(shell find docs -name '*.md' | cut -d '/' -f 2)
 JS_FILES	:= $(shell find cmd lib test -name '*.js')
 JSON_FILES	 = package.json \
-		   $(shell find networking/configs \
-		   	        config \
+		   $(shell find config \
 				manifests \
 				sapi_manifests -name '*.json')
 JSL_CONF_NODE	 = tools/jsl.node.conf
@@ -31,7 +30,7 @@ JSL_FILES_NODE   = $(JS_FILES)
 JSSTYLE_FILES	 = $(JS_FILES)
 JSSTYLE_FLAGS    = -o doxygen
 
-NODE_PREBUILT_VERSION=v0.8.26
+NODE_PREBUILT_VERSION=v0.10.32
 NODE_PREBUILT_TAG=zone
 NODE_PREBUILT_IMAGE=fd2cc906-8938-11e3-beab-4359c665ac99
 

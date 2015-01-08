@@ -19,7 +19,7 @@
         "optimist": "0.3.5",
         "once": "1.3.0",
         "readable-stream": "1.0.26",
-        "sdc-clients": "git+ssh://git@github.com:joyent/node-sdc-clients.git#f7bb37d72d",
+        "sdc-clients": "git+ssh://git@github.com:joyent/node-sdc-clients.git#42ea07d3ca",
         "sprintf-js": "0.0.7",
         "tab": "0.1.0",
         "vasync": "1.4.3",
