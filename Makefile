@@ -24,7 +24,7 @@ JS_FILES	:= $(shell find cmd lib test -name '*.js')
 JSON_FILES	 = package.json \
 		   $(shell find config \
 				manifests \
-				sapi_manifests -name '*.json')
+				sapi_manifests -name '*.json*')
 JSL_CONF_NODE	 = tools/jsl.node.conf
 JSL_FILES_NODE   = $(JS_FILES)
 JSSTYLE_FILES	 = $(JS_FILES)
