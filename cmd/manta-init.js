@@ -920,12 +920,14 @@ async.waterfall([
 				});
 			}
 		], cb);
+	},
+
+	function finiClients(cb) {
+		common.finiSdcClients.call(self, cb);
 	}
 ], function (err) {
 	if (err) {
 		console.error('Error: ' + err.message);
 		process.exit(1);
 	}
-
-	process.exit(0);
 });
