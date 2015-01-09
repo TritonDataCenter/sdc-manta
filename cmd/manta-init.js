@@ -16,6 +16,7 @@
 
 var assert = require('assert-plus');
 var async = require('async');
+var child_process = require('child_process');
 var common = require('../lib/common');
 var https = require('https');
 var fs = require('fs');
@@ -835,6 +836,90 @@ async.waterfall([
 			log.info('updated all images on services');
 			return (cb(null));
 		});
+	},
+
+	function addMuskieAes(cb) {
+		var log = self.log;
+		var sapi = self.SAPI;
+		var cmd = 'openssl enc -aes-128-cbc -k ' + node_uuid.v4() +
+			' -P';
+		var pfx = 'MUSKIE_JOB_TOKEN_AES_';
+		var svc, i, m;
+
+		for (i = 0; i < self.sapi_services.length; i++) {
+			if (self.sapi_services[i].name == 'webapi') {
+				svc = self.sapi_services[i];
+				break;
+			}
+		}
+
+		if (svc === undefined) {
+			m = 'did not find expected "webapi" service!';
+			log.error(m);
+			cb(new Error(m));
+			return;
+		}
+
+		if (svc.metadata.hasOwnProperty('MUSKIE_JOB_TOKEN_AES_KEY')) {
+			log.info('skipping muskie AES key (already present)');
+			cb(null);
+			return;
+		}
+
+		log.info('generating muskie AES key');
+		async.waterfall([
+			/*
+			 * Turns output of OpenSSL key gen into
+			 * an object:
+			 *
+			 * salt=ABDABC20E045270D
+			 * key=10E0E4E7F8AF968E22819E91AA7D45E9
+			 * iv =4A603A273291A459A60C5AB240E9CEC2
+			 *
+			 * {
+			 *   salt: 'ABDABC20E045270D',
+			 *   key: '10E0E4E7F8AF968E22819E91AA7D45E9',
+			 *   iv: '4A603A273291A459A60C5AB240E9CEC2'
+			 * }
+			 */
+			function (subcb) {
+				child_process.exec(cmd, function (err, stdout) {
+					if (err) {
+						subcb(err);
+						return;
+					}
+
+					var aes = {};
+					var lines = stdout.split('\n');
+					lines.forEach(function (l) {
+						var tmp = l.split('=');
+						aes[tmp[0].trim()] = tmp[1];
+					});
+
+					subcb(null, aes);
+				});
+			},
+			function (aes, subcb) {
+				var md = {};
+				Object.keys(aes).forEach(function (k) {
+					md[pfx + k.toUpperCase()] = aes[k];
+				});
+
+				sapi.updateService(svc.uuid,
+				    { metadata: md }, function (err) {
+					if (err) {
+						log.error(err,
+						    'failed to push ' +
+						    'job token keys ' +
+						    '(muskie)');
+						subcb(err);
+						return;
+					}
+
+					subcb();
+				});
+			}
+		], cb);
 	}
 ], function (err) {
 	if (err) {
