@@ -68,11 +68,11 @@ When adding a new service to manta, there are several prerequisites:
  * To deploy the new service, the image must be available in the
    updates.joyent.com IMGAPI.  It should be named "manta-SERVICE", as in:
 
-    [root@headnode (bh1-kvm6) ~]# updates-imgadm list name=manta-postgres | tail -3 | awk '{print $1, $2, $3 }'
-    a54c49d4-68c8-41b8-906e-0eb0d84fe3f7 manta-postgres master-20130621T213801Z-g94b316a
-    a579d45b-6703-4d18-8673-c35202490d37 manta-postgres master-20130621T224758Z-g94b316a
-    5d9524cf-67e4-43c5-a77d-72a1b43cfa9f manta-postgres master-20130624T162632Z-g1f6c2f7
-    [root@headnode (bh1-kvm6) ~]#
+        [root@headnode (bh1-kvm6) ~]# updates-imgadm list name=manta-postgres | tail -3 | awk '{print $1, $2, $3 }'
+        a54c49d4-68c8-41b8-906e-0eb0d84fe3f7 manta-postgres master-20130621T213801Z-g94b316a
+        a579d45b-6703-4d18-8673-c35202490d37 manta-postgres master-20130621T224758Z-g94b316a
+        5d9524cf-67e4-43c5-a77d-72a1b43cfa9f manta-postgres master-20130624T162632Z-g1f6c2f7
+        [root@headnode (bh1-kvm6) ~]#
 
    If you implement Makefile rules similarly to other repositories, then the
    image upload will happen as part of the standard "make publish" target.  See
