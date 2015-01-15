@@ -670,6 +670,15 @@ dladm create-vnic -t -l \$mn_link -m \$mn_vmac \$mn_vlan \$mn_vnname
 ifconfig \$mn_vnname plumb up || fatal "failed to bring up \$mn_vnname"
 ifconfig \$mn_vnname \$mn_ip netmask \$mn_subnet || fatal "failed to assign ip"
 
+#
+# Update sysinfo and then tell CNAPI to refresh it.  This is necessary for
+# other parts of Manta (e.g., the marlin dashboard configurator) to see the
+# newly created VNIC.  These steps are both best-effort.  If CNAPI is
+# temporarily down, we don't want to stop this service from coming up.
+#
+server_uuid=\$(sysinfo -f | json UUID) &&
+    sdc-cnapi /servers/\$server_uuid/sysinfo-refresh -X POST
+
 exit \$SMF_EXIT_OK
 EOF
 	[[ $? -eq 0 ]] || fatal "failed to generate init script"
