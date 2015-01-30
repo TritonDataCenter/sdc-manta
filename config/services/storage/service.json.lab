@@ -1,0 +1,5 @@
+{
+	"params": {
+                "cpu_shares": 2048
+	}
+}
