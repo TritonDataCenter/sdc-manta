@@ -15,6 +15,7 @@
 #
 # Files
 #
+BASHSTYLE	 = $(NODE) tools/bashstyle
 BASH_FILES	 = scripts/user-script.sh  \
 		   tools/add-dev-user      \
 		   bin/manta-deploy-lab \
@@ -60,6 +61,8 @@ INSTDIR		:= $(PROTO)/root/opt/smartdc/$(NAME)
 #
 .PHONY: all
 all: $(SMF_MANIFESTS) deps sdc-scripts
+
+check:: $(NODE_EXEC)
 
 .PHONY: test
 test: all
