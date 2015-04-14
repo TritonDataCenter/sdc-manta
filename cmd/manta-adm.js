@@ -198,18 +198,23 @@ MantaAdm.prototype.do_genconfig = function (subcmd, opts, args, callback)
 		var adm = self.madm_adm;
 		var func = args[0] == 'lab' ?
 		    adm.dumpConfigLab : adm.dumpConfigCoal;
-		var nwarnings;
+
 		adm.fetchDeployed(function (err) {
 			if (err)
 				fatal(err.message);
 
-			nwarnings = func.call(adm, process.stdout);
-			if (nwarnings !== 0) {
-				console.error('error: %d services ' +
-				    'were not included', nwarnings);
-				process.exit(nwarnings);
-			}
-			self.finiAdm();
+			func.call(adm, process.stdout,
+			    function (serr, nwarnings) {
+				if (serr)
+					fatal(serr.message);
+
+				if (nwarnings !== 0) {
+					console.error('error: %d services ' +
+					    'were not included', nwarnings);
+					process.exit(nwarnings);
+				}
+				self.finiAdm();
+			    });
 		});
 	});
 };
