@@ -44,15 +44,12 @@ function get_server
 	gc_server=$uuid
 }
 
-#
-# Coal always has e1000g0 for the external network.
-#
 function get_mac
 {
 	local mac
 
-	mac=$(dladm show-phys -mpo address e1000g0)
-	[[ $? -eq 0 ]] || fatal "failed to run dladm"
+	mac=$(nictagadm list -p -d, | awk -F, '$1 == "external" { print $2 }')
+	[[ $? -eq 0 ]] || fatal "failed to run nictagadm/awk"
 	[[ -z "$mac" ]] && fatal "found an empty mac address"
 	gc_mac=$mac
 }
