@@ -6,7 +6,7 @@
 #
 
 #
-# Copyright (c) 2014, Joyent, Inc.
+# Copyright (c) 2015, Joyent, Inc.
 #
 
 #
@@ -656,6 +656,23 @@ function fatal
         exit \$SMF_EXIT_ERR_FATAL
 }
 
+#
+# If we're on a system with boot-time modules, then we need to verify that it
+# hasn't beaten us to the punch. If it has, then we basically disable ourselves
+# if it's already gotten here. In addition, if we're disabling ourselves, then
+# we need to also disable the dependent xdc-routes script; however, it may not
+# always exist. Therefore, we don't explicitly fail if we fail to disable it.
+#
+function check_bootime
+{
+	if dladm show-vnic \$mn_vnname >/dev/null 2>/dev/null; then
+		svcadm disable svc:/smartdc/hack/xdc-routes:default
+                svcadm disable \$SMF_FMRI
+                exit 0
+	fi
+}
+
+check_bootime
 mn_link=\$(nictagadm list \
   | awk "{ if (\\\$1 == \"\$mn_nictag\") { print \\\$3 } }")
 [[ \$? -eq 0 ]]  || fatal "failed to get link for tag \$mn_nictag"
