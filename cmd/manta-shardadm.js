@@ -216,4 +216,5 @@ function addSuffix(str, suffix) {
 }
 
 
-cmdln.main(Shardadm);
+var cli = new Shardadm();
+cmdln.main(cli);

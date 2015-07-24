@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// -*- mode: js -*-
+/* vim: set ft=javascript: */
 /*
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
@@ -7,7 +7,7 @@
  */
 
 /*
- * Copyright (c) 2014, Joyent, Inc.
+ * Copyright (c) 2015, Joyent, Inc.
  */
 
 /*
@@ -24,6 +24,8 @@
  *
  *     genconfig	generate a configuration suitable for a single-system
  *     			install on either COAL or a lab machine
+ *
+ *     zk		view and manage configured nameserver instances
  *
  * In the long term, this could be used for initial deployment as well as
  * upgrades (including mass upgrades, as for the Marlin compute zones).  For
@@ -129,8 +131,10 @@ MantaAdm.prototype.do_cn = function (subcmd, opts, args, callback)
 	if (args.length > 0)
 		options.filter = args[0];
 
-	if (args.length > 1)
+	if (args.length > 1) {
 		callback(new Error('unexpected arguments'));
+		return;
+	}
 
 	this.initAdm(opts, function () {
 		var adm = self.madm_adm;
@@ -453,6 +457,233 @@ MantaAdm.prototype.do_update.options = [ {
     'type': 'bool',
     'help': 'When upgrading a zone, always provision and deprovision ' +
 	'rather than reprovision'
+} ];
+
+MantaAdm.prototype.do_zk = MantaAdmZk;
+
+function MantaAdmZk(parent)
+{
+	this.mn_parent = parent;
+	cmdln.Cmdln.call(this, {
+	    'name': 'zk',
+	    'desc': 'View and modify ZooKeeper servers configuration'
+	});
+}
+
+util.inherits(MantaAdmZk, cmdln.Cmdln);
+
+MantaAdmZk.prototype.do_list = function (subcmd, opts, args, callback)
+{
+	var self = this;
+	var options = {};
+	var selected;
+
+	if (args.length > 0) {
+		callback(new Error('unexpected arguments'));
+		return;
+	}
+
+	if (opts.columns) {
+		selected = checkColumns(madm.zkColumnNames(), opts.columns);
+		if (selected instanceof Error) {
+			callback(selected);
+			return;
+		}
+
+		options.columns = selected;
+	}
+
+	if (opts.omit_header)
+		options.omitHeader = true;
+
+	this.mn_parent.initAdm(opts, function () {
+		var adm = self.mn_parent.madm_adm;
+		adm.fetchDeployed(function (err) {
+			var problems;
+
+			if (err)
+				fatal(err.message);
+			problems = adm.dumpZkServers(process.stdout, options);
+			problems.critical.forEach(function (warn) {
+				console.error('error: %s', warn.message);
+			});
+			problems.fixable.forEach(function (warn) {
+				console.error('warning: %s', warn.message);
+			});
+
+			if (problems.critical.length +
+			    problems.fixable.length > 0)
+				process.exit(1);
+			self.mn_parent.finiAdm();
+		});
+	});
+};
+
+MantaAdmZk.prototype.do_list.help =
+    'List configured ZooKeeper servers\n\n' +
+    'Usage:\n\n' +
+    '    manta-adm zk list OPTIONS\n\n' +
+    'Examples:\n\n' +
+    '    # list ZooKeeper servers\n' +
+    '    manta-adm zk list\n\n' +
+    '    # list only IPs of ZK servers\n' +
+    '    manta-adm zk list --omit-header -o ip\n\n' +
+    '{{options}}\n' +
+    'Available columns for -o:\n    ' + madm.zkColumnNames().join(', ');
+
+/*
+ * Note that the "manta-adm" commands that may modify the system use
+ * /var/log/manta-adm.log as the default log file, as those logs currently serve
+ * as general debug logs.  But the "zk list" subcommand is read-only and only
+ * applicable to this user, so we use a path in /var/tmp for the log.
+ */
+MantaAdmZk.prototype.do_list.options = [ {
+    'names': [ 'omit-header', 'H'],
+    'type': 'bool',
+    'help': 'Omit the header row for columnar output'
+}, {
+    'names': [ 'log_file', 'l' ],
+    'type': 'string',
+    'help': 'dump logs to this file (or "stdout")',
+    'default': '/var/tmp/manta-adm.log'
+}, {
+    'names': [ 'columns', 'o' ],
+    'type': 'arrayOfString',
+    'help': 'Select columns for output (see below)'
+} ];
+
+MantaAdmZk.prototype.do_fixup = function (subcmd, opts, args, callback)
+{
+	var self = this;
+	var adm, nissues, nfixed;
+
+	if (args.length > 0) {
+		callback(new Error('unexpected arguments'));
+		return;
+	}
+
+	vasync.pipeline({
+	    'funcs': [
+		function initAdm(_, stepcb) {
+			self.mn_parent.initAdm(opts, function () {
+				adm = self.mn_parent.madm_adm;
+				stepcb();
+			});
+		},
+		function fetchDeployed(_, stepcb) {
+			adm.fetchDeployed(stepcb);
+		},
+		function dumpNameservers(_, stepcb) {
+			var problems;
+
+			console.error('CURRENT CONFIGURATION');
+			problems = adm.dumpZkServers(process.stderr, {});
+			if (problems.critical.length > 0) {
+				problems.critical.forEach(function (e) {
+					console.error('error: %s', e.message);
+				});
+				stepcb(new VError('bailing out after errors'));
+				return;
+			}
+
+			nissues = problems.fixable.length;
+			if (nissues === 0) {
+				console.error('no issues to repair');
+				stepcb();
+				return;
+			}
+
+			console.error(
+			    'The following issues should be repaired:');
+			problems.fixable.forEach(function (e) {
+				console.error('error: %s', e.message);
+			});
+
+			if (opts.dryrun) {
+				console.error('To repair, leave off ' +
+				    '-n (--dry-run)');
+			}
+
+			stepcb();
+		},
+		function uconfirm(_, stepcb) {
+			if (opts.dryrun || nissues === 0 || opts.confirm) {
+				stepcb();
+				return;
+			}
+
+			common.confirm(
+			    'Do you want to repair these issues now? (y/N): ',
+			    function (proceed) {
+				process.stdout.write('\n');
+				if (!proceed) {
+					stepcb(new Error('aborted by user'));
+				} else {
+					stepcb();
+				}
+			    });
+		},
+		function repair(_, stepcb) {
+			if (opts.dryrun || nissues === 0) {
+				stepcb();
+				return;
+			}
+
+			adm.fixupZkServers(function (err, n) {
+				if (!err)
+					nfixed = n;
+				stepcb(err);
+			});
+		}
+	    ]
+	}, function (err) {
+		if (err)
+			fatal(err.message);
+		if (!opts.dryrun && nissues > 0)
+			console.error('%d issue%s repaired',
+			    nfixed, nfixed == 1 ? '' : 's');
+		self.mn_parent.finiAdm();
+		callback();
+	});
+};
+
+MantaAdmZk.prototype.do_fixup.help = [
+    'Repair ZooKeeper configuration',
+    '',
+    'This command compares the ZooKeeper configuration (defined by the ',
+    'ZK_SERVERS and ZK_ID SAPI metadata properties) to the list of deployed ',
+    'nameservice zones, reports any discrepancies or other issues, and ',
+    'optionally repairs certain kinds of issues.  If repairs are made, only ',
+    'metadata is changed.  This tool is intended for cases where a ZK server ',
+    'has been undeployed and the configuration needs to be updated, or where ',
+    'deployment failed and left stale configuration, or other unusual cases ',
+    'where the configuration does not match the list of deployed nameservers.',
+    'The "manta-adm zk list" command identifies these problem cases.',
+    '',
+    'Usage:',
+    '',
+    '    manta-adm zk [-n | --dry-run] [-y | --confirm] fixup',
+    '',
+    'Examples:',
+    '',
+    '    # check for configuration issues and repair them',
+    '    manta-adm zk fixup',
+    '',
+    '{{options}}'
+].join('\n');
+
+MantaAdmZk.prototype.do_fixup.options = [ {
+    'names': [ 'confirm', 'y' ],
+    'type': 'bool',
+    'help': 'Bypass all confirmations (be careful!)'
+}, {
+    'names': [ 'dryrun', 'n' ],
+    'type': 'bool',
+    'help': 'Print what would be done without actually doing it.'
+}, {
+    'names': [ 'log_file', 'l' ],
+    'type': 'string',
+    'help': 'Dump logs to this file (or "stdout")'
 } ];
 
 function checkColumns(allowed, columns)

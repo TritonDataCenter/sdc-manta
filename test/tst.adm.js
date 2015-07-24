@@ -16,9 +16,8 @@ var assert = require('assert');
 var bunyan = require('bunyan');
 var jsprim = require('jsprim');
 var vasync = require('vasync');
+var CollectorStream = require('./CollectorStream');
 var VError = require('verror').VError;
-var readable = require('readable-stream');
-var util = require('util');
 
 var madm = require('../lib/adm');
 
@@ -66,25 +65,6 @@ function populateVms(params)
 		};
 	}
 }
-
-function CollectorStream(options)
-{
-	readable.Transform.call(this, options);
-	this.data = '';
-}
-
-util.inherits(CollectorStream, readable.Transform);
-
-CollectorStream.prototype._transform = function (chunk, encoding, done)
-{
-	this.data += chunk;
-	done();
-};
-
-CollectorStream.prototype._flush = function (callback)
-{
-	callback();
-};
 
 function runTestCase(t, callback)
 {
