@@ -1,0 +1,83 @@
+TEST CASE: set empty, formatter mzResultToJson
+---------------------------------
+---------------------------------
+TEST CASE: set auto-multiline-stderr, formatter mzResultToJson
+---------------------------------
+{"uuid":"my_uuid","hostname":"garbage","zonename":"chunkify","service":"webapi","result":{"exit_status":1,"stdout":"hello world\n","stderr":"line one\nline two\nline three\n"}}
+---------------------------------
+TEST CASE: set auto-multiline, formatter mzResultToJson
+---------------------------------
+{"uuid":"my_uuid","hostname":"garbage","zonename":"chunkify","service":"webapi","result":{"exit_status":0,"stdout":"hello world\n","stderr":""}}
+{"uuid":"my_uuid_two","hostname":"trash","zonename":"prettify","service":"moray","result":{"exit_status":0,"stdout":"hello world\nI have a second line\n","stderr":"stderr should normally be ignored\n"}}
+{"uuid":"my_uuid_two","hostname":"trash","zonename":"beautify","service":"postgres","result":{"exit_status":1,"stdout":"","stderr":"stderr is not ignored here\n"}}
+---------------------------------
+TEST CASE: set empty, formatter mzResultToText
+---------------------------------
+---------------------------------
+TEST CASE: set auto-multiline, formatter mzResultToText
+---------------------------------
+=== Output from chunkify on garbage (webapi):
+hello world
+
+=== Output from prettify on trash (moray):
+hello world
+I have a second line
+
+=== Output from beautify on trash (postgres):
+stderr is not ignored here
+
+---------------------------------
+TEST CASE: set auto-multiline, formatter mzResultToText
+---------------------------------
+SERVICE          ZONE     OUTPUT
+webapi           chunkify hello world
+moray            prettify I have a second line
+postgres         beautify stderr is not ignored here
+---------------------------------
+TEST CASE: set auto-multiline, formatter mzResultToText
+---------------------------------
+=== Output from prettify on trash (moray):
+hello world
+I have a second line
+
+=== Output from beautify on trash (postgres):
+stderr is not ignored here
+
+=== Output from chunkify on garbage (webapi):
+hello world
+
+---------------------------------
+TEST CASE: set auto-multiline, formatter mzResultToText
+---------------------------------
+SERVICE          ZONE     OUTPUT
+moray            prettify I have a second line
+postgres         beautify stderr is not ignored here
+webapi           chunkify hello world
+---------------------------------
+TEST CASE: set auto-multiline-stderr, formatter mzResultToText
+---------------------------------
+=== Output from chunkify on garbage (webapi):
+hello world
+line one
+line two
+line three
+
+---------------------------------
+TEST CASE: set auto-multiline, formatter mzResultToText
+---------------------------------
+=== Output from prettify on trash (moray):
+hello world
+I have a second line
+
+=== Output from beautify on trash (postgres):
+stderr is not ignored here
+
+=== Output from chunkify on garbage (webapi):
+hello world
+
+---------------------------------
+TEST CASE: set auto-oneline, formatter mzResultToText
+---------------------------------
+SERVICE          ZONE     OUTPUT
+webapi           chunkify hello world
+---------------------------------

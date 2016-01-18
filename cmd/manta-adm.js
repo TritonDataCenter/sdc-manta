@@ -38,6 +38,7 @@
 
 var bunyan = require('bunyan');
 var cmdln = require('cmdln');
+var cmdutil = require('cmdutil');
 var jsprim = require('jsprim');
 var path = require('path');
 var util = require('util');
@@ -711,9 +712,5 @@ function fatal(msg)
 	process.exit(1);
 }
 
-process.stdout.on('error', function (err) {
-	if (err.code == 'EPIPE')
-		process.exit(0);
-	throw (err);
-});
+cmdutil.exitOnEpipe();
 cmdln.main(MantaAdm);

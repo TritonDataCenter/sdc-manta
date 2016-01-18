@@ -10,3 +10,6 @@
 [submodule "deps/sdc-scripts"]
 	path = deps/sdc-scripts
 	url = git@github.com:joyent/sdc-scripts.git
+[submodule "deps/catest"]
+	path = deps/catest
+	url = https://github.com/joyent/catest

@@ -54,6 +54,12 @@ Before committing and pushing a change, run:
 
 and if warranted, get a code review.
 
+`make prepush` will run the test suite.  For this to work, you'll need to have a
+configuration file in etc/config.json.  The easiest way to create one is to copy
+the template in sapi\_manifests/manta/template and fill in the details for your
+environment, or else copy the configuration file directly out of a deployed
+sdc-manta zone in your environment.
+
 
 ## Adding a new Manta service
 

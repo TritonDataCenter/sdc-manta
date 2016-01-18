@@ -6,12 +6,14 @@
     "license": "MPL-2.0",
     "private": true,
     "dependencies": {
-        "assert-plus": "0.1.3",
+        "assert-plus": "0.2.0",
         "async": "0.1.22",
         "bunyan": "0.21.3",
         "cmdln": "3.2.1",
+        "cmdutil": "1.0.0",
         "extsprintf": "1.3.0",
         "fash": "2.3.1",
+        "forkexec": "0.1.0",
         "hogan.js": "2.0.0",
         "imgapi-cli": "git+ssh://git@github.com:joyent/sdc-imgapi-cli.git#65bba66818",
         "jsprim": "0.5.1",
@@ -19,11 +21,14 @@
         "node-uuid": "1.4.0",
         "optimist": "0.3.5",
         "once": "1.3.0",
+        "posix-getopt": "1.2.0",
         "readable-stream": "1.0.26",
         "sdc-clients": "git+ssh://git@github.com:joyent/node-sdc-clients.git#42ea07d3ca",
         "sprintf-js": "0.0.7",
         "tab": "0.1.0",
-        "vasync": "1.4.3",
-        "verror": "1.3.7"
+        "urclient": "1.0.0",
+        "vasync": "1.6.3",
+        "verror": "1.3.7",
+        "zonename": "1.1.0"
     }
 }
