@@ -467,7 +467,7 @@ function MantaAdmZk(parent)
 	this.mn_parent = parent;
 	cmdln.Cmdln.call(this, {
 	    'name': 'zk',
-	    'desc': 'View and modify ZooKeeper servers configuration'
+	    'desc': 'View and modify ZooKeeper servers configuration.'
 	});
 }
 

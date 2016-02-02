@@ -1,0 +1,498 @@
+.TH MANTA\-ADM 1 "2016" Manta "Manta Operator Commands"
+.SH NAME
+.PP
+manta\-adm \- administer a Manta deployment
+.SH SYNOPSIS
+.PP
+\fB\fCmanta\-adm cn [\-l LOG_FILE] [\-H] [\-o FIELD...] [\-n] [\-s] CN_FILTER\fR
+.PP
+\fB\fCmanta\-adm genconfig "lab" | "coal"\fR
+.PP
+\fB\fCmanta\-adm show [\-l LOG_FILE] [\-a] [\-c] [\-H] [\-o FIELD...] [\-s] SERVICE\fR
+.PP
+\fB\fCmanta\-adm show [\-l LOG_FILE] [\-js] SERVICE\fR
+.PP
+\fB\fCmanta\-adm update [\-l LOG_FILE] [\-n] [\-y] [\-\-no\-reprovision] FILE [SERVICE]\fR
+.PP
+\fB\fCmanta\-adm zk list [\-l LOG_FILE] [\-H] [\-o FIELD...]\fR
+.PP
+\fB\fCmanta\-adm zk fixup [\-l LOG_FILE] [\-n] [\-y]\fR
+.SH DESCRIPTION
+.PP
+The \fB\fCmanta\-adm\fR command is used to administer various aspects of a Manta
+deployment.  This command only operates on zones within the same datacenter.
+The command may need to be repeated in other datacenters in order to execute it
+across an entire Manta deployment.
+.TP
+\fB\fCmanta\-adm cn\fR
+Show information about Manta servers in this DC.
+.TP
+\fB\fCmanta\-adm genconfig\fR
+Generate a configuration for a COAL or lab deployment.
+.TP
+\fB\fCmanta\-adm show\fR
+Show information about deployed services.
+.TP
+\fB\fCmanta\-adm update\fR
+Update deployment to match a JSON configuration.
+.TP
+\fB\fCmanta\-adm zk\fR
+View and modify ZooKeeper servers configuration.
+.PP
+With the exception of agents (which are not currently managed by this tool),
+Manta components are deployed as SDC \fBzones\fP (also called \fBinstances\fP).
+Each zone is part of a \fBservice\fP, which identifies its role in the system.
+.PP
+Services that are part of the Manta application include:
+.TP
+\fBauthcache\fP
+Stores user identity information
+.TP
+\fBelectric\-moray\fP
+Moray proxy that handles sharding using consistent hashing
+.TP
+\fBjobpuller\fP
+Manages the archival of completed user compute jobs
+.TP
+\fBjobsupervisor\fP
+Manages the execution of user compute jobs
+.TP
+\fBloadbalancer\fP
+Handles SSL termination and loadbalancing for "webapi"
+.TP
+\fBmadtom\fP
+Operational dashboard for component health
+.TP
+\fBmarlin\-dashboard\fP
+Operational dashboard for job activity
+.TP
+\fBmarlin\fP
+Zones used to execute end user compute tasks
+.TP
+\fBmedusa\fP
+Manages end user interactive shell sessions
+.TP
+\fBmoray\fP
+Key\-value store used to access PostgreSQL
+.TP
+\fBnameservice\fP
+internal DNS nameservers and ZooKeeper nodes
+.TP
+\fBops\fP
+Manages asynchronous operations like garbage collection, metering, and auditing
+.TP
+\fBpostgres\fP
+PostgreSQL databases used for storing object and job metadata
+.TP
+\fBstorage\fP
+Stores actual object data
+.TP
+\fBwebapi\fP
+Handles end user API requests
+.PP
+These services are described in much more detail in the Manta Operator's Guide.
+.PP
+The SDC SAPI service stores configuration about the "manta" application, each of
+the above services, and each instance of the above service.  The information
+reported by this tool is derived from SDC's internal APIs, including SAPI (for
+service configuration), CNAPI (for compute node information), VMAPI (for zone
+information), NAPI (for network information), and IMGAPI (for image information)
+services.
+.PP
+Many subcommands produce tabular output, with a header row, one data record per
+line, and columns separated by whitespace.  With any of these commands, you can
+use options:
+.TP
+\fB\fC\-H, \-\-omit\-header\fR
+Do not print the header row.
+.TP
+\fB\fC\-o, \-\-columns FIELD[,FIELD...]\fR
+Only print columns named \fB\fCFIELD\fR\&.  You can specify this option multiple times
+or use comma\-separated field names (or both) to select multiple fields.  The
+available field names vary by command and are described in the corresponding
+command section above.  In general, the default set of field names for each
+command is subject to change at any time.
+.PP
+Many commands also accept:
+.TP
+\fB\fC\-l, \-\-log_file LOGFILE\fR
+Emit verbose log to LOGFILE.  The special string "stdout" causes output to be
+emitted to the program's stdout.
+.SH SUBCOMMANDS
+.SS "cn" subcommand
+.PP
+\fB\fCmanta\-adm cn [\-l LOG_FILE] [\-H] [\-o FIELD...] [\-n] [\-s] [CN_FILTER]\fR
+.PP
+The \fB\fCmanta\-adm cn\fR subcommand is used to list SDC compute nodes being used in
+the current Manta deployment in the current datacenter.  The default output is a
+table with one row per compute node.  See above for information on the \fB\fC\-l\fR,
+\fB\fC\-H\fR, and \fB\fC\-o\fR options.
+.TP
+\fB\fC\-n, \-\-oneachnode\fR
+Instead of printing a table, emit a comma\-separated list of matching
+hostnames, suitable for use with 
+.BR sdc-oneachnode (1)'s 
+\fB\fC\-n\fR option.  See also
+.BR manta-oneach (1).
+.TP
+\fB\fC\-s, \-\-storage\-only\fR
+Show only compute nodes with "storage" zones on them.
+.PP
+The optional \fB\fCCN_FILTER\fR string can be used to provide any substring of a
+compute node's hostname, server uuid, administrative IP address, compute id, or
+storage ids.  All matching compute nodes will be reported.
+.PP
+Available fields for the \fB\fC\-o/\-\-columns\fR option include "server_uuid", "host",
+"dc" (the datacenter name), "admin_ip", "ram", "compute_id", "storage_ids",
+and "kind" (which is either "storage" or "other").
+.PP
+Example: list basic info about all Manta CNs in this DC:
+.PP
+.RS
+.nf
+# manta\-adm cn
+.fi
+.RE
+.PP
+Example: list info about Manta CN with server uuid matching 7432ffc8:
+.PP
+.RS
+.nf
+# manta\-adm cn 7432ffc8
+.fi
+.RE
+.PP
+Example: list only storage nodes:
+.PP
+.RS
+.nf
+# manta\-adm cn \-s
+.fi
+.RE
+.PP
+Example: list only the hostnames (and omit the header):
+.PP
+.RS
+.nf
+# manta\-adm cn \-H \-o host
+.fi
+.RE
+.PP
+Example: list hostnames in form suitable for "sdc\-oneachnode \-n":
+.PP
+.RS
+.nf
+# manta\-adm cn \-n
+.fi
+.RE
+.SS "genconfig" subcommand
+.PP
+\fB\fCmanta\-adm genconfig "lab" | "coal"\fR
+.PP
+The \fB\fCmanta\-adm genconfig\fR subcommand generates a JSON configuration file
+suitable for use with \fB\fCmanta\-adm update\fR that deploys an appropriate set of
+services for a single\-system Manta deployment.
+.PP
+The sole argument, \fB\fC"coal"\fR or \fB\fC"lab"\fR, determines the broad class of
+deployment.  \fB\fC"coal"\fR produces a configuration suitable for a small,
+VM\-in\-a\-laptop deployment, while \fB\fC"lab"\fR produces a configuration suitable for
+a larger server install.  The images used for each service are the images
+configured in SAPI, which are generally the last images downloaded by
+.BR manta-init (1), 
+so this command is sometimes used as a shortcut for identifying
+the latest images that have been fetched for each service.
+.SS "show" subcommand
+.PP
+\fB\fCmanta\-adm show [\-l LOG_FILE] [\-a] [\-c] [\-H] [\-o FIELD...] [\-s] SERVICE\fR
+.PP
+\fB\fCmanta\-adm show [\-l LOG_FILE] [\-js] SERVICE\fR
+.PP
+The \fB\fCmanta\-adm show\fR subcommand reports information about deployed Manta
+component zones.  The default output is a table with one row per deployed zone.
+See above for information on the \fB\fC\-l\fR, \fB\fC\-H\fR, and \fB\fC\-o\fR options.
+.TP
+\fB\fC\-a, \-\-all\fR
+Show zones deployed in all datacenters associated with this Manta deployment.
+By default, only zones deployed in the current datacenter are shown.  Many
+fields for zones deployed in other datacenters will not be available.
+.TP
+\fB\fC\-c, \-\-bycn\fR
+Instead of showing tabular output with one row per zone sorted by service,
+group zones by the compute node on which each zone is deployed.  With
+\fB\fC\-a/\-\-all\fR, all compute zones in other datacenters are grouped together, since
+compute node information is not available for remote datacenters.
+.TP
+\fB\fC\-s, \-\-summary\fR
+Instead of showing tabular output with one row per zone, show tabular output
+with one row per group of zones having the same "service", "image", and
+"shard" properties (or just "image", for zones to which "shard" does not
+logically apply).  The count for each group is also reported.  With
+\fB\fC\-j/\-\-json\fR, the same information is presented in JSON form.
+.TP
+\fB\fC\-j, \-\-json\fR
+Instead of the default text\-based output, emit a JSON representation of the
+summary information reported with the \fB\fC\-s/\-\-summary\fR command.  This format is 
+suitable for use with \fB\fCmanta\-adm update\fR\&.  This option cannot be combined with
+\fB\fC\-c/\-\-bycn\fR, \fB\fC\-a/\-\-all\fR, \fB\fC\-H/\-\-omit\-header\fR, or \fB\fC\-o/\-\-columns\fR, and it \fImust\fP
+be combined with \fB\fC\-s/\-\-summary\fR\&.  (Future versions of this command may support
+a different JSON\-based report when \fB\fC\-j/\-\-json\fR is used without
+\fB\fC\-s/\-\-summary\fR\&.)  For details on the JSON format, see \fB\fCmanta\-adm update\fR\&.
+.PP
+If \fB\fCSERVICE\fR is specified, then only zones whose service name is \fB\fCSERVICE\fR will
+be reported.
+.PP
+Available fields for the \fB\fC\-o/\-\-columns\fR option include:
+.RS
+.IP \(bu 2
+\fB\fCdatacenter\fR: the name of the datacenter in which this zone is deployed
+.IP \(bu 2
+\fB\fCimage\fR: the uuid of the zone's image
+.IP \(bu 2
+\fB\fCprimary_ip\fR: the primary IP address for this zone
+.IP \(bu 2
+\fB\fCservice\fR: the name of the service this zone is part of
+.IP \(bu 2
+\fB\fCshard\fR: the metadata shard number for this zone.  This is only meaningful
+for "moray" and "postgres" zones.
+.IP \(bu 2
+\fB\fCstorage_id\fR: the internal storage id for this zone.  This is only present
+for "storage" zones.
+.IP \(bu 2
+\fB\fCzonename\fR: the full unique identifier for this zone
+.IP \(bu 2
+\fB\fCzoneabbr\fR: the first 8 characters of "zonename"
+.IP \(bu 2
+\fB\fCgz_host\fR: the hostname of the CN on which this zone is deployed
+.IP \(bu 2
+\fB\fCgz_admin_ip\fR: the primary IP address for the CN on which this zone is
+deployed
+.IP \(bu 2
+\fB\fCcount\fR (summary mode only): the number of zones having the same "service",
+"image", and "shard" fields (where meaningful)
+.RE
+.PP
+Note that the "count" field is only meaningful when \fB\fC\-s/\-\-summarize\fR is
+specified.  The only other fields that are meaningful when \fB\fC\-s/\-\-sumarize\fR is
+specified are "service", "image", and "shard".
+.PP
+Example: list all Manta zones in the current DC
+.PP
+.RS
+.nf
+# manta\-adm show
+.fi
+.RE
+.PP
+Example: list zones in the current DC by compute node
+.PP
+.RS
+.nf
+# manta\-adm show \-c
+.fi
+.RE
+.PP
+Example: summarize Manta zones in the current DC
+.PP
+.RS
+.nf
+# manta\-adm show \-s
+.fi
+.RE
+.PP
+Example: list all Manta zones in all datacenters (no IP info available)
+.PP
+.RS
+.nf
+# manta\-adm show \-a
+.fi
+.RE
+.PP
+Example: show only postgres zones in the current datacenter
+.PP
+.RS
+.nf
+# manta\-adm show postgres
+.fi
+.RE
+.SS "update" subcommand
+.PP
+\fB\fCmanta\-adm update [\-l LOG_FILE] [\-n] [\-y] [\-\-no\-reprovision] FILE [SERVICE]\fR
+.PP
+The \fB\fCmanta\-adm update\fR command updates a Manta deployment to match the JSON
+configuration stored at path \fB\fCFILE\fR\&.  The JSON configuration describes the
+precise number of instances that should be running for each version (image) of
+each type of service on each server.  The update process will involve some
+number of zone deployments, undeployments, and reprovisions.  For example, if
+there are 3 "webapi" instances deployed of version "X" on a given server and the
+configuration specifies that there should be 1 "webapi" instance at version "Y",
+then one of the existing "webapi" instances will be reprovisioned to version "Y"
+and the others will be removed.
+.PP
+The command automatically manages the sequence and concurrency of updates to
+minimize impact to a running system.  Because running the command always
+compares the current deployment to the one provided in the configuration file,
+it is idempotent.  If there are any failures, you can re\-run \fB\fCmanta\-adm update\fR
+as needed to bring the system to the desired configuration.
+.PP
+\fBThis command is primarily intended for use with stateless services.  Extreme
+care should be taken when using it with stateful services like "postgres" or
+"storage".  See the Manta Operator's Guide for the appropriate procedures for
+upgrading all components.\fP
+.PP
+Options:
+.TP
+\fB\fC\-n, \-\-dryrun\fR
+Print what changes would be made without actually making them.
+.TP
+\fB\fC\-y, \-\-confirm\fR
+Bypass all confirmation prompts.
+.TP
+\fB\fC\-\-no\-reprovision\fR
+When upgrading a zone, always provision a new zone and deprovision the
+previous one, rather than reprovisioning the existing one.
+.PP
+See above for information about the \fB\fC\-l/\-\-log_file\fR option.
+.PP
+If \fB\fCSERVICE\fR is specified, then only instances of the named service are
+changed.
+.PP
+The JSON configuration format consists of an object with several levels of
+properties:
+.nr step0 0 1
+.RS
+.IP \n+[step0]
+Top\-level properties are server uuids.  Everything below a given server uuid
+describes instances deployed on that server.
+.IP \n+[step0]
+The next\-level properties are service names.
+.IP \n+[step0]
+For services that use shards ("postgres" and "moray"), the next\-level
+property names are shard numbers.
+.IP \n+[step0]
+The next\-level property names are image uuids, which describe the specific
+image (version) of zones should be deployed.
+.IP \n+[step0]
+The values at the leafs are integers describing the number of zones for that
+image uuid should be deployed for this service on this server.
+.RE
+.PP
+Here's an example snippet:
+.PP
+.RS
+.nf
+{
+    "44454c4c\-5700\-1047\-8051\-b3c04f585131": {
+        "nameservice": {
+            "59ef6322\-6968\-11e5\-987a\-0bd10a3d6e65": 3
+        },
+        "postgres": {
+            "1": {
+                "0a8692f6\-6968\-11e5\-a997\-3334c877b2f3": 3
+            },
+            "2": {
+                "0a8692f6\-6968\-11e5\-a997\-3334c877b2f3": 3
+            }
+        },
+        ...
+    }
+}
+.fi
+.RE
+.PP
+This configuration denotes that on the server with uuid
+"44454c4c\-5700\-1047\-8051\-b3c04f585131", there should be:
+.RS
+.IP \(bu 2
+three "nameservice" instances using image
+"59ef6322\-6968\-11e5\-987a\-0bd10a3d6e65",
+.IP \(bu 2
+three "postgres" instances in shard 1 using image
+"0a8692f6\-6968\-11e5\-a997\-3334c877b2f3", and
+.IP \(bu 2
+three "postgres" instances in shard 2 using image
+"0a8692f6\-6968\-11e5\-a997\-3334c877b2f3".
+.RE
+.PP
+The starting point for an update operation is usually the output of \fB\fCmanta\-adm
+show \-sj\fR\&.  From that configuration, you can:
+.RS
+.IP \(bu 2
+scale up or down the number of any component by increasing or decreasing the
+counts,
+.IP \(bu 2
+upgrade all instances of a component by changing the image uuid for it, and
+.IP \(bu 2
+perform rolling upgrades by adding a second image uuid for a service with
+count "1", then updating repeatedly with more instances of the second image
+and fewer instances of the first image.
+.RE
+.PP
+subject to the caveats described above for stateful services.
+.PP
+This tool does not provide an interface for undeploying or upgrading specific
+zones by zonename.
+.PP
+Example: update the current deployment to the configuration in \fB\fCnewconfig.json\fR:
+.PP
+.RS
+.nf
+# manta\-adm update newconfig.json
+.fi
+.RE
+.PP
+Example: update only "moray" instances to the configuration in \fB\fCnewconfig.json\fR:
+.PP
+.RS
+.nf
+# manta\-adm update newconfig.json moray
+.fi
+.RE
+.SS "zk" subcommand
+.PP
+\fB\fCmanta\-adm zk list [\-l LOG_FILE] [\-H] [\-o FIELD...]\fR
+.PP
+\fB\fCmanta\-adm zk fixup [\-l LOG_FILE] [\-n] [\-y]\fR
+.PP
+The \fB\fCmanta\-adm zk\fR subcommand provides subcommands for viewing and repairing the
+list of ZooKeeper peers.  The \fB\fCmanta\-adm zk list\fR command reports a tabular view
+of the ZooKeeper servers used for the current Manta deployment.  The \fB\fCmanta\-adm
+zk fixup\fR command compares the ZooKeeper configuration (defined by the
+\fB\fCZK_SERVERS\fR and \fB\fCZK_ID\fR SAPI metadata properties) to the list of deployed
+nameservice zones, reports any discrepancies or other issues, and optionally
+repairs certain kinds of issues.  If repairs are made, only metadata is changed.
+This tool is intended for cases where a ZK server has been undeployed and the
+configuration needs to be updated, or where deployment failed and left stale
+configuration, or other unusual cases where the configuration does not match the
+list of deployed nameservers.
+.PP
+See above for information about the \fB\fC\-l\fR, \fB\fC\-H\fR, and \fB\fC\-o\fR options for
+\fB\fCmanta\-adm zk list\fR\&.  Fields available for use with \fB\fC\-o\fR include "ord" (the
+ordinal number of each server), "datacenter", "zoneabbr", "zonename", "ip", and
+"port".
+.PP
+The \fB\fCmanta\-adm zk fixup\fR command supports options:
+.TP
+\fB\fC\-n, \-\-dryrun\fR
+Print what changes would be made without actually making them.
+.TP
+\fB\fC\-y, \-\-confirm\fR
+Bypass all confirmation prompts.
+.PP
+It also supports the \fB\fC\-l/\-\-log_file\fR option described above.
+.SH EXIT STATUS
+.TP
+\fB\fC0\fR
+Success
+.TP
+\fB\fC1\fR
+Generic failure.
+.TP
+\fB\fC2\fR
+The command\-line options were not valid.
+.SH COPYRIGHT
+.PP
+Copyright (c) 2016 Joyent Inc.
+.SH SEE ALSO
+.PP
+.BR json (1), 
+Manta Operator's Guide

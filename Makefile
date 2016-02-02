@@ -5,17 +5,34 @@
 #
 
 #
-# Copyright (c) 2014, Joyent, Inc.
+# Copyright (c) 2016, Joyent, Inc.
 #
 
 #
-# Makefile: basic Makefile to build deployment tarball
+# Makefile: basic Makefile to build deployment image
+#
+# This Makefile should contain only repo-specific logic and uses included
+# makefiles to supply common targets (javascriptlint, jsstyle, restdown, etc.),
+# which are used by other repos as well.
+#
+# If you find yourself adding support for new targets that could be useful for
+# other projects too, you should add these to the original versions of the
+# included Makefiles (in eng.git) so that other teams can use them too.
 #
 
 #
 # Programs
 #
 CATEST		 = deps/catest/catest
+
+#
+# Options and overrides
+#
+
+JSL_CONF_NODE	 = tools/jsl.node.conf
+JSSTYLE_FLAGS	 = -o doxygen
+# Overrides needed to use v8plus for binary modules
+NPM_ENV		 = MAKE_OVERRIDES="CTFCONVERT=/bin/true CTFMERGE=/bin/true"
 
 #
 # Files
@@ -25,27 +42,27 @@ BASH_FILES	 = scripts/user-script.sh  \
 		   tools/add-dev-user      \
 		   bin/manta-deploy-lab \
 		   networking/manta-net.sh
-DOC_FILES	 = $(shell find docs -name '*.md' | cut -d '/' -f 2)
+DOC_FILES	 = index.md
 JS_FILES	:= $(shell find cmd lib test -name '*.js')
+JSL_FILES_NODE	 = $(JS_FILES)
+JSSTYLE_FILES	 = $(JS_FILES)
 JSON_FILES	 = package.json \
 		   $(shell find config \
 				manifests \
 				sapi_manifests -name '*.json*')
-JSL_CONF_NODE	 = tools/jsl.node.conf
-JSL_FILES_NODE	 = $(JS_FILES)
-JSSTYLE_FILES	 = $(JS_FILES)
-JSSTYLE_FLAGS	 = -o doxygen
-NPM_ENV		 = MAKE_OVERRIDES="CTFCONVERT=/bin/true CTFMERGE=/bin/true"
+
+include ./tools/mk/Makefile.defs
+include ./tools/mk/Makefile.node_deps.defs
 
 NODE_PREBUILT_VERSION=v0.10.32
 NODE_PREBUILT_TAG=zone
 NODE_PREBUILT_IMAGE=fd2cc906-8938-11e3-beab-4359c665ac99
-
-
-include ./tools/mk/Makefile.defs
 include ./tools/mk/Makefile.node_prebuilt.defs
-include ./tools/mk/Makefile.node_deps.defs
 
+MAN_INROOT	 = docs/man
+MAN_OUTROOT	 = man
+MAN_SECTION	:= 1
+include ./tools/mk/Makefile.manpages.defs
 
 #
 # MG variables
@@ -68,6 +85,9 @@ INSTDIR		:= $(PROTO)/root/opt/smartdc/$(NAME)
 .PHONY: all
 all: $(SMF_MANIFESTS) deps sdc-scripts
 
+.PHONY: manpages
+manpages: $(MAN_OUTPUTS)
+
 check:: $(NODE_EXEC)
 
 .PHONY: test
@@ -80,10 +100,6 @@ $(CATEST): deps/catest/.git
 deps: | $(REPO_DEPS) $(NPM_EXEC)
 	$(NPM_ENV) $(NPM) install
 
-.PHONY: shrinkwrap
-shrinkwrap: | $(NPM_EXEC)
-	$(NPM) shrinkwrap
-
 .PHONY: release
 release: all deps docs $(SMF_MANIFESTS)
 	@echo "Building $(RELEASE_TARBALL)"
@@ -95,6 +111,7 @@ release: all deps docs $(SMF_MANIFESTS)
 		$(TOP)/config \
 		$(TOP)/docs \
 		$(TOP)/lib \
+		$(TOP)/man \
 		$(TOP)/manifests \
 		$(TOP)/networking \
 		$(TOP)/node_modules \
@@ -127,5 +144,8 @@ include ./tools/mk/Makefile.deps
 include ./tools/mk/Makefile.node_prebuilt.targ
 include ./tools/mk/Makefile.node_deps.targ
 include ./tools/mk/Makefile.targ
+
+MAN_SECTION	:= 1
+include ./tools/mk/Makefile.manpages.targ
 
 sdc-scripts: deps/sdc-scripts/.git

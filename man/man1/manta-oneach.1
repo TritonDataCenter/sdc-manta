@@ -1,0 +1,342 @@
+.TH MANTA\-ONEACH 1 "2016" Manta "Manta Operator Commands"
+.SH NAME
+.PP
+manta\-oneach \- execute commands and file transfers on Manta components
+.SH SYNOPSIS
+.PP
+\fB\fCmanta\-oneach OPTIONS SCOPE_ARGUMENTS COMMAND\fR
+.PP
+\fB\fCmanta\-oneach OPTIONS SCOPE_ARGUMENTS \-d|\-\-dir DIRECTORY \-g|\-\-get FILE\fR
+.PP
+\fB\fCmanta\-oneach OPTIONS SCOPE_ARGUMENTS \-d|\-\-dir DIRECTORY \-p|\-\-put FILE\fR
+.SH DESCRIPTION
+.PP
+The \fB\fCmanta\-oneach\fR command is used to execute commands and file transfers on an
+arbitrary set of Manta components.  Manta components include:
+.RS
+.IP \(bu 2
+\fBnon\-global zones\fP, which make up most Manta components.  Each zone is
+associated with a service like "webapi", "jobsupervisor", "loadbalancer",
+and the like.  See 
+.BR manta-adm (1).
+.IP \(bu 2
+\fBglobal zones\fP, which represent the operating system context on each compute
+node.  Manta has agent components that run in global zones.  Operating on
+global zones can also be useful for fetching system\-wide metrics or
+manipulating system\-wide configuration.
+.RE
+.PP
+When you use this command, you specify a \fBscope\fP (which identifies the
+components to operate on) and a \fBcommand\fP (which either represents a shell
+script to execute or else describes a file to transfer).
+.SS Selecting a scope
+.PP
+This command only operates on zones within the same datacenter.  The command
+may need to be repeated in other datacenters in order to execute it across an
+entire Manta deployment.
+.PP
+The following options must be specified to select a group of zones within the
+current datacenter:
+.TP
+\fB\fC\-a, \-\-all\-zones\fR
+Select all non\-global zones (e.g., all Manta components, but not operating
+system global zones).
+.TP
+\fB\fC\-s, \-\-service SERVICE[,SERVICE...]\fR
+Select zones for the specified services.  You can specify this option multiple
+times or specify a comma\-separated list of service names.  See 
+.BR manta-adm (1)
+for a list of service names.
+.TP
+\fB\fC\-S, \-\-compute\-node HOSTNAME | UUID[,HOSTNAME | UUID...]\fR
+Select zones running on the specified compute nodes (servers), identified by
+their hostname or server uuid.  You can specify this option multiple times or
+specify a comma\-separated list of hostnames or server uuids.
+.TP
+\fB\fC\-z, \-\-zonename ZONENAME[,ZONENAME...]\fR
+Select specific zones by zonename (uuid).  You can specify this option
+multiple times or specify a comma\-separated list of zonenames.
+.PP
+At least one of the above options must be specified.  You can specify any
+combination of \fB\fC\-\-service\fR, \fB\fC\-\-compute\-node\fR, and \fB\fC\-\-zonename\fR, options, in
+which case only zones matching all of these criteria will be selected.
+.PP
+You may also specify:
+.TP
+\fB\fC\-G, \-\-global\-zones\fR
+Execute the operation (either the shell command or the file transfer) in the
+global zones of whatever zones are matched by the other flags.  For example,
+\fB\fC\-\-global\-zones \-\-all\-zones\fR executes the command once in each global zone.
+\fB\fC\-\-global\-zones \-\-service webapi\fR executes the command once for each global
+zone where a "webapi" zone is running.
+.SS Executing commands
+.PP
+To execute a shell command in each of the selected zones, simply pass a single
+\fB\fCCOMMAND\fR argument.  This argument must be a single string, so it usually needs
+to be quoted on the command\-line.  The string is executed as a script with
+.BR bash (1) 
+in a login shell.  It may contain any valid bash input, including
+redirects, pipes, and other special characters (\fB\fC>\fR, \fB\fC<\fR, \fB\fC|\fR, \fB\fC&&\fR, and the
+like).
+.SS Transferring files
+.PP
+To transfer files between the current system and each of the selected zones, you
+must specify exactly one of the following options:
+.TP
+\fB\fC\-p, \-\-put FILENAME\fR
+For each of the selected components, transfers file \fB\fCFILENAME\fR from that
+component into the local directory specified by the \fB\fC\-d/\-\-dir\fR option.  The
+target directory will contain one file for each of the selected components,
+named by the unique identifier for that component (zonenames for non\-global
+zones, and server uuids for global zones).
+.TP
+\fB\fC\-g, \-\-get FILENAME\fR
+For each of the selected components, transfers file \fB\fCFILENAME\fR from the local
+system to the directory on the remote system specified by the \fB\fC\-d/\-\-dir\fR
+option.
+.PP
+You must also specify:
+.TP
+\fB\fC\-d, \-\-dir DIRECTORY\fR
+When \fB\fC\-p/\-\-put\fR is used, \fB\fCDIRECTORY\fR is the directory on the current system
+into which files from each of the remote components will be transferred.  When
+\fB\fC\-g/\-\-get\fR is used, \fB\fCDIRECTORY\fR is the directory on the remote system into
+which the local file will be transferred.
+.PP
+and you may also specify:
+.TP
+\fB\fC\-X, \-\-clobber\fR
+If specified, allow a \fB\fC\-g/\-\-get\fR operation to overwrite an existing file.
+Otherwise, the operation may fail if the destination file already exists.
+.PP
+\fBNOTE:\fP This tool is intended for operators and only supports zones that are
+expected to be under the full control of trusted operators.  The mechanism used
+for per\-zone file transfers is not safe when untrusted users have access to the
+selected zones.
+.SH OTHER OPTIONS
+.PP
+Besides the scope options and file transfer options described above, the
+following options may be specified:
+.TP
+\fB\fC\-c, \-\-concurrency N\fR
+Specifies that no more than \fB\fCN\fR remote commands or file transfers may be
+outstanding at any given time.
+.TP
+\fB\fC\-I, \-\-immediate\fR
+Causes results to be emitted immediately as they are received rather than only
+after all results are available.  When this option is not used, then
+\fB\fCmanta\-oneach\fR waits for all results before printing any, it sorts them by
+component so that they appear in a consistent order, and it formats them
+either for single\-line (tabular) or multi\-line display depending on the actual
+result output.  (See the \fB\fC\-N/\-\-oneline\fR option for details.)  If this flag is
+specified, the results are printed as they arrive, in arbitrary order, and
+with the multi\-line output mode unless \fB\fC\-N/\-\-oneline\fR was also specified.
+.TP
+\fB\fC\-J, \-\-jsonstream\fR
+Report results as newline\-separated JSON rather than human\-readable text.  See
+"Streaming JSON format" below.
+.TP
+\fB\fC\-n, \-\-dry\-run\fR
+Report what would be executed without actually doing anything.
+.TP
+\fB\fC\-N, \-\-oneline\fR
+Forces tabular, single\-line\-per\-result output mode.  Normally, if
+\fB\fC\-I/\-\-immediate\fR is not used, then \fB\fCmanta\-oneach\fR waits for all results before
+printing any.  If all results contain only one line of output, then the
+results are reported using a single line with leading columns that describe
+which component reported that result.  If any result contains more than one
+line of output, then all results are reported verbatim with a single\-line
+header before each result and a blank line after each result.  This option
+forces the single\-line\-per\-result output.
+.TP
+\fB\fC\-T, \-\-exectimeout SECONDS\fR
+If a command takes longer than \fB\fCSECONDS\fR seconds or a file transfer takes more
+than \fB\fCSECONDS\fR seconds to start, then the operation is abandoned on that
+component and an error is reported.  Note that the command is not killed when
+this happens, so the operator is responsible for any necessary cleanup.  The
+default timeout is 60 seconds.
+.PP
+\fB\fC\-\-amqp\-host HOST, \-\-amqp\-port TCP_PORT,\fR
+.PP
+\fB\fC\-\-amqp\-login LOGIN, \-\-amqp\-password PASSWORD,\fR
+.TP
+\fB\fC\-\-amqp\-timeout NSECONDS\fR
+AMQP connection parameters.  This tool uses the SDC Ur facility through the
+SDC AMQP broker.  By default, the host, port, login, and password are
+automatically configured based on the current SDC installation.  The default
+connect timeout is 5 seconds.
+.SS Streaming JSON format
+.PP
+If the \fB\fC\-J/\-\-jsonstream\fR option is used, then the output consists of one line
+per result, with each line containing a complete JSON object describing the
+result of the operation.  This format is a subset of the format reported by
+\fB\fCsdc\-oneachnode(1)\fR\&'s JSON output format.  Specifically, objects contain
+properties:
+.RS
+.IP \(bu 2
+\fB\fCuuid\fR (string): the server uuid where the command was executed
+.IP \(bu 2
+\fB\fChostname\fR (string): the server hostname where the command was executed
+.IP \(bu 2
+\fB\fCzonename\fR (string): the zonename where the command was executed (only present
+when \fB\fC\-G/\-\-global\-zones\fR was not specified)
+.IP \(bu 2
+\fB\fCservice\fR (string): the service name to which zone \fB\fCzonename\fR belongs (only
+present when \fB\fC\-G/\-\-global\-zones\fR was not specified)
+.IP \(bu 2
+\fB\fCresult\fR (object) Ur result, which contains an integer property \fB\fCexit_status\fR
+describing the exit status of the command.  The \fB\fCresult\fR property is only
+present when \fB\fCerror\fR is not present.  For command execution, the properties
+\fB\fCstdout\fR and \fB\fCstderr\fR are also attached the \fB\fCresult\fR, and they contain the
+stdout and stderr from the command executed.
+.IP \(bu 2
+\fB\fCerror\fR (object): describes a failure to execute the command or transfer the
+file.  The presence of this property indicates that the command failed to
+execute at all or it was abandoned because of the execution timeout (see
+\fB\fC\-T/\-\-exectimeout\fR) or the system failed to determine the result.  If the
+command was executed but it failed, that will not produce an error.  Callers
+should use \fB\fCexit_status\fR to identify that case.
+.RE
+.SH EXAMPLES
+.PP
+\fBRunning commands in all zones for a given service\fP: Use the 
+.BR svcs (1) 
+command
+to check the status of the \fB\fCminnow\fR service inside each storage zone:
+.PP
+.RS
+.nf
+$ manta\-oneach \-\-service storage 'svcs minnow'
+=== Output from 3211f5ed\-f70d\-481d\-93ae\-755e4c84837d on headnode (storage):
+STATE          STIME    FMRI
+online         Jan_20   svc:/manta/application/minnow:default
+=== Output from 4ecda097\-2556\-49ca\-908a\-b8fea6a923c4 on headnode (storage):
+STATE          STIME    FMRI
+online         Jan_20   svc:/manta/application/minnow:default
+=== Output from b150f995\-a91b\-4fa5\-8fe4\-7cb84621e553 on headnode (storage):
+STATE          STIME    FMRI
+online         Jan_20   svc:/manta/application/minnow:default
+.fi
+.RE
+.PP
+Or, use 
+.BR svcs (1) 
+options to limit the output to a single line for a more concise
+display:
+.PP
+.RS
+.nf
+$ manta\-oneach \-\-service storage 'svcs \-H \-o state minnow'
+SERVICE          ZONE     OUTPUT
+storage          3211f5ed online
+storage          4ecda097 online
+storage          b150f995 online
+.fi
+.RE
+.PP
+\fBRunning commands in global zones\fP: report disk usage from 
+.BR zpool (1M) 
+on each
+of the compute nodes running at least one "postgres" instance:
+.PP
+.RS
+.nf
+$ manta\-oneach \-\-global\-zones \-\-service postgres 'zpool list'
+=== Output from 44454c4c\-5700\-1047\-8051\-b3c04f585131 (headnode):
+NAME    SIZE  ALLOC   FREE  EXPANDSZ   FRAG    CAP  DEDUP  HEALTH  ALTROOT
+zones  1.62T   565G  1.07T         \-    42%    33%  1.00x  ONLINE  \-
+.fi
+.RE
+.PP
+Similarly, the 
+.BR zpool (1M) 
+command can provide more concise output:
+.PP
+.RS
+.nf
+$ manta\-oneach \-G \-s postgres 'zpool list \-H \-o cap'
+HOSTNAME              OUTPUT
+headnode              33%
+.fi
+.RE
+.PP
+\fBComplex filtering:\fP use 
+.BR svcs (1) 
+to report the state of "haproxy" processes
+in "moray" and "webapi" zones on compute node RA14872:
+.PP
+.RS
+.nf
+# manta\-oneach \-\-compute\-node RA14872 \-\-service moray,webapi 'svcs haproxy'
+=== Output from 69790d4a\-d500\-4e56\-99ac\-967024765805 on RA14872 (moray):
+STATE          STIME    FMRI
+online         Jan_15   svc:/manta/haproxy:default
+=== Output from b3c6c144\-7500\-4904\-a0b5\-91997a71f75d on RA14872 (moray):
+STATE          STIME    FMRI
+online         Jan_15   svc:/manta/haproxy:default
+=== Output from b68396db\-d49f\-487a\-8379\-a36234ac9993 on RA14872 (moray):
+STATE          STIME    FMRI
+online         Jan_15   svc:/manta/haproxy:default
+=== Output from 380920d9\-ed44\-4bcd\-b61c\-4b99f49c1329 on RA14872 (webapi):
+STATE          STIME    FMRI
+online         Jan_15   svc:/manta/haproxy:default
+.fi
+.RE
+.PP
+\fBFile transfer from remote components\fP: transfer a copy of \fB\fC/etc/resolv.conf\fR
+from all "jobsupervisor" components into /var/tmp on the current system
+.PP
+.RS
+.nf
+$ manta\-oneach \-\-service jobsupervisor \-\-dir /var/tmp \-\-put /etc/resolv.conf
+SERVICE          ZONE     OUTPUT
+jobsupervisor    2b1d10be ok
+.fi
+.RE
+.PP
+After that, /var/tmp will contain one file for each jobsupervisor zone, each
+named according to that zone's zonename.
+.PP
+\fBFile transfer to remote components:\fP transfer a copy file "pgsqlstat" in the
+current directory to \fB\fC/root\fR in each "postgres" zone:
+.PP
+.RS
+.nf
+$ manta\-oneach \-\-service postgres \-\-dir /root \-\-get ./pgsqlstat
+SERVICE          ZONE     OUTPUT
+postgres         70d44638 ok
+postgres         a5223321 ok
+postgres         ef318383 ok
+.fi
+.RE
+.SH EXIT STATUS
+.TP
+\fB\fC0\fR
+Success
+.TP
+\fB\fC1\fR
+Generic failure.
+.TP
+\fB\fC2\fR
+The command\-line options were not valid.
+.PP
+Programs that want to determine the precise result of each operation should use
+the \fB\fC\-J/\-\-jsonstream\fR output format.
+.SH ENVIRONMENT
+.TP
+\fB\fCLOG_LEVEL\fR
+If present, this must be a valid node\-bunyan log level name (e.g., "warn").
+The internal logger will use this log level and emit output to \fB\fCstderr\fR\&.  This
+option is subject to change at any time.
+.SH COPYRIGHT
+.PP
+Copyright (c) 2016 Joyent Inc.
+.SH SEE ALSO
+.PP
+.BR bash (1), 
+.BR json (1), 
+.BR manta-adm (1), 
+.BR manta-login (1), 
+.BR sdc-oneachnode (1), 
+Manta
+Operator's Guide

@@ -28,10 +28,10 @@ function fatal {
 }
 
 function usage {
-    echo "Usage: manta-login <service> [choice]"
-    echo "       manta-login <uuid> [choice]"
-    echo "       manta-login <uuid-prefix> [choice]"
-    echo "       manta-login <any substring> [choice]"
+    echo "Usage: manta-login SERVICE [CHOICE]"
+    echo "       manta-login ZONENAME [CHOICE]"
+    echo "       manta-login ZONENAME_PREFIX [CHOICE]"
+    echo "       manta-login SUBSTR [CHOICE]"
 }
 
 
