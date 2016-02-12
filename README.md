@@ -110,13 +110,14 @@ the sdc-manta repository.  There are several steps involved there:
    to see which options are available, and consult the SAPI documentation for a
    full explanation.
 
- * You probably want to update lib/adm.js to deploy your service in a standard
-   deployment.  You'll definitely want to update maSvcNames so that manta-adm
-   knows about this service and will update it when requested.  The service
-   should almost certainly become part of the default lab system configuration
-   later in the file so that people are testing its deployment frequently.
-   If the service can reasonably be deployed in COAL (or needs to be, in order
-   for Manta to work), then add it to the default COAL configuration as well.
+ * You probably want to update lib/adm.js, lib/services.js, and lib/layout.js to
+   deploy your service in a standard deployment.  You'll definitely want to
+   update mSvcNames so that manta-adm knows about this service and will update
+   it when requested.  The service should almost certainly become part of the
+   default lab system configuration later in the file so that people are testing
+   its deployment frequently.  If the service can reasonably be deployed in COAL
+   (or needs to be, in order for Manta to work), then add it to the default COAL
+   configuration as well.
 
 # Everything else
 

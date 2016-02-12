@@ -10,6 +10,8 @@ manta-adm - administer a Manta deployment
 
 `manta-adm genconfig "lab" | "coal"`
 
+`manta-adm genconfig --from-file=FILE`
+
 `manta-adm show [-l LOG_FILE] [-a] [-c] [-H] [-o FIELD...] [-s] SERVICE`
 
 `manta-adm show [-l LOG_FILE] [-js] SERVICE`
@@ -32,7 +34,7 @@ across an entire Manta deployment.
   Show information about Manta servers in this DC.
 
 `manta-adm genconfig`
-  Generate a configuration for a COAL or lab deployment.
+  Generate a configuration for a COAL, lab, or multi-server deployment.
 
 `manta-adm show`
   Show information about deployed services.
@@ -177,17 +179,64 @@ Example: list hostnames in form suitable for "sdc-oneachnode -n":
 
 `manta-adm genconfig "lab" | "coal"`
 
-The `manta-adm genconfig` subcommand generates a JSON configuration file
-suitable for use with `manta-adm update` that deploys an appropriate set of
-services for a single-system Manta deployment.
+`manta-adm genconfig --from-file=FILE`
 
-The sole argument, `"coal"` or `"lab"`, determines the broad class of
-deployment.  `"coal"` produces a configuration suitable for a small,
-VM-in-a-laptop deployment, while `"lab"` produces a configuration suitable for
-a larger server install.  The images used for each service are the images
-configured in SAPI, which are generally the last images downloaded by
+The `manta-adm genconfig` subcommand generates a JSON configuration file
+suitable for use with `manta-adm update`.  The images used for each service are
+the images configured in SAPI, which are generally the last images downloaded by
 manta-init(1), so this command is sometimes used as a shortcut for identifying
 the latest images that have been fetched for each service.
+
+When the first argument is `"coal"`, the command produces a configuration
+suitable for a small VM-in-a-laptop deployment.
+
+When the first argument is `"lab"`, the command produces a configuration
+suitable for a larger single-server install.
+
+The `--from-file=FILE` option can be used to generate a configuration suitable
+for a much larger deployment.  This form is somewhat experimental, but attempts
+to create a deployment that will survive failures of any component, server, or
+rack.  `FILE` is a JSON file describing the parameters of the deployment,
+including the number of metadata shards and the set of availability zones,
+racks, and servers.  You can omit availability zone and rack information.  The
+JSON file should represent a single object with properties:
+
+`nshards` (positive integer)
+  the number of metadata shards to create
+
+`servers` (array of objects)
+  the list of servers available for deployment
+
+Each element of `servers` is an object with properties:
+
+`type` (string: either `"metadata"` or `"storage"`)
+  identifies this server as a target for metadata services or storage services.
+  It's not strictly required that Manta services be partitioned in this way, but
+  this tool requires that because most production deployments use two classes of
+  hardware for these purposes.
+
+`uuid` (string)
+  the SDC compute node uuid for this server.  This must be unique within the
+  entire region.
+
+`memory` (positive integer)
+  gigabytes of memory available on this server.  This is currently only used for
+  storage servers to determine the appropriate number of compute zones.
+
+`az` (string)
+  (optional) availability zone.  This version of the tool only works for a
+  single-availability-zone deployment, so all servers must have the same value
+  here.  If the value is omitted from any server, that server is placed into a
+  default availablity zone.
+
+`rack` (string)
+  (optional) arbitrary identifier for the rack this server is part of.  Racks
+  often represent fault domains, so the tool uses this information to attempt to
+  distribute services across racks.  If the value is omitted from any server,
+  that server is placed into a default rack.
+
+See the Manta Operator's Guide for a more complete discussion of sizing and
+laying out Manta services.
 
 
 ### "show" subcommand

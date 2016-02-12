@@ -112,7 +112,7 @@ var test_cases = [ {
 }, {
     'name': 'bad service name',
     /* JSSTYLED */
-    'error': /unsupported service: "devnullapi"/,
+    'error': /unrecognized service: "devnullapi"/,
     'args': {
 	'scopeServices': [ 'devnullapi' ],
 	'execMode': oneach.MZ_EM_COMMAND,
