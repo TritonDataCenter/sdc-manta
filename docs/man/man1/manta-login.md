@@ -6,13 +6,13 @@ manta-login - start interactive shell session on remote Manta zones
 
 ## SYNOPSIS
 
-`manta-login SERVICE [CHOICE]`
+`manta-login [-G] SERVICE [CHOICE]`
 
-`manta-login ZONENAME [CHOICE]`
+`manta-login [-G] ZONENAME [CHOICE]`
 
-`manta-login ZONENAME_PREFIX [CHOICE]`
+`manta-login [-G] ZONENAME_PREFIX [CHOICE]`
 
-`manta-login SUBSTR [CHOICE]`
+`manta-login [-G] SUBSTR [CHOICE]`
 
 ## DESCRIPTION
 
@@ -31,7 +31,10 @@ CHOICE to bypass this prompt and select that option.
 
 ## OPTIONS
 
-This command does not support any options.
+`-G`
+  If specified, then `manta-login` opens a shell in the global zone of the
+  compute node where the specified component runs (rather than opening a shell
+  inside the component itself).
 
 
 ## EXAMPLES

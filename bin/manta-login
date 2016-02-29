@@ -6,7 +6,7 @@
 #
 
 #
-# Copyright (c) 2014, Joyent, Inc.
+# Copyright (c) 2016, Joyent, Inc.
 #
 
 #
@@ -28,14 +28,21 @@ function fatal {
 }
 
 function usage {
-    echo "Usage: manta-login SERVICE [CHOICE]"
-    echo "       manta-login ZONENAME [CHOICE]"
-    echo "       manta-login ZONENAME_PREFIX [CHOICE]"
-    echo "       manta-login SUBSTR [CHOICE]"
+    echo "Usage: manta-login [-G] SERVICE [CHOICE]"
+    echo "       manta-login [-G] ZONENAME [CHOICE]"
+    echo "       manta-login [-G] ZONENAME_PREFIX [CHOICE]"
+    echo "       manta-login [-G] SUBSTR [CHOICE]"
 }
 
 
 #---- mainline
+
+if [[ "$1" == "-G" ]]; then
+    do_zlogin=false
+    shift
+else
+    do_zlogin=true
+fi
 
 if [[ -z "$1" ]]; then
     usage
@@ -74,4 +81,10 @@ elif [[ "$server" == "-" ]]; then
     fatal "don't have an IP for the zone's server (is it in a different DC?)"
 fi
 
-ssh -t root@$server zlogin $zone
+if [[ $do_zlogin == "true" ]]; then
+    cmd="zlogin $zone"
+else
+    cmd=
+fi
+
+ssh -t root@$server $cmd

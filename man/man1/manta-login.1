@@ -4,13 +4,13 @@
 manta\-login \- start interactive shell session on remote Manta zones
 .SH SYNOPSIS
 .PP
-\fB\fCmanta\-login SERVICE [CHOICE]\fR
+\fB\fCmanta\-login [\-G] SERVICE [CHOICE]\fR
 .PP
-\fB\fCmanta\-login ZONENAME [CHOICE]\fR
+\fB\fCmanta\-login [\-G] ZONENAME [CHOICE]\fR
 .PP
-\fB\fCmanta\-login ZONENAME_PREFIX [CHOICE]\fR
+\fB\fCmanta\-login [\-G] ZONENAME_PREFIX [CHOICE]\fR
 .PP
-\fB\fCmanta\-login SUBSTR [CHOICE]\fR
+\fB\fCmanta\-login [\-G] SUBSTR [CHOICE]\fR
 .SH DESCRIPTION
 .PP
 The \fB\fCmanta\-login\fR command is used to start an interactive shell session on
@@ -30,8 +30,11 @@ any substring of a service name or zonename.  If more than one zone matches the
 criteria, you will be prompted to select from a list of zones.  You may specify
 CHOICE to bypass this prompt and select that option.
 .SH OPTIONS
-.PP
-This command does not support any options.
+.TP
+\fB\fC\-G\fR
+If specified, then \fB\fCmanta\-login\fR opens a shell in the global zone of the
+compute node where the specified component runs (rather than opening a shell
+inside the component itself).
 .SH EXAMPLES
 .PP
 Log into a "webapi" zone, specified by service name.  Since there's more than
