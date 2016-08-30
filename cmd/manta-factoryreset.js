@@ -192,6 +192,10 @@ async.waterfall([
 		var log = self.log;
 		log.info('checking stage');
 
+		if (!self.application) {
+			return (cb(null));
+		}
+
 		var app = self.application;
 
 		if (app.metadata.SIZE === 'production') {
