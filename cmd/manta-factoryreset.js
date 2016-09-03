@@ -253,6 +253,41 @@ async.waterfall([
 		});
 	},
 
+	function getProbeGroups(cb) {
+		var amon = self.AMON;
+		var log = self.log;
+
+		log.info('fetching probe groups from amon');
+
+		amon.listProbeGroups(POSEIDON.uuid, function (err, res) {
+			if (err) {
+				log.error(err,
+					'failed to get amon probe groups');
+				return (cb(err));
+			}
+
+			self.probeGroups = res;
+			return (cb(null));
+		});
+	},
+
+	function getProbes(cb) {
+		var amon = self.AMON;
+		var log = self.log;
+
+		log.info('fetching probes from amon');
+
+		amon.listProbes(POSEIDON.uuid, function (err, res) {
+			if (err) {
+				log.error(err, 'failed to get amon probes');
+				return (cb(err));
+			}
+
+			self.probes = res;
+			return (cb(null));
+		});
+	},
+
 	function _undeployMarlinAgents(cb) {
 		if (!self.application) {
 			return (cb(null));
@@ -353,6 +388,68 @@ async.waterfall([
 				log.info('deleted application %s', app.uuid);
 			}
 
+			cb(err);
+		});
+	},
+
+	function _deleteProbes(cb) {
+		var amon = self.AMON;
+		var log = self.log;
+
+		if (!self.probes)
+			return (cb(null));
+
+		var uuids = [];
+		self.probes.forEach(function (elem, idx, ary) {
+			uuids = uuids.concat(elem.uuid);
+		});
+
+		async.forEachLimit(uuids, 8, function (uuid, subcb) {
+			log.info('deleting probe %s', uuid);
+
+			amon.deleteProbe(POSEIDON.uuid, uuid, function (err) {
+				if (err) {
+					log.error(err, 'failed to ' +
+						'delete probe %s', uuid);
+				} else {
+					log.info('deleted probe %s', uuid);
+				}
+
+				subcb(err);
+			});
+		}, function (err) {
+			cb(err);
+		});
+	},
+
+	function _deleteProbeGroups(cb) {
+		var amon = self.AMON;
+		var log = self.log;
+
+		if (!self.probeGroups)
+			return (cb(null));
+
+		var uuids = [];
+		self.probeGroups.forEach(function (elem, idx, ary) {
+			uuids = uuids.concat(elem.uuid);
+		});
+
+		async.forEachLimit(uuids, 8, function (uuid, subcb) {
+			log.info('deleting probe group %s', uuid);
+
+			amon.deleteProbeGroup(POSEIDON.uuid, uuid,
+				function (err) {
+				if (err) {
+					log.error(err, 'failed to ' +
+						'delete probe group %s', uuid);
+				} else {
+					log.info('deleted probe group %s',
+						uuid);
+				}
+
+				subcb(err);
+			});
+		}, function (err) {
 			cb(err);
 		});
 	},
