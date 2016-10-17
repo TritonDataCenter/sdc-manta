@@ -5,7 +5,7 @@
  */
 
 /*
- * Copyright (c) 2014, Joyent, Inc.
+ * Copyright (c) 2016, Joyent, Inc.
  */
 
 /*
@@ -108,7 +108,7 @@ function main()
 	if (!('network' in spec['marlin']))
 		fatal('marlin section missing network name');
 
-	for (i = 0; i < spec['azs'].lenght; i++) {
+	for (i = 0; i < spec['azs'].length; i++) {
 		az = spec['azs'][i];
 		if (!(az in spec['admin']))
 			fatal('missing information for az ' + az +
