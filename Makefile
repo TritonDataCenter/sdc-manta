@@ -43,7 +43,7 @@ BASH_FILES	 = scripts/user-script.sh  \
 		   bin/manta-deploy-lab \
 		   networking/manta-net.sh
 DOC_FILES	 = index.md
-JS_FILES	:= $(shell find cmd lib test -name '*.js')
+JS_FILES	:= $(shell find cmd lib test networking -name '*.js')
 JSL_FILES_NODE	 = $(JS_FILES)
 JSSTYLE_FILES	 = $(JS_FILES)
 JSON_FILES	 = package.json \
