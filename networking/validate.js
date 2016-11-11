@@ -19,25 +19,43 @@ function fatal(message)
 	process.exit(1);
 }
 
+function validateMappings(network, mappings, spec)
+{
+	var i, node, tag, nic;
+	for (i = 0; i < spec[network + '_nodes'].length; i++) {
+		node = spec[network + '_nodes'][i];
+		tag = spec[network]['nic_tag'];
+		if (!(node in mappings))
+			fatal('missing node from mappings: ' + node);
+		if (!(tag in mappings[node]))
+			fatal('missing tag ' + tag + ' in mappings.' + node);
+		nic = mappings[node][tag];
+		if ('mac_mappings' in spec) {
+			if (!(typeof (nic) === 'string'))
+				fatal('mac_mappings.' + node + '.' + tag +
+				    ' must be a string');
+		}
+		if ('nic_mappings' in spec) {
+			if (!(typeof (nic) === 'object'))
+				fatal('nic_mappings.' + node + '.' + tag +
+				    ' must be an object');
+			if (Object.keys(nic).length > 1 ||
+			    !('mac' in nic) && !('aggr' in nic))
+				fatal('nic_mappings.' + node + '.' + tag +
+				    ' must only have property "mac" or "aggr"');
+		}
+	}
+}
+
 function main()
 {
-	var spec, az, i, mappings, node, tag, nic;
+	var spec, i, az, mappings;
 
 	if (process.argv.length !== 3) {
 		console.error('validate.js: <file>');
 		process.exit(1);
 	}
 	spec = JSON.parse(mod_fs.readFileSync(process.argv[2]));
-
-	if (!('mac_mappings' in spec) &&
-	    !('nic_mappings' in spec))
-		fatal('missing nic_mappings or mac_mappings');
-
-	if (('mac_mappings' in spec) &&
-	    ('nic_mappings' in spec))
-		fatal('either nic_mappings or mac_mappings');
-
-	mappings = spec['mac_mappings'] || spec['nic_mappings'];
 
 	if (!('marlin_nodes' in spec))
 		fatal('missing marlin_nodes');
@@ -48,32 +66,6 @@ function main()
 	if (spec['marlin_nodes'].length === 0)
 		fatal('no marlin CNs listed');
 
-	for (i = 0; i < spec['marlin_nodes'].length; i++) {
-		node = spec['marlin_nodes'][i];
-		tag = spec['marlin']['nic_tag'];
-		if (!(node in mappings))
-			fatal('missing node from mappings: ' + node);
-		if (!(tag in mappings[node])) {
-			fatal('missing tag ' + tag + ' in mappings.' + node);
-		}
-		nic = mappings[node][tag];
-		if ('mac_mappings' in spec) {
-			if (!(typeof (nic) === 'string'))
-				fatal('mac_mappings.' + node + '.' + tag +
-				    'must be a string');
-		}
-		if ('nic_mappings' in spec) {
-			if (!(typeof (nic) === 'object'))
-				fatal('nic_mappings.' + node + '.' + tag +
-				    'must be an object');
-			if (Object.keys(nic).length > 1 ||
-			    !('mac' in nic) && !('aggr' in nic)) {
-				fatal('nic_mappings.' + node + '.' + tag +
-				    'must only have property "mac" or "aggr"');
-			}
-		}
-	}
-
 	if (!('manta_nodes' in spec))
 		fatal('missing manta_nodes');
 
@@ -82,32 +74,6 @@ function main()
 
 	if (spec['manta_nodes'].length === 0)
 		fatal('no indexing CNs listed');
-
-	for (i = 0; i < spec['manta_nodes'].length; i++) {
-		node = spec['marlin_nodes'][i];
-		tag = spec['marlin']['nic_tag'];
-		if (!(node in mappings))
-			fatal('missing node from mappings: ' + node);
-		if (!(tag in mappings[node])) {
-			fatal('missing tag ' + tag + 'in mappings.' + node);
-		}
-		nic = mappings[node][tag];
-		if ('mac_mappings' in spec) {
-			if (!(typeof (nic) === 'string'))
-				fatal('mac_mappings.' + node + '.' + tag +
-				    'must be a string');
-		}
-		if ('nic_mappings' in spec) {
-			if (!(typeof (nic) === 'object'))
-				fatal('nic_mappings.' + node + '.' + tag +
-				    'must be an object');
-			if (Object.keys(nic).length > 1 ||
-			    !('mac' in nic) && !('aggr' in nic)) {
-				fatal('nic_mappings.' + node + '.' + tag +
-				    'must only have property "mac" or "aggr"');
-			}
-		}
-	}
 
 	if (!('azs' in spec))
 		fatal('missing availability zone list');
@@ -144,6 +110,19 @@ function main()
 
 	if (!('network' in spec['marlin']))
 		fatal('marlin section missing network name');
+
+	if (!('mac_mappings' in spec) &&
+	    !('nic_mappings' in spec))
+		fatal('missing nic_mappings or mac_mappings');
+
+	if (('mac_mappings' in spec) &&
+	    ('nic_mappings' in spec))
+		fatal('either nic_mappings or mac_mappings');
+
+	mappings = spec['mac_mappings'] || spec['nic_mappings'];
+
+	validateMappings('manta', mappings, spec);
+	validateMappings('marlin', mappings, spec);
 
 	for (i = 0; i < spec['azs'].length; i++) {
 		az = spec['azs'][i];
