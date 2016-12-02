@@ -223,6 +223,26 @@ var testcases = [ {
 	]
     }
 }, {
+    'name': 'one rack with fewer servers',
+    'config': {
+	'nshards': 2,
+	'servers': [
+	    mkserver('metadata', 0, 0),
+	    mkserver('metadata', 0, 1),
+	    mkserver('metadata', 0, 2),
+	    mkserver('storage',  0, 0),
+
+	    mkserver('metadata', 1, 0),
+	    mkserver('metadata', 1, 1),
+	    mkserver('metadata', 1, 2),
+	    mkserver('storage',  1, 0),
+
+	    mkserver('metadata', 2, 0),
+	    mkserver('metadata', 2, 2),
+	    mkserver('storage',  2, 0)
+	]
+    }
+}, {
     'name': '3-rack, 4-shard deployment',
     'config': {
 	'nshards': 4,
@@ -247,6 +267,63 @@ var testcases = [ {
 	    mkserver('metadata', 2, 3),
 	    mkserver('storage',  2, 0),
 	    mkserver('storage',  2, 1)
+	]
+    }
+}, {
+    'name': '3-AZ, 1-rack-per-AZ, 1-shard deployment',
+    'config': {
+	'nshards': 1,
+	'servers': [
+	    mkserver('metadata', 0, 0, 0),
+	    mkserver('storage',  0, 0, 0),
+
+	    mkserver('metadata', 0, 0, 1),
+	    mkserver('storage',  0, 0, 1),
+
+	    mkserver('metadata', 0, 0, 2),
+	    mkserver('storage',  0, 0, 2)
+	]
+    }
+}, {
+    'name': '3-AZ, 1-rack-per-AZ, 2-shard deployment',
+    'config': {
+	'nshards': 2,
+	'servers': [
+	    mkserver('metadata', 0, 0, 0),
+	    mkserver('storage',  0, 0, 0),
+
+	    mkserver('metadata', 0, 0, 1),
+	    mkserver('storage',  0, 0, 1),
+
+	    mkserver('metadata', 0, 0, 2),
+	    mkserver('storage',  0, 0, 2)
+	]
+    }
+}, {
+    'name': '3-AZ, 2-racks-per-AZ, 3-shard deployment',
+    'config': {
+	'nshards': 3,
+	'servers': [
+	    mkserver('metadata', 0, 0, 0),
+	    mkserver('storage',  0, 0, 0),
+	    mkserver('metadata', 0, 1, 0),
+	    mkserver('storage',  0, 1, 0),
+	    mkserver('metadata', 0, 2, 0),
+	    mkserver('storage',  0, 2, 0),
+
+	    mkserver('metadata', 0, 0, 1),
+	    mkserver('storage',  0, 0, 1),
+	    mkserver('metadata', 0, 1, 1),
+	    mkserver('storage',  0, 1, 1),
+	    mkserver('metadata', 0, 2, 1),
+	    mkserver('storage',  0, 2, 1),
+
+	    mkserver('metadata', 0, 0, 2),
+	    mkserver('storage',  0, 0, 2),
+	    mkserver('metadata', 0, 1, 2),
+	    mkserver('storage',  0, 1, 2),
+	    mkserver('metadata', 0, 2, 2),
+	    mkserver('storage',  0, 2, 2)
 	]
     }
 } ];
@@ -289,12 +366,13 @@ function main()
 }
 
 /*
- * Generate an object representing a server of type "role" in rack "racknum".
- * This will be server "role" + "servernum" within this rack.
+ * Generate an object representing a server of type "role" in rack "racknum",
+ * and optionally in availability zone "aznum".  This will be server "role" +
+ * "servernum" within this rack.
  */
-function mkserver(role, racknum, servernum)
+function mkserver(role, racknum, servernum, aznum)
 {
-	var rack, cnid;
+	var rack, cnid, server, azname;
 
 	assertplus.ok([ 'metadata', 'storage' ].indexOf(role) != -1);
 	assertplus.number(racknum);
@@ -303,16 +381,32 @@ function mkserver(role, racknum, servernum)
 	assertplus.number(servernum);
 	assertplus.ok(servernum >= 0);
 	assertplus.ok(servernum < 100);
+	assertplus.optionalNumber(aznum);
 
-	rack = sprintf('rack_r%02d', racknum);
-	cnid = sprintf('server_r%02d_%s%02d', racknum, role, servernum);
+	if (typeof (aznum) == 'number') {
+		azname = 'az' + aznum;
+		rack = azname + '_';
+		cnid = azname + '_';
+	} else {
+		rack = '';
+		cnid = '';
+	}
 
-	return ({
+	rack += sprintf('rack_r%02d', racknum);
+	cnid += sprintf('server_r%02d_%s%02d', racknum, role, servernum);
+
+	server = {
 	    'type': role,
 	    'uuid': cnid,
 	    'memory': 64,
 	    'rack': rack
-	});
+	};
+
+	if (azname !== undefined) {
+		server['az'] = azname;
+	}
+
+	return (server);
 }
 
 /*
@@ -448,7 +542,7 @@ function runTestCaseLoadDirectly(tcstate, callback)
  */
 function runTestCaseGenerate(tcstate, callback)
 {
-	var svclayout;
+	var svclayout, rv, azs;
 
 	/* See notes about error handling above. */
 	if (tcstate.tc_dcconfig !== null) {
@@ -460,7 +554,19 @@ function runTestCaseGenerate(tcstate, callback)
 		});
 
 		console.log('\ngenerated config:');
-		svclayout.serialize(process.stdout, process.stdout);
+		azs = svclayout.azs();
+		azs.forEach(function (azname, i) {
+			rv = svclayout.serialize(azname);
+			if (rv !== null) {
+				process.stdout.write(rv);
+			}
+		});
+
+		svclayout.printIssues(process.stdout);
+		if (svclayout.nerrors() === 0) {
+			console.log('\nsummary:');
+			svclayout.printSummary(process.stdout);
+		}
 	}
 
 	console.log(separator);
