@@ -447,6 +447,8 @@ function setupMockManta(_, callback)
 	    'svc003': []
 	};
 	fakeDeployedTopology.vms = {};
+	fakeDeployedTopology.images = {};
+
 
 	for (i = 0; i < 9; i++) {
 		zoneid = 'zone' + (i + 1);

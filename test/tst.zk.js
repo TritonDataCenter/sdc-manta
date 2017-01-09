@@ -94,6 +94,7 @@ function runTestCase(testcase, callback)
 	});
 
 	deployed.vms = {};
+	deployed.images = {};
 	testcase.instances.forEach(function (instance) {
 		var uuid, server_uuid, islocal;
 

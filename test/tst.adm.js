@@ -5,7 +5,7 @@
  */
 
 /*
- * Copyright (c) 2014, Joyent, Inc.
+ * Copyright (c) 2016, Joyent, Inc.
  */
 
 /*
@@ -19,52 +19,8 @@ var vasync = require('vasync');
 var CollectorStream = require('./CollectorStream');
 var VError = require('verror').VError;
 
+var common = require('./common');
 var madm = require('../lib/adm');
-
-/*
- * Helper functions
- */
-
-var ids = {};
-function nextId(name)
-{
-	var rv;
-
-	if (!ids[name])
-		ids[name] = 1;
-
-	rv = ids[name]++;
-	if (rv < 10)
-		return (name + '00' + rv);
-	if (rv < 100)
-		return (name + '0' + rv);
-	return (name + rv);
-}
-
-function populateVms(params)
-{
-	var i, id;
-	for (i = 0; i < params['count']; i++) {
-		id = nextId('instance');
-		if (!fakeBase['instances'][params['svcid']])
-			fakeBase['instances'][params['svcid']] = [];
-		fakeBase['instances'][params['svcid']].push({
-		    'uuid': id,
-		    'params': { 'server_uuid': params['cnid'] },
-		    'metadata': {
-			'SHARD': params['shardid'],
-			'DATACENTER': 'test'
-		    }
-		});
-		fakeBase['vms'][id] = {
-		    'image_uuid': params['imgid'],
-		    'nics': [ {
-		        'primary': true,
-			'ip4addr': '0.0.0.0'
-		    } ]
-		};
-	}
-}
 
 function runTestCase(t, callback)
 {
@@ -72,7 +28,7 @@ function runTestCase(t, callback)
 
 	console.log('test case "%s"', t['name']);
 	adm = new madm.MantaAdm(log);
-	adm.loadFakeDeployed(fakeBase);
+	adm.loadFakeDeployed(common.generateFakeBase(fakeDeployed, 1));
 	desired = jsprim.deepCopy(fakeDeployed);
 
 	/* Sanity-check that we created the fake config properly */
@@ -158,69 +114,6 @@ var fakeDeployed = {
 	}
     }
 };
-
-/*
- * Populate the detailed fake configuration by making up a bunch of instances to
- * go with the summary configuration defined above.
- */
-var fakeBase = {
-    'app': { 'name': 'manta' },
-    'services': { /* filled in below */ },
-    'instances': { /* filled in below */ },
-    'vms': { /* filled in below */ },
-    'cns': { /* filled in below */ }
-};
-
-var cnid, svcname, svcids, svcid, next, imgid, shardid;
-
-svcids = {};
-for (cnid in fakeDeployed) {
-	fakeBase['cns'][cnid] = {
-	    'datacenter': 'test',
-	    'hostname': cnid.toUpperCase(),
-	    'server_uuid': cnid,
-	    'sysinfo': {
-	        'Network Interfaces': {
-		    'foo': {
-			'NIC Names': 'admin',
-			'ip4addr': cnid + '.example.com'
-		    }
-		}
-	    }
-	};
-
-	for (svcname in fakeDeployed[cnid]) {
-		if (!svcids[svcname])
-			svcids[svcname] = nextId('service');
-		svcid = svcids[svcname];
-		next = fakeDeployed[cnid][svcname];
-
-		fakeBase['services'][svcid] = { 'name': svcname };
-		if (svcname == 'postgres' || svcname == 'moray') {
-			for (shardid in next) {
-				for (imgid in next[shardid]) {
-					populateVms({
-					    'cnid': cnid,
-					    'svcid': svcid,
-					    'shardid': shardid,
-					    'imgid': imgid,
-					    'count': next[shardid][imgid]
-					});
-				}
-			}
-		} else {
-			for (imgid in next) {
-				populateVms({
-				    'cnid': cnid,
-				    'svcid': svcid,
-				    'shardid': 1,
-				    'imgid': imgid,
-				    'count': next[imgid]
-				});
-			}
-		}
-	}
-}
 
 vasync.forEachPipeline({
     'func': runTestCase,

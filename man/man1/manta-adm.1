@@ -120,6 +120,22 @@ Many commands also accept:
 \fB\fC\-l, \-\-log_file LOGFILE\fR
 Emit verbose log to LOGFILE.  The special string "stdout" causes output to be
 emitted to the program's stdout.
+.PP
+\fBImportant note for programmatic users:\fP Except as noted below, the output
+format for this command is subject to change at any time. The only subcommands
+whose output is considered committed are:
+.RS
+.IP \(bu 2
+\fB\fCmanta\-adm cn\fR, only when used with the "\-o" option
+.IP \(bu 2
+\fB\fCmanta\-adm show\fR, only when used with either the "\-o" or "\-j" option
+.IP \(bu 2
+\fB\fCmanta\-adm zk list\fR, only when used with the "\-o" option
+.RE
+.PP
+The output for any other commands may change at any time. Documented
+subcommands, options, and arguments are committed, and you can use the exit
+status of the program to determine success of failure.
 .SH SUBCOMMANDS
 .SS "cn" subcommand
 .PP
@@ -310,6 +326,8 @@ Available fields for the \fB\fC\-o/\-\-columns\fR option include:
 .IP \(bu 2
 \fB\fCimage\fR: the uuid of the zone's image
 .IP \(bu 2
+\fB\fCversion\fR: the version of the zone's image
+.IP \(bu 2
 \fB\fCprimary_ip\fR: the primary IP address for this zone
 .IP \(bu 2
 \fB\fCservice\fR: the name of the service this zone is part of
@@ -335,7 +353,7 @@ deployed
 .PP
 Note that the "count" field is only meaningful when \fB\fC\-s/\-\-summarize\fR is
 specified.  The only other fields that are meaningful when \fB\fC\-s/\-\-sumarize\fR is
-specified are "service", "image", and "shard".
+specified are "service", "image", "version", and "shard".
 .PP
 Example: list all Manta zones in the current DC
 .PP

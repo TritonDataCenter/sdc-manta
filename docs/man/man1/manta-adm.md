@@ -125,6 +125,18 @@ Many commands also accept:
   Emit verbose log to LOGFILE.  The special string "stdout" causes output to be
   emitted to the program's stdout.
 
+**Important note for programmatic users:** Except as noted below, the output
+format for this command is subject to change at any time. The only subcommands
+whose output is considered committed are:
+
+* `manta-adm cn`, only when used with the "-o" option
+* `manta-adm show`, only when used with either the "-o" or "-j" option
+* `manta-adm zk list`, only when used with the "-o" option
+
+The output for any other commands may change at any time. Documented
+subcommands, options, and arguments are committed, and you can use the exit
+status of the program to determine success of failure.
+
 
 ## SUBCOMMANDS
 
@@ -296,6 +308,7 @@ Available fields for the `-o/--columns` option include:
 
 * `datacenter`: the name of the datacenter in which this zone is deployed
 * `image`: the uuid of the zone's image
+* `version`: the version of the zone's image
 * `primary_ip`: the primary IP address for this zone
 * `service`: the name of the service this zone is part of
 * `shard`: the metadata shard number for this zone.  This is only meaningful
@@ -312,7 +325,7 @@ Available fields for the `-o/--columns` option include:
 
 Note that the "count" field is only meaningful when `-s/--summarize` is
 specified.  The only other fields that are meaningful when `-s/--sumarize` is
-specified are "service", "image", and "shard".
+specified are "service", "image", "version", and "shard".
 
 Example: list all Manta zones in the current DC
 

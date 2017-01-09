@@ -1,0 +1,674 @@
+--------------------------------------------------
+test case "manta-adm show"
+SERVICE          SH ZONENAME                             GZ ADMIN IP     
+marlin            1 instance001                          test-1-cn001.example.com
+marlin            1 instance002                          test-1-cn001.example.com
+marlin            1 instance003                          test-1-cn001.example.com
+marlin            1 instance004                          test-1-cn001.example.com
+marlin            1 instance005                          test-1-cn001.example.com
+marlin            1 instance006                          test-1-cn001.example.com
+marlin            1 instance007                          test-1-cn001.example.com
+marlin            1 instance008                          test-1-cn001.example.com
+marlin            1 instance009                          test-1-cn001.example.com
+marlin            1 instance010                          test-1-cn001.example.com
+marlin            1 instance022                          test-1-cn002.example.com
+marlin            1 instance023                          test-1-cn002.example.com
+marlin            1 instance024                          test-1-cn002.example.com
+marlin            1 instance025                          test-1-cn002.example.com
+marlin            1 instance026                          test-1-cn002.example.com
+marlin            1 instance027                          test-1-cn002.example.com
+marlin            1 instance028                          test-1-cn002.example.com
+marlin            1 instance029                          test-1-cn002.example.com
+marlin            1 instance030                          test-1-cn002.example.com
+marlin            1 instance031                          test-1-cn002.example.com
+marlin            1 instance041                          test-1-cn003.example.com
+marlin            1 instance042                          test-1-cn003.example.com
+marlin            1 instance043                          test-1-cn003.example.com
+marlin            1 instance044                          test-1-cn003.example.com
+marlin            1 instance045                          test-1-cn003.example.com
+marlin            1 instance046                          test-1-cn003.example.com
+marlin            1 instance047                          test-1-cn003.example.com
+marlin            1 instance048                          test-1-cn003.example.com
+marlin            1 instance049                          test-1-cn003.example.com
+marlin            1 instance050                          test-1-cn003.example.com
+marlin            1 instance060                          test-1-cn004.example.com
+marlin            1 instance061                          test-1-cn004.example.com
+medusa            1 instance020                          test-1-cn001.example.com
+medusa            1 instance021                          test-1-cn001.example.com
+moray             1 instance011                          test-1-cn001.example.com
+moray             1 instance012                          test-1-cn001.example.com
+moray             1 instance013                          test-1-cn001.example.com
+moray             1 instance032                          test-1-cn002.example.com
+moray             1 instance033                          test-1-cn002.example.com
+moray             1 instance034                          test-1-cn002.example.com
+moray             2 instance014                          test-1-cn001.example.com
+moray             2 instance015                          test-1-cn001.example.com
+moray             2 instance016                          test-1-cn001.example.com
+moray             2 instance035                          test-1-cn002.example.com
+moray             2 instance036                          test-1-cn002.example.com
+moray             2 instance037                          test-1-cn002.example.com
+moray             3 instance017                          test-1-cn001.example.com
+moray             3 instance018                          test-1-cn001.example.com
+moray             3 instance019                          test-1-cn001.example.com
+moray             3 instance038                          test-1-cn002.example.com
+moray             3 instance039                          test-1-cn002.example.com
+moray             3 instance040                          test-1-cn002.example.com
+postgres          1 instance051                          test-1-cn003.example.com
+postgres          1 instance052                          test-1-cn003.example.com
+postgres          1 instance053                          test-1-cn003.example.com
+postgres          1 instance062                          test-1-cn004.example.com
+postgres          2 instance054                          test-1-cn003.example.com
+postgres          2 instance055                          test-1-cn003.example.com
+postgres          2 instance056                          test-1-cn003.example.com
+postgres          2 instance063                          test-1-cn004.example.com
+postgres          3 instance057                          test-1-cn003.example.com
+postgres          3 instance058                          test-1-cn003.example.com
+postgres          3 instance059                          test-1-cn003.example.com
+--------------------------------------------------
+--------------------------------------------------
+test case "manta-adm show -c"
+CN TEST-1-CN001                         test-1-cn001 test-1-cn001.example.com
+     SERVICE          SH ZONENAME                            
+     marlin            1 instance001                         
+     marlin            1 instance007                         
+     marlin            1 instance010                         
+     marlin            1 instance009                         
+     marlin            1 instance008                         
+     marlin            1 instance006                         
+     marlin            1 instance005                         
+     marlin            1 instance004                         
+     marlin            1 instance003                         
+     marlin            1 instance002                         
+     medusa            1 instance020                         
+     medusa            1 instance021                         
+     moray             1 instance011                         
+     moray             2 instance014                         
+     moray             2 instance015                         
+     moray             3 instance019                         
+     moray             3 instance018                         
+     moray             1 instance013                         
+     moray             2 instance016                         
+     moray             3 instance017                         
+     moray             1 instance012                         
+CN TEST-1-CN002                         test-1-cn002 test-1-cn002.example.com
+     SERVICE          SH ZONENAME                            
+     marlin            1 instance022                         
+     marlin            1 instance023                         
+     marlin            1 instance024                         
+     marlin            1 instance025                         
+     marlin            1 instance026                         
+     marlin            1 instance027                         
+     marlin            1 instance028                         
+     marlin            1 instance029                         
+     marlin            1 instance030                         
+     marlin            1 instance031                         
+     moray             3 instance039                         
+     moray             1 instance033                         
+     moray             1 instance032                         
+     moray             3 instance040                         
+     moray             3 instance038                         
+     moray             2 instance037                         
+     moray             2 instance036                         
+     moray             2 instance035                         
+     moray             1 instance034                         
+CN TEST-1-CN003                         test-1-cn003 test-1-cn003.example.com
+     SERVICE          SH ZONENAME                            
+     marlin            1 instance049                         
+     marlin            1 instance044                         
+     marlin            1 instance041                         
+     marlin            1 instance050                         
+     marlin            1 instance043                         
+     marlin            1 instance042                         
+     marlin            1 instance045                         
+     marlin            1 instance046                         
+     marlin            1 instance047                         
+     marlin            1 instance048                         
+     postgres          1 instance052                         
+     postgres          1 instance053                         
+     postgres          1 instance051                         
+     postgres          3 instance059                         
+     postgres          3 instance058                         
+     postgres          3 instance057                         
+     postgres          2 instance056                         
+     postgres          2 instance055                         
+     postgres          2 instance054                         
+CN TEST-1-CN004                         test-1-cn004 test-1-cn004.example.com
+     SERVICE          SH ZONENAME                            
+     marlin            1 instance060                         
+     marlin            1 instance061                         
+     postgres          1 instance062                         
+     postgres          2 instance063                         
+--------------------------------------------------
+--------------------------------------------------
+test case "manta-adm show -s"
+SERVICE          SH VERSION                                    COUNT
+marlin            1 master001                                     32
+medusa            1 -                                              2
+moray             1 master002                                      6
+moray             2 master002                                      6
+moray             3 master002                                      6
+postgres          1 master003                                      4
+postgres          2 master003                                      4
+postgres          3 master003                                      3
+--------------------------------------------------
+--------------------------------------------------
+test case "manta-adm show -a"
+SERVICE          SH DATACENTER ZONENAME                            
+marlin            1 test-1     instance001                         
+marlin            1 test-1     instance002                         
+marlin            1 test-1     instance003                         
+marlin            1 test-1     instance004                         
+marlin            1 test-1     instance005                         
+marlin            1 test-1     instance006                         
+marlin            1 test-1     instance007                         
+marlin            1 test-1     instance008                         
+marlin            1 test-1     instance009                         
+marlin            1 test-1     instance010                         
+marlin            1 test-1     instance022                         
+marlin            1 test-1     instance023                         
+marlin            1 test-1     instance024                         
+marlin            1 test-1     instance025                         
+marlin            1 test-1     instance026                         
+marlin            1 test-1     instance027                         
+marlin            1 test-1     instance028                         
+marlin            1 test-1     instance029                         
+marlin            1 test-1     instance030                         
+marlin            1 test-1     instance031                         
+marlin            1 test-1     instance041                         
+marlin            1 test-1     instance042                         
+marlin            1 test-1     instance043                         
+marlin            1 test-1     instance044                         
+marlin            1 test-1     instance045                         
+marlin            1 test-1     instance046                         
+marlin            1 test-1     instance047                         
+marlin            1 test-1     instance048                         
+marlin            1 test-1     instance049                         
+marlin            1 test-1     instance050                         
+marlin            1 test-1     instance060                         
+marlin            1 test-1     instance061                         
+marlin            1 test-2     instance064                         
+marlin            1 test-2     instance065                         
+marlin            1 test-2     instance066                         
+marlin            1 test-2     instance067                         
+marlin            1 test-2     instance068                         
+marlin            1 test-2     instance069                         
+marlin            1 test-2     instance070                         
+marlin            1 test-2     instance071                         
+marlin            1 test-2     instance072                         
+marlin            1 test-2     instance073                         
+marlin            1 test-2     instance085                         
+marlin            1 test-2     instance086                         
+marlin            1 test-2     instance087                         
+marlin            1 test-2     instance088                         
+marlin            1 test-2     instance089                         
+marlin            1 test-2     instance090                         
+marlin            1 test-2     instance091                         
+marlin            1 test-2     instance092                         
+marlin            1 test-2     instance093                         
+marlin            1 test-2     instance094                         
+marlin            1 test-2     instance104                         
+marlin            1 test-2     instance105                         
+marlin            1 test-2     instance106                         
+marlin            1 test-2     instance107                         
+marlin            1 test-2     instance108                         
+marlin            1 test-2     instance109                         
+marlin            1 test-2     instance110                         
+marlin            1 test-2     instance111                         
+marlin            1 test-2     instance112                         
+marlin            1 test-2     instance113                         
+marlin            1 test-2     instance123                         
+marlin            1 test-2     instance124                         
+marlin            1 test-3     instance127                         
+marlin            1 test-3     instance128                         
+marlin            1 test-3     instance129                         
+marlin            1 test-3     instance130                         
+marlin            1 test-3     instance131                         
+marlin            1 test-3     instance132                         
+marlin            1 test-3     instance133                         
+marlin            1 test-3     instance134                         
+marlin            1 test-3     instance135                         
+marlin            1 test-3     instance136                         
+marlin            1 test-3     instance148                         
+marlin            1 test-3     instance149                         
+marlin            1 test-3     instance150                         
+marlin            1 test-3     instance151                         
+marlin            1 test-3     instance152                         
+marlin            1 test-3     instance153                         
+marlin            1 test-3     instance154                         
+marlin            1 test-3     instance155                         
+marlin            1 test-3     instance156                         
+marlin            1 test-3     instance157                         
+marlin            1 test-3     instance167                         
+marlin            1 test-3     instance168                         
+marlin            1 test-3     instance169                         
+marlin            1 test-3     instance170                         
+marlin            1 test-3     instance171                         
+marlin            1 test-3     instance172                         
+marlin            1 test-3     instance173                         
+marlin            1 test-3     instance174                         
+marlin            1 test-3     instance175                         
+marlin            1 test-3     instance176                         
+marlin            1 test-3     instance186                         
+marlin            1 test-3     instance187                         
+medusa            1 test-1     instance020                         
+medusa            1 test-1     instance021                         
+medusa            1 test-2     instance083                         
+medusa            1 test-2     instance084                         
+medusa            1 test-3     instance146                         
+medusa            1 test-3     instance147                         
+moray             1 test-1     instance011                         
+moray             1 test-1     instance012                         
+moray             1 test-1     instance013                         
+moray             1 test-1     instance032                         
+moray             1 test-1     instance033                         
+moray             1 test-1     instance034                         
+moray             1 test-2     instance074                         
+moray             1 test-2     instance075                         
+moray             1 test-2     instance076                         
+moray             1 test-2     instance095                         
+moray             1 test-2     instance096                         
+moray             1 test-2     instance097                         
+moray             1 test-3     instance137                         
+moray             1 test-3     instance138                         
+moray             1 test-3     instance139                         
+moray             1 test-3     instance158                         
+moray             1 test-3     instance159                         
+moray             1 test-3     instance160                         
+moray             2 test-1     instance014                         
+moray             2 test-1     instance015                         
+moray             2 test-1     instance016                         
+moray             2 test-1     instance035                         
+moray             2 test-1     instance036                         
+moray             2 test-1     instance037                         
+moray             2 test-2     instance077                         
+moray             2 test-2     instance078                         
+moray             2 test-2     instance079                         
+moray             2 test-2     instance098                         
+moray             2 test-2     instance099                         
+moray             2 test-2     instance100                         
+moray             2 test-3     instance140                         
+moray             2 test-3     instance141                         
+moray             2 test-3     instance142                         
+moray             2 test-3     instance161                         
+moray             2 test-3     instance162                         
+moray             2 test-3     instance163                         
+moray             3 test-1     instance017                         
+moray             3 test-1     instance018                         
+moray             3 test-1     instance019                         
+moray             3 test-1     instance038                         
+moray             3 test-1     instance039                         
+moray             3 test-1     instance040                         
+moray             3 test-2     instance080                         
+moray             3 test-2     instance081                         
+moray             3 test-2     instance082                         
+moray             3 test-2     instance101                         
+moray             3 test-2     instance102                         
+moray             3 test-2     instance103                         
+moray             3 test-3     instance143                         
+moray             3 test-3     instance144                         
+moray             3 test-3     instance145                         
+moray             3 test-3     instance164                         
+moray             3 test-3     instance165                         
+moray             3 test-3     instance166                         
+postgres          1 test-1     instance051                         
+postgres          1 test-1     instance052                         
+postgres          1 test-1     instance053                         
+postgres          1 test-1     instance062                         
+postgres          1 test-2     instance114                         
+postgres          1 test-2     instance115                         
+postgres          1 test-2     instance116                         
+postgres          1 test-2     instance125                         
+postgres          1 test-3     instance177                         
+postgres          1 test-3     instance178                         
+postgres          1 test-3     instance179                         
+postgres          1 test-3     instance188                         
+postgres          2 test-1     instance054                         
+postgres          2 test-1     instance055                         
+postgres          2 test-1     instance056                         
+postgres          2 test-1     instance063                         
+postgres          2 test-2     instance117                         
+postgres          2 test-2     instance118                         
+postgres          2 test-2     instance119                         
+postgres          2 test-2     instance126                         
+postgres          2 test-3     instance180                         
+postgres          2 test-3     instance181                         
+postgres          2 test-3     instance182                         
+postgres          2 test-3     instance189                         
+postgres          3 test-1     instance057                         
+postgres          3 test-1     instance058                         
+postgres          3 test-1     instance059                         
+postgres          3 test-2     instance120                         
+postgres          3 test-2     instance121                         
+postgres          3 test-2     instance122                         
+postgres          3 test-3     instance183                         
+postgres          3 test-3     instance184                         
+postgres          3 test-3     instance185                         
+--------------------------------------------------
+--------------------------------------------------
+test case "manta-adm show -H"
+marlin            1 instance001                          test-1-cn001.example.com
+marlin            1 instance002                          test-1-cn001.example.com
+marlin            1 instance003                          test-1-cn001.example.com
+marlin            1 instance004                          test-1-cn001.example.com
+marlin            1 instance005                          test-1-cn001.example.com
+marlin            1 instance006                          test-1-cn001.example.com
+marlin            1 instance007                          test-1-cn001.example.com
+marlin            1 instance008                          test-1-cn001.example.com
+marlin            1 instance009                          test-1-cn001.example.com
+marlin            1 instance010                          test-1-cn001.example.com
+marlin            1 instance022                          test-1-cn002.example.com
+marlin            1 instance023                          test-1-cn002.example.com
+marlin            1 instance024                          test-1-cn002.example.com
+marlin            1 instance025                          test-1-cn002.example.com
+marlin            1 instance026                          test-1-cn002.example.com
+marlin            1 instance027                          test-1-cn002.example.com
+marlin            1 instance028                          test-1-cn002.example.com
+marlin            1 instance029                          test-1-cn002.example.com
+marlin            1 instance030                          test-1-cn002.example.com
+marlin            1 instance031                          test-1-cn002.example.com
+marlin            1 instance041                          test-1-cn003.example.com
+marlin            1 instance042                          test-1-cn003.example.com
+marlin            1 instance043                          test-1-cn003.example.com
+marlin            1 instance044                          test-1-cn003.example.com
+marlin            1 instance045                          test-1-cn003.example.com
+marlin            1 instance046                          test-1-cn003.example.com
+marlin            1 instance047                          test-1-cn003.example.com
+marlin            1 instance048                          test-1-cn003.example.com
+marlin            1 instance049                          test-1-cn003.example.com
+marlin            1 instance050                          test-1-cn003.example.com
+marlin            1 instance060                          test-1-cn004.example.com
+marlin            1 instance061                          test-1-cn004.example.com
+medusa            1 instance020                          test-1-cn001.example.com
+medusa            1 instance021                          test-1-cn001.example.com
+moray             1 instance011                          test-1-cn001.example.com
+moray             1 instance012                          test-1-cn001.example.com
+moray             1 instance013                          test-1-cn001.example.com
+moray             1 instance032                          test-1-cn002.example.com
+moray             1 instance033                          test-1-cn002.example.com
+moray             1 instance034                          test-1-cn002.example.com
+moray             2 instance014                          test-1-cn001.example.com
+moray             2 instance015                          test-1-cn001.example.com
+moray             2 instance016                          test-1-cn001.example.com
+moray             2 instance035                          test-1-cn002.example.com
+moray             2 instance036                          test-1-cn002.example.com
+moray             2 instance037                          test-1-cn002.example.com
+moray             3 instance017                          test-1-cn001.example.com
+moray             3 instance018                          test-1-cn001.example.com
+moray             3 instance019                          test-1-cn001.example.com
+moray             3 instance038                          test-1-cn002.example.com
+moray             3 instance039                          test-1-cn002.example.com
+moray             3 instance040                          test-1-cn002.example.com
+postgres          1 instance051                          test-1-cn003.example.com
+postgres          1 instance052                          test-1-cn003.example.com
+postgres          1 instance053                          test-1-cn003.example.com
+postgres          1 instance062                          test-1-cn004.example.com
+postgres          2 instance054                          test-1-cn003.example.com
+postgres          2 instance055                          test-1-cn003.example.com
+postgres          2 instance056                          test-1-cn003.example.com
+postgres          2 instance063                          test-1-cn004.example.com
+postgres          3 instance057                          test-1-cn003.example.com
+postgres          3 instance058                          test-1-cn003.example.com
+postgres          3 instance059                          test-1-cn003.example.com
+--------------------------------------------------
+--------------------------------------------------
+test case "manta-adm show -a -o service,datacenter,shard,version"
+SERVICE          DATACENTER SH VERSION                                   
+marlin           test-1      1 master001                                 
+marlin           test-1      1 master001                                 
+marlin           test-1      1 master001                                 
+marlin           test-1      1 master001                                 
+marlin           test-1      1 master001                                 
+marlin           test-1      1 master001                                 
+marlin           test-1      1 master001                                 
+marlin           test-1      1 master001                                 
+marlin           test-1      1 master001                                 
+marlin           test-1      1 master001                                 
+marlin           test-1      1 master001                                 
+marlin           test-1      1 master001                                 
+marlin           test-1      1 master001                                 
+marlin           test-1      1 master001                                 
+marlin           test-1      1 master001                                 
+marlin           test-1      1 master001                                 
+marlin           test-1      1 master001                                 
+marlin           test-1      1 master001                                 
+marlin           test-1      1 master001                                 
+marlin           test-1      1 master001                                 
+marlin           test-1      1 master001                                 
+marlin           test-1      1 master001                                 
+marlin           test-1      1 master001                                 
+marlin           test-1      1 master001                                 
+marlin           test-1      1 master001                                 
+marlin           test-1      1 master001                                 
+marlin           test-1      1 master001                                 
+marlin           test-1      1 master001                                 
+marlin           test-1      1 master001                                 
+marlin           test-1      1 master001                                 
+marlin           test-1      1 master001                                 
+marlin           test-1      1 master001                                 
+marlin           test-2      1 -                                         
+marlin           test-2      1 -                                         
+marlin           test-2      1 -                                         
+marlin           test-2      1 -                                         
+marlin           test-2      1 -                                         
+marlin           test-2      1 -                                         
+marlin           test-2      1 -                                         
+marlin           test-2      1 -                                         
+marlin           test-2      1 -                                         
+marlin           test-2      1 -                                         
+marlin           test-2      1 -                                         
+marlin           test-2      1 -                                         
+marlin           test-2      1 -                                         
+marlin           test-2      1 -                                         
+marlin           test-2      1 -                                         
+marlin           test-2      1 -                                         
+marlin           test-2      1 -                                         
+marlin           test-2      1 -                                         
+marlin           test-2      1 -                                         
+marlin           test-2      1 -                                         
+marlin           test-2      1 -                                         
+marlin           test-2      1 -                                         
+marlin           test-2      1 -                                         
+marlin           test-2      1 -                                         
+marlin           test-2      1 -                                         
+marlin           test-2      1 -                                         
+marlin           test-2      1 -                                         
+marlin           test-2      1 -                                         
+marlin           test-2      1 -                                         
+marlin           test-2      1 -                                         
+marlin           test-2      1 -                                         
+marlin           test-2      1 -                                         
+marlin           test-3      1 -                                         
+marlin           test-3      1 -                                         
+marlin           test-3      1 -                                         
+marlin           test-3      1 -                                         
+marlin           test-3      1 -                                         
+marlin           test-3      1 -                                         
+marlin           test-3      1 -                                         
+marlin           test-3      1 -                                         
+marlin           test-3      1 -                                         
+marlin           test-3      1 -                                         
+marlin           test-3      1 -                                         
+marlin           test-3      1 -                                         
+marlin           test-3      1 -                                         
+marlin           test-3      1 -                                         
+marlin           test-3      1 -                                         
+marlin           test-3      1 -                                         
+marlin           test-3      1 -                                         
+marlin           test-3      1 -                                         
+marlin           test-3      1 -                                         
+marlin           test-3      1 -                                         
+marlin           test-3      1 -                                         
+marlin           test-3      1 -                                         
+marlin           test-3      1 -                                         
+marlin           test-3      1 -                                         
+marlin           test-3      1 -                                         
+marlin           test-3      1 -                                         
+marlin           test-3      1 -                                         
+marlin           test-3      1 -                                         
+marlin           test-3      1 -                                         
+marlin           test-3      1 -                                         
+marlin           test-3      1 -                                         
+marlin           test-3      1 -                                         
+medusa           test-1      1 -                                         
+medusa           test-1      1 -                                         
+medusa           test-2      1 -                                         
+medusa           test-2      1 -                                         
+medusa           test-3      1 -                                         
+medusa           test-3      1 -                                         
+moray            test-1      1 master002                                 
+moray            test-1      1 master002                                 
+moray            test-1      1 master002                                 
+moray            test-1      1 master002                                 
+moray            test-1      1 master002                                 
+moray            test-1      1 master002                                 
+moray            test-2      1 -                                         
+moray            test-2      1 -                                         
+moray            test-2      1 -                                         
+moray            test-2      1 -                                         
+moray            test-2      1 -                                         
+moray            test-2      1 -                                         
+moray            test-3      1 -                                         
+moray            test-3      1 -                                         
+moray            test-3      1 -                                         
+moray            test-3      1 -                                         
+moray            test-3      1 -                                         
+moray            test-3      1 -                                         
+moray            test-1      2 master002                                 
+moray            test-1      2 master002                                 
+moray            test-1      2 master002                                 
+moray            test-1      2 master002                                 
+moray            test-1      2 master002                                 
+moray            test-1      2 master002                                 
+moray            test-2      2 -                                         
+moray            test-2      2 -                                         
+moray            test-2      2 -                                         
+moray            test-2      2 -                                         
+moray            test-2      2 -                                         
+moray            test-2      2 -                                         
+moray            test-3      2 -                                         
+moray            test-3      2 -                                         
+moray            test-3      2 -                                         
+moray            test-3      2 -                                         
+moray            test-3      2 -                                         
+moray            test-3      2 -                                         
+moray            test-1      3 master002                                 
+moray            test-1      3 master002                                 
+moray            test-1      3 master002                                 
+moray            test-1      3 master002                                 
+moray            test-1      3 master002                                 
+moray            test-1      3 master002                                 
+moray            test-2      3 -                                         
+moray            test-2      3 -                                         
+moray            test-2      3 -                                         
+moray            test-2      3 -                                         
+moray            test-2      3 -                                         
+moray            test-2      3 -                                         
+moray            test-3      3 -                                         
+moray            test-3      3 -                                         
+moray            test-3      3 -                                         
+moray            test-3      3 -                                         
+moray            test-3      3 -                                         
+moray            test-3      3 -                                         
+postgres         test-1      1 master003                                 
+postgres         test-1      1 master003                                 
+postgres         test-1      1 master003                                 
+postgres         test-1      1 master003                                 
+postgres         test-2      1 -                                         
+postgres         test-2      1 -                                         
+postgres         test-2      1 -                                         
+postgres         test-2      1 -                                         
+postgres         test-3      1 -                                         
+postgres         test-3      1 -                                         
+postgres         test-3      1 -                                         
+postgres         test-3      1 -                                         
+postgres         test-1      2 master003                                 
+postgres         test-1      2 master003                                 
+postgres         test-1      2 master003                                 
+postgres         test-1      2 master003                                 
+postgres         test-2      2 -                                         
+postgres         test-2      2 -                                         
+postgres         test-2      2 -                                         
+postgres         test-2      2 -                                         
+postgres         test-3      2 -                                         
+postgres         test-3      2 -                                         
+postgres         test-3      2 -                                         
+postgres         test-3      2 -                                         
+postgres         test-1      3 master003                                 
+postgres         test-1      3 master003                                 
+postgres         test-1      3 master003                                 
+postgres         test-2      3 -                                         
+postgres         test-2      3 -                                         
+postgres         test-2      3 -                                         
+postgres         test-3      3 -                                         
+postgres         test-3      3 -                                         
+postgres         test-3      3 -                                         
+--------------------------------------------------
+--------------------------------------------------
+test case "manta-adm show -js"
+{
+    "test-1-cn001": {
+        "marlin": {
+            "img001": 10
+        },
+        "medusa": {
+            "img004": 2
+        },
+        "moray": {
+            "1": {
+                "img002": 3
+            },
+            "2": {
+                "img002": 3
+            },
+            "3": {
+                "img002": 3
+            }
+        }
+    },
+    "test-1-cn002": {
+        "marlin": {
+            "img001": 10
+        },
+        "moray": {
+            "1": {
+                "img002": 3
+            },
+            "2": {
+                "img002": 3
+            },
+            "3": {
+                "img002": 3
+            }
+        }
+    },
+    "test-1-cn003": {
+        "marlin": {
+            "img001": 10
+        },
+        "postgres": {
+            "1": {
+                "img003": 3
+            },
+            "2": {
+                "img003": 3
+            },
+            "3": {
+                "img003": 3
+            }
+        }
+    },
+    "test-1-cn004": {
+        "marlin": {
+            "img001": 2
+        },
+        "postgres": {
+            "1": {
+                "img003": 1
+            },
+            "2": {
+                "img003": 1
+            }
+        }
+    }
+}
+--------------------------------------------------
