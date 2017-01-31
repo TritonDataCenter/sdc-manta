@@ -109,5 +109,5 @@ confirm "Are you ready to proceed? (y/N) " || fail "aborted by user"
 
 set -o xtrace
 manta-adm update -y $mdl_conffile
-manta-marlin
+manta-marlin -s $(manta-adm cn -H -o server_uuid storage)
 set +o xtrace
