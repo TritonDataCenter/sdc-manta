@@ -92,7 +92,7 @@ check:: $(NODE_EXEC)
 
 .PHONY: test
 test: | $(CATEST)
-	$(CATEST) -a
+	PATH="$(TOP)/build/node/bin:$$PATH" $(CATEST) -a
 
 $(CATEST): deps/catest/.git
 
