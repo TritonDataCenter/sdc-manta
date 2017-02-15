@@ -220,6 +220,7 @@ function generateFakeBase(fakeDeployed, azCount) {
 			if (masterAz) {
 				fakeBase['vms'][id] = {
 					'image_uuid': params['imgid'],
+					'server_uuid': params['cnid'],
 					'nics': [ {
 						'primary': true,
 						'ip4addr': '0.0.0.0'

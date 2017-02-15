@@ -469,6 +469,7 @@ function setupMockManta(_, callback)
 		    'metadata': { 'SHARD': '1', 'DATACENTER': 'test' }
 		});
 		fakeDeployedTopology.vms[zoneid] = {
+		    'server_uuid': cnid,
 		    'nics': [ {
 			'primary': true,
 			'ip': '10.0.0.' + (i + 1)

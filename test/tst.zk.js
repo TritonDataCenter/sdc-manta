@@ -103,12 +103,15 @@ function runTestCase(testcase, callback)
 		islocal = deployed.cns.hasOwnProperty(server_uuid) &&
 		    deployed.cns[server_uuid] !== null;
 		if (islocal) {
-			deployed.vms[uuid] = {
-			    'nics': [ {
-			        'primary': true,
-				'ip': instance['ip']
-			    } ]
-			};
+			if (instance.zone_removed !== true) {
+				deployed.vms[uuid] = {
+				    'nics': [ {
+					'primary': true,
+					'ip': instance['ip']
+				    } ],
+				    'server_uuid': server_uuid
+				};
+			}
 		} else {
 			deployed.cns[server_uuid] = null;
 		}
@@ -468,6 +471,36 @@ vasync.forEachPipeline({
 	].join('\n'),
 	'warnings': [
 	    new RegExp('nameservice instance "vm003": missing ZK_SERVERS entry')
+	]
+    }, {
+	'name': 'list zk servers, multi DC, local zone destroyed/missing',
+	'zk_servers': [ '10.0.0.7', '10.0.0.8', '10.0.0.9' ],
+	'cns': [ identCn(1), identCn(2) ],
+	'instances': [ {
+	    'cn': identCn(1),
+	    'vm': identVm(1),
+	    'ip': '10.0.0.7',
+	    'zone_removed': true
+	}, {
+	    'cn': identCn(2),
+	    'vm': identVm(2),
+	    'ip': '10.0.0.8'
+	}, {
+	    'cn': identCn(3),
+	    'vm': identVm(3),
+	    'ip': '10.0.0.9'
+	} ],
+	'output': [
+	    outputHeader,
+	    outputRow(1, localDc, identVm(1), '10.0.0.7'),
+	    outputRow(2, localDc, identVm(2), '10.0.0.8'),
+	    outputRow(3, remoteDc, identVm(3), '10.0.0.9'),
+	    ''
+	].join('\n'),
+	'warnings': [
+	    new RegExp('nameservice instance "vm001": VM appears to have ' +
+		'been provisioned in this datacenter, but could not be ' +
+		'found in VMAPI')
 	]
     } ]
 }, function (err) {
