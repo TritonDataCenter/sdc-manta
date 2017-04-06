@@ -75,6 +75,12 @@ function main()
 	if (spec['manta_nodes'].length === 0)
 		fatal('no indexing CNs listed');
 
+	if (!('this_az' in spec))
+		fatal('missing this availability zone');
+
+	if (!(typeof (spec['this_az']) === 'string'))
+		fatal('this availability zone must be a string');
+
 	if (!('azs' in spec))
 		fatal('missing availability zone list');
 
@@ -83,6 +89,10 @@ function main()
 
 	if (spec['azs'].length === 0)
 		fatal('no azs listed');
+
+	if (spec['azs'].indexOf(spec['this_az']) < 0)
+		fatal('this availability zone missing from ' +
+		    'availability zone list');
 
 	if (!('admin' in spec))
 		fatal('missing admin network information');
@@ -138,6 +148,10 @@ function main()
 			fatal('missing information for az ' + az +
 			    'in the marlin block');
 	}
+
+	if ('distribute_svcs' in spec &&
+	    (typeof (spec['distribute_svcs']) !== 'boolean'))
+		fatal('distribute_svcs can only be a boolean');
 }
 
 main();
