@@ -28,6 +28,7 @@ mn_otheraz=
 mn_ufds_adminid=
 mn_out_dir="output.$$"
 mn_manta_vnic="manta0"
+mn_distribute_svcs=
 
 #
 # Variables for passing around return data.
@@ -567,25 +568,35 @@ function distribute_smf_route_svc
 	[[ $? -eq 0 ]] || fatal "failed to list nodes"
 	[[ -z "$nodes" ]] && fatal "found an empty list of nodes"
 	for n in $nodes; do
-		sdc-oneachnode >/dev/null -n $n 'mkdir -p /opt/custom/smf \
-		    /opt/custom/mnet/bin' || fatal "failed to make directories"
-
-		sdc-oneachnode -n $n -d /tmp -g $mn_out_dir/xdc-route.sh \
-		    || fatal "failed to place routing service method"
-		sdc-oneachnode -n $n 'mv /tmp/xdc-route.sh \
-		    /opt/custom/mnet/bin && chmod +x \
-		    /opt/custom/mnet/bin/xdc-route.sh' \
-		    || fatal "failed to install xdc-route.sh"
-
-		sdc-oneachnode -n $n -d /tmp -g ./smf/xdc-route.xml \
-		    || fatal "failed to place routing service manifest"
-		sdc-oneachnode -n $n 'mv /tmp/xdc-route.xml /opt/custom/smf' \
-		    || fatal "failed to install xdc-route.xml"
-
-		sdc-oneachnode -n $n 'svcs smartdc/hack/xdc-routes || svccfg \
-		    import /opt/custom/smf/xdc-route.xml' \
-		    || fatal "failed to import xdc-route service"
+		setup_route_svc $n
 	done
+}
+
+function setup_route_svc
+{
+	local server
+
+	server=$1
+	[[ -z "$server" ]] && fatal "missing required server uuid"
+
+	sdc-oneachnode >/dev/null -n $server 'mkdir -p /opt/custom/smf \
+	    /opt/custom/mnet/bin' || fatal "failed to make directories"
+
+	sdc-oneachnode -n $server -d /tmp -g $mn_out_dir/xdc-route.sh || fatal \
+	    "failed to place routing service method"
+	sdc-oneachnode -n $server 'mv /tmp/xdc-route.sh \
+	    /opt/custom/mnet/bin && chmod +x \
+	    /opt/custom/mnet/bin/xdc-route.sh' || fatal \
+	"failed to install xdc-route.sh"
+
+	sdc-oneachnode -n $server -d /tmp -g ./smf/xdc-route.xml || fatal \
+	    "failed to place routing service manifest"
+	sdc-oneachnode -n $server 'mv /tmp/xdc-route.xml \
+	    /opt/custom/smf' || fatal "failed to install xdc-route.xml"
+
+	sdc-oneachnode -n $server 'svcs smartdc/hack/xdc-routes || svccfg \
+	    import /opt/custom/smf/xdc-route.xml' || fatal \
+	    "failed to import xdc-route service"
 }
 
 function has_manta_ip
@@ -843,6 +854,66 @@ function resolve_path
 	echo "$absdir/$rbase"
 }
 
+#
+# Fetch our boot-time networking capabilities from SAPI and set
+# mn_distribute_svcs to either true or false depending on the result. This is
+# used to determine if we should distribute the GZ SMF services from
+# "create_smf_route_svc" and "setup_manta_nic", but can be overridden with the
+# "distribute_svcs" property in the config.
+#
+function fetch_distribute_svcs
+{
+	local override sres count sapi_metadata fabric_cfg
+	override=$(json distribute_svcs < $mn_config)
+	[[ $? -eq 0 ]] || fatal "failed to get svcs override"
+	sres=$(sdc-sapi /applications?name=sdc | json -H)
+	[[ $? -eq 0 ]] || fatal "unexpected failure reaching sapi"
+	count=$(echo $sres | json -a uuid | wc -l)
+	[[ $? -eq 0 ]] || fatal "failed to count services"
+	[[ $count -eq 1 ]] || fatal "didn't find exactly one sdc service"
+	sapi_metadata=$(echo $sres | json -a metadata)
+	[[ $? -eq 0 ]] || fatal "failed to get sapi metadata"
+	[[ -z "$sapi_metadata" ]] && fatal "failed to get sapi metadata"
+	fabric_cfg=$(echo $sapi_metadata | json fabric_cfg)
+	[[ $? -eq 0 ]] || fatal "failed to get get fabric config"
+	if [[ -n "$fabric_cfg" ]]; then
+		mn_distribute_svcs="false"
+	else
+		mn_distribute_svcs="true"
+	fi
+
+	# $override is optional and its value can only be a boolean. This is
+	# enforced by validate.js
+	if [[ -n "$override" ]]; then
+		mn_distribute_svcs=$override
+	fi
+}
+
+#
+# Headnodes can't make use of boot-time networking directly from NAPI, so we
+# should still distribute the SMF services if the headnode is found in our node
+# list.
+#
+function handle_headnode_svcs
+{
+	local uuid nodes
+	uuid=$(sysinfo | json UUID)
+	[[ $? -eq 0 ]] || fatal "failed to fetch sysinfo"
+	[[ -z "$uuid" ]] && "unexpected empty local uuid"
+	nodes=$(json < $mn_config | json manta_nodes | json -a)
+	[[ $? -eq 0 ]] || fatal "failed to list nodes"
+	[[ -z "$nodes" ]] && fatal "found an empty list of nodes"
+	if echo $nodes | grep -q $uuid; then
+		node_has_manta_nic $uuid || setup_manta_nic $uuid
+		if [[ -n "$mn_otheraz" ]]; then
+			create_smf_route_svc || fatal "failed to create smf" \
+			    "routing hack service"
+			setup_route_svc $uuid || fatal "failed to setup smf" \
+			    "routing hack service"
+		fi
+	fi
+}
+
 if [[ $# -ne 1 ]]; then
 	fatal "<config.json>"
 fi
@@ -854,6 +925,8 @@ cd "$mn_dir" || fatal "failed to cd to \"$mn_dir\""
 validate_config || fatal "failed to validate config"
 fetch_az || fatal "failed to determine our AZ"
 fetch_ufds_ids || fatal "failed to fetch ufds admin id"
+fetch_distribute_svcs || fatal "failed to determine if GZ SMF services" \
+    "should be distributed"
 handle_tag 'admin' || fatal "failed to handle tag for admin nic_tag"
 handle_tag 'manta' || fatal "failed to handle manta nic_tag"
 handle_tag 'marlin' || fatal "failed to handle marlin nic_tag"
@@ -869,13 +942,25 @@ add_tags 'marlin' 'marlin_nodes' || fatal "failed to add marlin nic tag to CNs"
 
 setup_output_dir || fatal "failed to setup output directory"
 allocate_manta_ips || fatal "failed to allocate ips for manta nics for GZs"
-handle_manta_nics || fatal "failed to create and setup manta nics in GZs"
 
-if [[ -n "$mn_otheraz" ]]; then
-	create_smf_route_svc || fatal \
-	    "failed to create smf routing hack service"
-	distribute_smf_route_svc || fatal \
-	    "failed to distribute smf routing hack service"
+if [[ "$mn_distribute_svcs" == "true" ]]; then
+	handle_manta_nics || fatal "failed to create and setup manta nics" \
+	    "in GZs"
+	if [[ -n "$mn_otheraz" ]]; then
+		create_smf_route_svc || fatal \
+		    "failed to create smf routing hack service"
+		distribute_smf_route_svc || fatal \
+		    "failed to distribute smf routing hack service"
+	fi
+else
+	handle_headnode_svcs || fatal "failed to handle headnode GZ SMF" \
+	    "services"
+	warn "GZ SMF services have not been distributed to non-headnodes due" \
+	    "to either the detection of boot-time networking in the" \
+	    "datacenter or a configuration option supplied in $mn_config. a" \
+	    "reboot of each non-headnode present in $mn_config is required" \
+	    "for their respective GZ networking components (nics, cross-DC" \
+	    "routes) to be configured/updated"
 fi
 
 exit 0
