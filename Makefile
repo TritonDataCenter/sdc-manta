@@ -54,7 +54,7 @@ JSON_FILES	 = package.json \
 include ./tools/mk/Makefile.defs
 include ./tools/mk/Makefile.node_deps.defs
 
-NODE_PREBUILT_VERSION=v0.10.32
+NODE_PREBUILT_VERSION=v0.10.48
 NODE_PREBUILT_TAG=zone
 # This is sdc-minimal-multiarch-lts@15.4.1, compat with
 # triton-origin-multiarch-15.4.1.
