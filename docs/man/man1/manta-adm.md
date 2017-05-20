@@ -1,10 +1,12 @@
-# MANTA-ADM 1 "2016" Manta "Manta Operator Commands"
+# MANTA-ADM 1 "2017" Manta "Manta Operator Commands"
 
 ## NAME
 
 manta-adm - administer a Manta deployment
 
 ## SYNOPSIS
+
+`manta-adm alarm SUBCOMMAND... [OPTIONS...]`
 
 `manta-adm cn [-l LOG_FILE] [-H] [-o FIELD...] [-n] [-s] CN_FILTER`
 
@@ -29,6 +31,9 @@ The `manta-adm` command is used to administer various aspects of a Manta
 deployment.  This command only operates on zones within the same datacenter.
 The command may need to be repeated in other datacenters in order to execute it
 across an entire Manta deployment.
+
+`manta-adm alarm`
+  List and configure amon-based alarms for Manta.
 
 `manta-adm cn`
   Show information about Manta servers in this DC.
@@ -125,6 +130,14 @@ Many commands also accept:
   Emit verbose log to LOGFILE.  The special string "stdout" causes output to be
   emitted to the program's stdout.
 
+Commands that make changes support:
+
+`-n, --dryrun`
+  Print what changes would be made without actually making them.
+
+`-y, --confirm`
+  Bypass all confirmation prompts.
+
 **Important note for programmatic users:** Except as noted below, the output
 format for this command is subject to change at any time. The only subcommands
 whose output is considered committed are:
@@ -133,12 +146,178 @@ whose output is considered committed are:
 * `manta-adm show`, only when used with either the "-o" or "-j" option
 * `manta-adm zk list`, only when used with the "-o" option
 
-The output for any other commands may change at any time. Documented
+The output for any other commands may change at any time.  The `manta-adm alarm`
+subcommand is still considered an experimental interface.  All other documented
 subcommands, options, and arguments are committed, and you can use the exit
-status of the program to determine success of failure.
+status of the program to determine success or failure.
 
 
 ## SUBCOMMANDS
+
+### "alarm" subcommand
+
+`manta-adm alarm close ALARM_ID...`
+
+`manta-adm alarm config probegroup list [-H] [-o FIELD...]`
+
+`manta-adm alarm config show`
+
+`manta-adm alarm config update [-n] [-y] [--unconfigure]`
+
+`manta-adm alarm config verify [--unconfigure]`
+
+`manta-adm alarm details ALARM_ID...`
+
+`manta-adm alarm faults ALARM_ID...`
+
+`manta-adm alarm list [-H] [-o FIELD...] [--state=STATE]`
+
+`manta-adm alarm metadata events`
+
+`manta-adm alarm metadata ka [EVENT_NAME...]`
+
+`manta-adm alarm notify on|off ALARM_ID...`
+
+`manta-adm alarm show`
+
+The `manta-adm alarm` subcommand provides several tools that allow operators to:
+
+* view and configure amon probes and probe groups (`config` subcommand)
+* view open alarms (`show`, `list`, `details`, and `faults` subcommands)
+* configure notifications for open alarms (`notify` subcommand)
+* view local metadata about alarms and probes (`metadata` subcommand)
+
+The primary commands for working with alarms are:
+
+* `manta-adm alarm config update`: typically used during initial deployment and
+  after other deployment operations to ensure that the right set of probes and
+  probe groups are configured for the deployed components
+* `manta-adm alarm show`: summarize open alarms
+* `manta-adm alarm details ALARM_ID...`: report detailed information (including
+  suggested actions) for the specified alarms
+* `manta-adm alarm close ALARM_ID...`: close open alarms, indicating that they
+  no longer represent issues
+
+For background about Amon itself, probes, probegroups, and alarms, see the
+Triton Amon reference documentation.
+
+As with other subcommands, this command only operates on the current Triton
+datacenter.  In multi-datacenter deployments, alarms are managed separately in
+each datacenter.
+
+Some of the following subcommands can operate on many alarms.  These subcommands
+exit failure if they fail for any of the specified alarms, but the operation may
+have completed successfully for other alarms.  For example, closing 3 alarms is
+not atomic.  If the operation fails, then 1, 2, or 3 alarms may still be open.
+
+`manta-adm alarm close ALARM_ID...`
+
+Close the specified alarms.  These alarms will no longer show up in the
+`manta-adm alarm list` or `manta-adm alarm show` output.  Amon purges closed
+alarms completely after some period of time.
+
+If the underlying issue that caused an alarm is not actually resolved, then a
+new alarm may be opened for the same issue.  In some cases, that can happen
+almost immediately.  In other cases, it may take many hours for the problem to
+resurface.  In the case of transient issues, a new alarm may not open again
+until the issue occurs again, which could be days, weeks, or months later.  That
+does not mean the underlying issue was actually resolved.
+
+`manta-adm alarm config probegroup list [-H] [-o FIELD...]`
+
+List configured probe groups in tabular form.  This is primarily useful in
+debugging unexpected behavior from the alarms themselves.  The `manta-adm alarm
+config show` command provides a more useful summary of the probe groups that are
+configured.
+
+`manta-adm alarm config show`
+
+Shows summary information about the probes and probe groups that are configured.
+This is not generally necessary but it can be useful to verify that probes are
+configured as expected.
+
+`manta-adm alarm config update [-n] [-y] [--unconfigure]`
+
+Examines the Manta components that are deployed and the alarm configuration
+(specifically, the probes and probe groups deployed to monitor those components)
+and compares them with the expected configuration.  If these do not match,
+prints out a summary of proposed changes to the configuration and optionally
+applies those changes.
+
+If `--unconfigure` is specified, then the tool removes all probes and probe
+groups.
+
+This is the primary tool for updating the set of deployed probes and probe
+groups.  Operators would typically use this command:
+
+- during initial deployment to deploy probes and probe groups
+- after deploying (or undeploying) any Manta components to deploy (or remove)
+  probes related to the affected components
+- after updating the `manta-adm` tool itself, which bundles the probe
+  definitions, to deploy any new or updated probes
+- at any time to verify that the configuration matches what's expected
+
+This operation is idempotent.
+
+This command supports the `-n/--dryrun` and `-y/--confirm` options described
+above.
+
+`manta-adm alarm config verify [--unconfigure]`
+
+Behaves exactly like `manta-adm alarm config update --dryrun`.
+
+`manta-adm alarm details ALARM_ID...`
+
+Prints detailed information about any number of alarms.  The detailed
+information includes the time the alarm was opened, the last time an event was
+associated with this alarm, the total number of events associated with the
+alarm, the affected components, and information about the severity, automated
+response, and suggested actions for this issue.
+
+`manta-adm alarm faults ALARM_ID...`
+
+Prints detailed information about the faults associated with any number of
+alarms.  Each fault represents a particular probe failure.  The specific
+information provided depends on the alarm.  If the alarm related to a failed
+health check command, then the exit status, terminating signal, stdout, and
+stderr of the command are provided.  If the alarm relates to an error log entry,
+the contents of the log entry are provided.  There can be many faults associated
+with a single alarm.
+
+`manta-adm alarm list [-H] [-o FIELD...] [--state=STATE]`
+
+Lists alarms in tabular form.  `STATE` controls which alarms are listed, which
+may be any of "open", "closed", "all", or "recent".  The default is "open".
+
+See also the `manta-adm alarm show` command.
+
+`manta-adm alarm metadata events`
+
+List the names for all of the events known to this version of `manta-adm`.  Each
+event corresponds to a distinct kind of problem.  For details about each one,
+see `manta-adm alarm metadata ka`.  The list of events comes from metadata
+bundled with the `manta-adm` tool.
+
+`manta-adm alarm metadata ka [EVENT_NAME...]`
+
+Print out knowledge articles about each of the specified events.  This
+information comes from metadata bundled with the `manta-adm` tool.  If no events
+are specified, prints out knowledge articles about all events.
+
+Knowledge articles include information about the severity of the problem, the
+impact, the automated response, and the suggested action.
+
+`manta-adm alarm notify on|off ALARM_ID...`
+
+Enable or disable notifications for the specified alarms.  Notifications are
+generally configured through Amon, which supports both email and XMPP
+notification for new alarms and new events on existing, open alarms.  This
+command controls whether notifications are enabled for the specified alarms.
+
+`manta-adm alarm show`
+
+Summarize open alarms.  For each alarm, use the `manta-adm alarm details`
+subcommand to view more information about it.
 
 
 ### "cn" subcommand
@@ -373,19 +552,12 @@ care should be taken when using it with stateful services like "postgres" or
 "storage".  See the Manta Operator's Guide for the appropriate procedures for
 upgrading all components.**
 
-Options:
-
-`-n, --dryrun`
-  Print what changes would be made without actually making them.
-
-`-y, --confirm`
-  Bypass all confirmation prompts.
+This command supports the `-l/--log_file`, `-n/--dryrun`, and `-y/--confirm`
+options described above, plus:
 
 `--no-reprovision`
   When upgrading a zone, always provision a new zone and deprovision the
   previous one, rather than reprovisioning the existing one.
-
-See above for information about the `-l/--log_file` option.
 
 If `SERVICE` is specified, then only instances of the named service are
 changed.
@@ -479,15 +651,8 @@ See above for information about the `-l`, `-H`, and `-o` options for
 ordinal number of each server), "datacenter", "zoneabbr", "zonename", "ip", and
 "port".
 
-The `manta-adm zk fixup` command supports options:
-
-`-n, --dryrun`
-  Print what changes would be made without actually making them.
-
-`-y, --confirm`
-  Bypass all confirmation prompts.
-
-It also supports the `-l/--log_file` option described above.
+The `manta-adm zk fixup` command supports the `-l/--log_file`, `-n/--dryrun`,
+and `-y/--confirm` options described above.
 
 
 ## EXIT STATUS
@@ -504,7 +669,7 @@ It also supports the `-l/--log_file` option described above.
 
 ## COPYRIGHT
 
-Copyright (c) 2016 Joyent Inc.
+Copyright (c) 2017 Joyent Inc.
 
 ## SEE ALSO
 

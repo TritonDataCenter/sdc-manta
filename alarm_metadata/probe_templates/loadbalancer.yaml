@@ -1,0 +1,152 @@
+#
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+#
+
+#
+# Copyright (c) 2017, Joyent, Inc.
+#
+
+#
+# amon probes for the "loadbalancer" service
+#
+# For background information, see lib/alarms/index.js.  The format of this file
+# is described in lib/alarms/metadata.js.
+#
+
+-
+    event: upset.manta.loadbalancer.haproxy.memory
+    legacyName: "haproxy memory size (1G)"
+    scope:
+        service: loadbalancer
+    checks:
+        -
+            type: cmd
+            config:
+                cmd: "ps -o rss= -p \"$(pgrep -c \"$(svcs -H -o ctid haproxy)\")\" | awk '$1 > 1048576{ printf(\"haproxy rss too large\\n\"); }'"
+                stdoutMatch:
+                    pattern: haproxy rss too large
+                interval: 120
+                threshold: 2
+                period: 360
+    ka:
+        title: Loadbalancer "haproxy" using too much memory
+        description: >-
+            Loadbalancer "haproxy" processes are using more memory than
+            expected.
+        severity: minor
+        response: No automated response will be taken.
+        impact: >-
+            There is no immediate impact.  However, if processes are leaking
+            memory, then performance may degrade and errors may be induced in
+            end-user requests.
+        action:
+            You may restart the "haproxy" service to alleviate the issue
+            temporarily, though this will impact some end user requests, and it
+            will not resolve the underlying cause of any resource leak.
+
+-
+    event: upset.manta.loadbalancer.stud.memory
+    legacyName: "stud memory size (1G)"
+    scope:
+        service: loadbalancer
+    checks:
+        -
+            type: cmd
+            config:
+                cmd: "test ! $(ps -orss -p \"`pgrep stud`\" | grep -v RSS | nawk '{t+=$1}END{print t}') -gt 1048576"
+                interval: 120
+                threshold: 2
+                period: 360
+    ka:
+        title: Loadbalancer "stud" using too much memory
+        description: >-
+            Loadbalancer "stud" processes are using more memory than expected.
+        severity: minor
+        response: No automated response will be taken.
+        impact: >-
+            There is no immediate impact.  However, if processes are leaking
+            memory, then performance may degrade and errors may be induced in
+            end-user requests.
+        action:
+            You may restart the "stud" service to alleviate the issue
+            temporarily, though this will impact some end user requests, and it
+            will not resolve the underlying cause of any resource leak.
+
+-
+    event: upset.manta.loadbalancer.muppet.memory
+    legacyName: "muppet memory size (512M)"
+    scope:
+        service: loadbalancer
+    checks:
+        -
+            type: cmd
+            config:
+                cmd: "test ! $(ps -orss -p $(svcs -Hoctid -p muppet | tail -n 1 | awk '{print $2}') | tail -n 1) -gt 524288"
+                interval: 120
+                threshold: 2
+                period: 360
+    ka:
+        title: Loadbalancer "muppet" using too much memory
+        description: >-
+            Loadbalancer "muppet" processes are using more memory than expected.
+        severity: minor
+        response: No automated response will be taken.
+        impact: There is no immediate impact.
+        action: Check the "muppet" process for memory leaks.
+
+-
+    event: upset.manta.loadbalancer.muppet.log_error
+    legacyName: muppet-logscan
+    scope:
+        service: loadbalancer
+    checks:
+        -
+            type: bunyan-log-scan
+            config:
+                smfServiceName: muppet
+                fields:
+                    level: ERROR
+                threshold: 1
+                period: 60
+    ka:
+        title: '"muppet" logged an error'
+        description: The "muppet" service has logged an error.
+        severity: major
+        response: No automated response will be taken.
+        impact: >-
+            If the problem was transient, there may be no impact.  Otherwise,
+            loadbalancers may not be correctly identifying when "webapi"
+            instances have come and gone.  They may be continuing to use old
+            webapi instances or ignoring new instances.
+        action:
+            Determine the scope of the problem based on the log message and
+            resolve the underlying issue.
+
+-
+    event: upset.manta.loadbalancer.no_backends
+    legacyName: no backend servers
+    scope:
+        service: loadbalancer
+    checks:
+        -
+            type: cmd
+            config:
+                cmd: "test -n $(/opt/smartdc/muppet/build/node/bin/node /opt/smartdc/muppet/node_modules/.bin/haproxystat showStat /tmp/haproxy  | /opt/smartdc/muppet/build/node/bin/node -e 's=\"\"; process.stdin.resume(); process.stdin.on(\"data\",function(c){s+=c}); process.stdin.on(\"end\",function(){o=eval(\"(\"+s+\")\");console.log(JSON.stringify(o)); });' | /usr/bin/json  -c 'this.type == \"backend\" && !/stats/.test(this.pxname) && act == 0' -a pxname)"
+                interval: 30
+                threshold: 2
+                period: 120
+    ka:
+        title: Loadbalancer has no backends
+        description: A loadbalancer has no working backends
+        severity: critical
+        response: No automated response will be taken.
+        impact:
+            End user requests may be experiencing very high error rates.
+        action:
+            Determine why the loadbalancer has no backends and resolve the
+            underlying issue.  First, ensure that there are working "webapi"
+            instances.  If so, identify whether they're registered in ZooKeeper.
+            If so, see if the Muppet instance in this loadbalancer zone has
+            found them.

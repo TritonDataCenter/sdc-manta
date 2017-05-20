@@ -5,7 +5,7 @@
  */
 
 /*
- * Copyright (c) 2016, Joyent, Inc.
+ * Copyright (c) 2017, Joyent, Inc.
  */
 
 /*
@@ -86,6 +86,16 @@ function main()
 			    services.serviceConfigProperties(svcname));
 		}
 	});
+
+	/*
+	 * Test serviceSupportsProbes().
+	 */
+	assertplus.deepEqual([ 'marlin', 'propeller' ], knownServices.filter(
+	    function (svcname) {
+		return (!services.serviceSupportsProbes(svcname));
+	    }));
+	assertplus.deepEqual(services.mSvcNamesProbes,
+	    services.mSvcNames.filter(services.serviceSupportsProbes));
 
 	console.error('%s tests passed', __filename);
 }

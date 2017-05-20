@@ -7,11 +7,13 @@
  */
 
 /*
- * Copyright (c) 2015, Joyent, Inc.
+ * Copyright (c) 2017, Joyent, Inc.
  */
 
 /*
  * manta-adm.js: manage manta deployments.  Provides subcommands:
+ *
+ *     alarm		view and configure information about alarms
  *
  *     cn		show information about CNs
  *
@@ -39,6 +41,7 @@ var cmdln = require('cmdln');
 var cmdutil = require('cmdutil');
 var jsprim = require('jsprim');
 var path = require('path');
+var restifyClients = require('restify-clients');
 var util = require('util');
 var vasync = require('vasync');
 var VError = require('verror').VError;
@@ -47,6 +50,64 @@ var deploy = require('../lib/deploy');
 var madm = require('../lib/adm');
 
 var maArg0 = path.basename(process.argv[1]);
+
+var maDefaultAlarmConcurrency = 10;
+
+/*
+ * These node-cmdln options are used by multiple subcommands.  They're defined
+ * in one place to ensure consistency in names, aliases, and help message.
+ */
+var maCommonOptions = {
+    'columns': {
+	'names': [ 'columns', 'o' ],
+	'type': 'arrayOfString',
+	'help': 'Select columns for output (see below).'
+    },
+    'concurrency': {
+	'names': [ 'concurrency' ],
+	'type': 'positiveInteger',
+	'help': 'Number of concurrent requests to make.',
+	'default': maDefaultAlarmConcurrency
+    },
+    'configFile': {
+	'names': [ 'config-file' ],
+	'type': 'string',
+	'help': 'Path to configuration.',
+	'default': common.CONFIG_FILE_DEFAULT
+    },
+    'confirm': {
+	'names': [ 'confirm', 'y' ],
+	'type': 'bool',
+	'help': 'Bypass all confirmations (be careful!)'
+    },
+    'dryrun': {
+	'names': [ 'dryrun', 'n' ],
+	'type': 'bool',
+	'help': 'Print what would be done without actually doing it.'
+    },
+    'logFile': {
+	'names': [ 'log_file', 'log-file', 'l' ],
+	'type': 'string',
+	'help': 'Dump logs to this file (or "stdout").',
+	'default': '/var/log/manta-adm.log'
+    },
+    'logFileDefaultNone': {
+	'names': [ 'log_file', 'log-file', 'l' ],
+	'type': 'string',
+	'help': 'Dump logs to this file (or "stdout")'
+    },
+    'omitHeader': {
+	'names': [ 'omit-header', 'H'],
+	'type': 'bool',
+	'help': 'Omit the header row for columnar output.'
+    },
+    'unconfigure': {
+	'names': [ 'unconfigure' ],
+	'type': 'bool',
+	'help': 'Remove all probes and probe groups instead of updating them.',
+	'default': false
+    }
+};
 
 /*
  * node-cmdln interface for the manta-adm tool.
@@ -61,6 +122,10 @@ function MantaAdm()
 
 util.inherits(MantaAdm, cmdln.Cmdln);
 
+/*
+ * Performs common initialization steps used by most subcommands.  "opts" are
+ * the cmdln-parsed CLI options.  This function processes the "log_file" option.
+ */
 MantaAdm.prototype.initAdm = function (opts, callback)
 {
 	var logstreams;
@@ -78,7 +143,7 @@ MantaAdm.prototype.initAdm = function (opts, callback)
 		console.error('logs at ' + opts.log_file);
 	} else {
 		logstreams = [ {
-		    'level': 'fatal',
+		    'level': process.env['LOG_LEVEL'] || 'fatal',
 		    'stream': process.stderr
 		} ];
 	}
@@ -86,7 +151,7 @@ MantaAdm.prototype.initAdm = function (opts, callback)
 	this.madm_log = new bunyan({
 	    'name': maArg0,
 	    'streams': logstreams,
-	    'serializers': bunyan.stdSerializers
+	    'serializers': restifyClients.bunyan.serializers
 	});
 
 	this.madm_adm = new madm.MantaAdm(this.madm_log);
@@ -101,6 +166,8 @@ MantaAdm.prototype.finiAdm = function ()
 {
 	this.madm_adm.close();
 };
+
+MantaAdm.prototype.do_alarm = MantaAdmAlarm;
 
 MantaAdm.prototype.do_cn = function (subcmd, opts, args, callback)
 {
@@ -167,27 +234,21 @@ MantaAdm.prototype.do_cn.help =
     '{{options}}\n' +
     'Available columns for -o:\n    ' + madm.cnColumnNames().join(', ');
 
-MantaAdm.prototype.do_cn.options = [ {
-    'names': [ 'omit-header', 'H'],
-    'type': 'bool',
-    'help': 'Omit the header row for columnar output'
-}, {
-    'names': [ 'log_file', 'l' ],
-    'type': 'string',
-    'help': 'Dump logs to this file (or "stdout")'
-}, {
-    'names': [ 'oneachnode', 'n' ],
-    'type': 'bool',
-    'help': 'Emit output suitable for "sdc-oneachnode -n"'
-}, {
-    'names': [ 'columns', 'o' ],
-    'type': 'arrayOfString',
-    'help': 'Select columns for output (see below)'
-}, {
-    'names': [ 'storage-only', 's' ],
-    'type': 'bool',
-    'help': 'Show only nodes used as storage nodes.'
-}];
+MantaAdm.prototype.do_cn.options = [
+    maCommonOptions.omitHeader,
+    maCommonOptions.logFileDefaultNone,
+    {
+	'names': [ 'oneachnode', 'n' ],
+	'type': 'bool',
+	'help': 'Emit output suitable for "sdc-oneachnode -n"'
+    },
+    maCommonOptions.columns,
+    {
+	'names': [ 'storage-only', 's' ],
+	'type': 'bool',
+	'help': 'Show only nodes used as storage nodes.'
+    }
+];
 
 MantaAdm.prototype.do_genconfig = function (subcmd, opts, args, callback)
 {
@@ -254,8 +315,7 @@ MantaAdm.prototype.do_genconfig = function (subcmd, opts, args, callback)
 };
 
 MantaAdm.prototype.do_genconfig.help =
-    'Generate a configuration for COAL or lab deployment or for \n' +
-    'a larger deployment.\n' +
+    'Generate a config for COAL, lab, or a larger deployment.\n' +
     '\n' +
     'Usage:\n' +
     '\n' +
@@ -364,23 +424,16 @@ MantaAdm.prototype.do_show.options = [ {
     'names': [ 'bycn', 'c' ],
     'type': 'bool',
     'help': 'Show results by compute node, rather than by service.'
-}, {
-    'names': [ 'omit-header', 'H'],
-    'type': 'bool',
-    'help': 'Omit the header row for columnar output'
-}, {
+},
+    maCommonOptions.omitHeader,
+{
     'names': [ 'json', 'j' ],
     'type': 'bool',
     'help': 'Show results in JSON form suitable for importing with "update".'
-}, {
-    'names': [ 'log_file', 'l' ],
-    'type': 'string',
-    'help': 'dump logs to this file (or "stdout")'
-}, {
-    'names': [ 'columns', 'o' ],
-    'type': 'arrayOfString',
-    'help': 'Select columns for output (see below)'
-}, {
+},
+    maCommonOptions.logFileDefaultNone,
+    maCommonOptions.columns,
+ {
     'names': [ 'summary', 's' ],
     'type': 'bool',
     'help': 'Show summary of deployed zones rather than each zone separately.'
@@ -481,20 +534,12 @@ MantaAdm.prototype.do_update = function (subcmd, opts, args, callback)
 MantaAdm.prototype.do_update.help =
     'Update deployment to match a JSON configuration.\n\n{{options}}';
 
-MantaAdm.prototype.do_update.options = [ {
-    'names': [ 'log_file', 'l' ],
-    'type': 'string',
-    'help': 'dump logs to this file (or "stdout")',
-    'default': '/var/log/manta-adm.log'
-}, {
-    'names': [ 'dryrun', 'n' ],
-    'type': 'bool',
-    'help': 'Print what would be done without actually doing it.'
-}, {
-    'names': [ 'confirm', 'y' ],
-    'type': 'bool',
-    'help': 'Bypass all confirmations (be careful!)'
-}, {
+MantaAdm.prototype.do_update.options = [
+    maCommonOptions.logFile,
+    maCommonOptions.dryrun,
+    maCommonOptions.confirm,
+    maCommonOptions.configFile,
+{
     'names': [ 'no-reprovision' ],
     'type': 'bool',
     'help': 'When upgrading a zone, always provision and deprovision ' +
@@ -507,7 +552,7 @@ function MantaAdmZk(parent)
 {
 	this.mn_parent = parent;
 	cmdln.Cmdln.call(this, {
-	    'name': 'zk',
+	    'name': parent.name + ' zk',
 	    'desc': 'View and modify ZooKeeper servers configuration.'
 	});
 }
@@ -562,7 +607,7 @@ MantaAdmZk.prototype.do_list = function (subcmd, opts, args, callback)
 };
 
 MantaAdmZk.prototype.do_list.help =
-    'List configured ZooKeeper servers\n\n' +
+    'List configured ZooKeeper servers.\n\n' +
     'Usage:\n\n' +
     '    manta-adm zk list OPTIONS\n\n' +
     'Examples:\n\n' +
@@ -579,20 +624,11 @@ MantaAdmZk.prototype.do_list.help =
  * as general debug logs.  But the "zk list" subcommand is read-only and only
  * applicable to this user, so we use a path in /var/tmp for the log.
  */
-MantaAdmZk.prototype.do_list.options = [ {
-    'names': [ 'omit-header', 'H'],
-    'type': 'bool',
-    'help': 'Omit the header row for columnar output'
-}, {
-    'names': [ 'log_file', 'l' ],
-    'type': 'string',
-    'help': 'dump logs to this file (or "stdout")',
-    'default': '/var/tmp/manta-adm.log'
-}, {
-    'names': [ 'columns', 'o' ],
-    'type': 'arrayOfString',
-    'help': 'Select columns for output (see below)'
-} ];
+MantaAdmZk.prototype.do_list.options = [
+    maCommonOptions.omitHeader,
+    maCommonOptions.logFileDefaultNone,
+    maCommonOptions.columns
+];
 
 MantaAdmZk.prototype.do_fixup = function (subcmd, opts, args, callback)
 {
@@ -690,7 +726,7 @@ MantaAdmZk.prototype.do_fixup = function (subcmd, opts, args, callback)
 };
 
 MantaAdmZk.prototype.do_fixup.help = [
-    'Repair ZooKeeper configuration',
+    'Repair ZooKeeper configuration.',
     '',
     'This command compares the ZooKeeper configuration (defined by the ',
     'ZK_SERVERS and ZK_ID SAPI metadata properties) to the list of deployed ',
@@ -714,19 +750,829 @@ MantaAdmZk.prototype.do_fixup.help = [
     '{{options}}'
 ].join('\n');
 
-MantaAdmZk.prototype.do_fixup.options = [ {
-    'names': [ 'confirm', 'y' ],
-    'type': 'bool',
-    'help': 'Bypass all confirmations (be careful!)'
-}, {
-    'names': [ 'dryrun', 'n' ],
-    'type': 'bool',
-    'help': 'Print what would be done without actually doing it.'
-}, {
-    'names': [ 'log_file', 'l' ],
-    'type': 'string',
-    'help': 'Dump logs to this file (or "stdout")'
-} ];
+MantaAdmZk.prototype.do_fixup.options = [
+    maCommonOptions.confirm,
+    maCommonOptions.dryrun,
+    maCommonOptions.logFile
+];
+
+function MantaAdmAlarm(parent)
+{
+	this.maa_parent = parent;
+	cmdln.Cmdln.call(this, {
+	    'name': parent.name + ' alarm',
+	    'desc': 'View and configure information about alarms.'
+	});
+}
+
+util.inherits(MantaAdmAlarm, cmdln.Cmdln);
+
+/*
+ * Performs common initialization steps used for the "manta-adm alarm"
+ * subcommands.  Named arguments:
+ *
+ *     sources      Describes which data to load.  See alarmsInit in lib/adm.js.
+ *
+ *     clioptions   Parsed CLI options, as provided by node-cmdln.  This
+ *                  function processes the "concurrency" and "config_file"
+ *                  options, plus the options processed by initAdm().
+ *
+ *     skipWarnings By default, warnings encountered while fetching alarm
+ *                  configuration are printed out.  If this option is true, then
+ *                  these warnings are ignored.
+ *
+ *     skipFetch    By default, Triton objects (VMs, CNs, and SAPI information)
+ *                  are fetched.  This takes some time, but this information is
+ *                  needed by most subcommands.  If this option is true, then
+ *                  this step is skipped.
+ */
+MantaAdmAlarm.prototype.initAdmAndFetchAlarms = function (args, callback)
+{
+	var self = this;
+	var clioptions, skipWarnings, initArgs, funcs;
+
+	assertplus.object(args, 'args');
+	assertplus.object(args.sources, 'args.sources');
+	assertplus.object(args.clioptions, 'clioptions');
+	assertplus.optionalBool(args.skipWarnings, 'args.skipWarnings');
+	assertplus.optionalBool(args.skipFetch, 'args.skipFetch');
+
+	skipWarnings = args.skipWarnings;
+	clioptions = args.clioptions;
+	initArgs = {
+	    'configFile': clioptions.config_file,
+	    'concurrency': clioptions.concurrency || maDefaultAlarmConcurrency,
+	    'sources': args.sources
+	};
+
+	funcs = [];
+	funcs.push(function initAdm(_, stepcb) {
+		self.maa_parent.initAdm(clioptions, stepcb);
+	});
+
+	if (!args.skipFetch) {
+		funcs.push(function fetch(_, stepcb) {
+			self.maa_parent.madm_adm.fetchDeployed(stepcb);
+		});
+	}
+
+	funcs.push(function fetchAmon(_, stepcb) {
+		self.maa_parent.madm_adm.alarmsInit(initArgs, stepcb);
+	});
+
+	vasync.pipeline({
+	    'funcs': funcs
+	}, function (err) {
+		var errors;
+
+		if (err) {
+			fatal(err.message);
+		}
+
+		if (!skipWarnings) {
+			errors = self.maa_parent.madm_adm.alarmWarnings();
+			errors.forEach(function (e) {
+				cmdutil.warn(e);
+			});
+		}
+
+		callback();
+	});
+};
+
+MantaAdmAlarm.prototype.do_close = function (subcmd, opts, args, callback)
+{
+	var parent;
+
+	if (args.length < 1) {
+		callback(new Error('expected ALARMID'));
+		return;
+	}
+
+	parent = this.maa_parent;
+	this.initAdmAndFetchAlarms({
+	    'clioptions': opts,
+	    'sources': {}
+	}, function () {
+		var adm = parent.madm_adm;
+		adm.alarmsClose({
+		    'alarmIds': args,
+		    'concurrency': opts.concurrency
+		}, function (err) {
+			if (err) {
+				VError.errorForEach(err, function (e) {
+					console.error('error: %s', e.message);
+				});
+
+				process.exit(1);
+			}
+
+			parent.finiAdm();
+			callback();
+		});
+	});
+};
+
+MantaAdmAlarm.prototype.do_close.help = [
+    'Close open alarms.',
+    '',
+    'Usage:',
+    '',
+    '    manta-adm alarm close ALARMID...',
+    '',
+    '{{options}}'
+].join('\n');
+
+MantaAdmAlarm.prototype.do_close.options = [
+    maCommonOptions.concurrency,
+    maCommonOptions.configFile
+];
+
+MantaAdmAlarm.prototype.do_config = MantaAdmAlarmConfig;
+
+MantaAdmAlarm.prototype.do_details = function (subcmd, opts, args, callback)
+{
+	this.doAlarmPrintSubcommand(opts, 1, args, callback);
+};
+
+MantaAdmAlarm.prototype.do_details.help = [
+    'Print details about an alarm.',
+    '',
+    'Usage:',
+    '',
+    '    manta-adm alarm details ALARMID...',
+    '',
+    '{{options}}'
+].join('\n');
+
+MantaAdmAlarm.prototype.do_details.options = [
+    maCommonOptions.configFile
+];
+
+MantaAdmAlarm.prototype.do_faults = function (subcmd, opts, args, callback)
+{
+	this.doAlarmPrintSubcommand(opts, undefined, args, callback);
+};
+
+MantaAdmAlarm.prototype.do_faults.help = [
+    'Print information about all of an alarm\'s faults.',
+    '',
+    'Usage:',
+    '',
+    '    manta-adm alarm faults ALARMID...',
+    '',
+    '{{options}}'
+].join('\n');
+
+MantaAdmAlarm.prototype.do_faults.options = [
+    maCommonOptions.configFile
+];
+
+MantaAdmAlarm.prototype.doAlarmPrintSubcommand = function
+    doAlarmPrintSubcommand(opts, nmaxfaults, args, callback)
+{
+	var self = this;
+	var sources = {};
+
+	if (args.length < 1) {
+		callback(new Error('expected ALARMID'));
+		return;
+	}
+
+	sources = {
+	    'configBasic': true,
+	    'alarms': {
+		'alarmIds': args
+	    }
+	};
+
+	this.initAdmAndFetchAlarms({
+	    'clioptions': opts,
+	    'sources': sources,
+	    'skipWarnings': true
+	}, function () {
+		var nerrors = 0;
+		args.forEach(function (id) {
+			var error;
+
+			error = self.maa_parent.madm_adm.alarmPrint({
+			    'id': id,
+			    'stream': process.stdout,
+			    'nmaxfaults': nmaxfaults
+			});
+
+			if (error instanceof Error) {
+				cmdutil.warn(error);
+				nerrors++;
+			}
+
+			console.log('');
+		});
+
+		if (nerrors > 0) {
+			process.exit(1);
+		}
+
+		self.maa_parent.finiAdm();
+	});
+};
+
+MantaAdmAlarm.prototype.do_list = function (subcmd, opts, args, callback)
+{
+	var self = this;
+	var options = {};
+	var sources = {};
+
+	if (args.length > 0) {
+		callback(new Error('unexpected arguments'));
+		return;
+	}
+
+	switch (opts.state) {
+	case 'all':
+	case 'closed':
+	case 'open':
+	case 'recent':
+		break;
+
+	default:
+		callback(new VError('unsupported state: %s', opts.state));
+		return;
+	}
+
+	options = listPrepareArgs(opts, madm.alarmColumnNames());
+	if (options instanceof Error) {
+		callback(options);
+		return;
+	}
+
+	sources = {
+	    'configBasic': true,
+	    'alarms': {
+		'state': opts.state
+	    }
+	};
+
+	options.stream = process.stdout;
+	this.initAdmAndFetchAlarms({
+	    'clioptions': opts,
+	    'sources': sources
+	}, function () {
+		self.maa_parent.madm_adm.alarmsList(options);
+		self.maa_parent.finiAdm();
+		callback();
+	});
+};
+
+MantaAdmAlarm.prototype.do_list.help = [
+    'List open alarms.',
+    '',
+    'Usage:',
+    '',
+    '    manta-adm alarm list OPTIONS',
+    '',
+    '{{options}}',
+    '',
+    'Available columns for -o:\n    ' + madm.alarmColumnNames().join(', ')
+].join('\n');
+
+MantaAdmAlarm.prototype.do_list.options = [
+    maCommonOptions.configFile,
+    maCommonOptions.omitHeader,
+    maCommonOptions.columns,
+    {
+	'names': [ 'state' ],
+	'type': 'string',
+	'help': 'List only alarms in specified state',
+	'default': 'open'
+    }
+];
+
+MantaAdmAlarm.prototype.do_metadata = MantaAdmAlarmMetadata;
+
+MantaAdmAlarm.prototype.do_notify = function (subcmd, opts, args, callback)
+{
+	var parent;
+	var allowedArg0 = {
+	    'enabled': true,
+	    'enable': true,
+	    'on': true,
+	    'true': true,
+	    'yes': true,
+
+	    'disabled': false,
+	    'disable': false,
+	    'off': false,
+	    'false': false,
+	    'no': false
+	};
+
+	if (args.length < 2) {
+		callback(new Error('expected arguments'));
+		return;
+	}
+
+	if (!allowedArg0.hasOwnProperty(args[0])) {
+		callback(new Error('expected "on" or "off"'));
+		return;
+	}
+
+	parent = this.maa_parent;
+	this.initAdmAndFetchAlarms({
+	    'clioptions': opts,
+	    'sources': {}
+	}, function () {
+		var adm = parent.madm_adm;
+		adm.alarmsUpdateNotification({
+		    'alarmIds': args.slice(1),
+		    'concurrency': opts.concurrency,
+		    'suppressed': !allowedArg0[args[0]]
+		}, function (err) {
+			if (err) {
+				VError.errorForEach(err, function (e) {
+					console.error('error: %s', e.message);
+				});
+
+				process.exit(1);
+			}
+
+			parent.finiAdm();
+			callback();
+		});
+	});
+};
+
+MantaAdmAlarm.prototype.do_notify.help = [
+    'Enable or disable alarm notifications.',
+    '',
+    'Usage:',
+    '',
+    '    manta-adm alarm notify on|off ALARMID...',
+    '',
+    '{{options}}'
+].join('\n');
+
+MantaAdmAlarm.prototype.do_notify.options = [
+    maCommonOptions.concurrency,
+    maCommonOptions.configFile
+];
+
+MantaAdmAlarm.prototype.do_show = function (subcmd, opts, args, callback)
+{
+	var parent, sources;
+
+	if (args.length > 0) {
+		callback(new Error('unexpected arguments'));
+		return;
+	}
+
+	parent = this.maa_parent;
+	sources = {
+	    'configBasic': true,
+	    'alarms': {
+		'state': 'open'
+	    }
+	};
+
+	this.initAdmAndFetchAlarms({
+	    'clioptions': opts,
+	    'sources': sources
+	}, function () {
+		var showArgs = { 'stream': process.stdout };
+		parent.madm_adm.alarmsShow(showArgs);
+		parent.finiAdm();
+		callback();
+	});
+};
+
+MantaAdmAlarm.prototype.do_show.help = [
+    'Summarize open alarms.',
+    '',
+    'Usage:',
+    '',
+    '    manta-adm alarm show',
+    '',
+    '{{options}}'
+].join('\n');
+
+MantaAdmAlarm.prototype.do_show.options = [ maCommonOptions.configFile ];
+
+
+function MantaAdmAlarmConfig(parent)
+{
+	this.maac_parent = parent;
+	this.maac_root = parent.maa_parent;
+
+	cmdln.Cmdln.call(this, {
+	    'name': parent.name + ' config',
+	    'desc': 'Manage probe and probe group configuration.'
+	});
+}
+
+util.inherits(MantaAdmAlarmConfig, cmdln.Cmdln);
+
+MantaAdmAlarmConfig.prototype.do_probegroup = MantaAdmAlarmProbeGroup;
+
+MantaAdmAlarmConfig.prototype.do_show = function (subcmd, opts, args, callback)
+{
+	var root, parent, adm, sources;
+
+	if (args.length > 0) {
+		callback(new Error('unexpected arguments'));
+		return;
+	}
+
+	root = this.maac_root;
+	parent = this.maac_parent;
+	sources = {
+	    'configFull': true
+	};
+
+	parent.initAdmAndFetchAlarms({
+	    'clioptions': opts,
+	    'sources': sources
+	}, function () {
+		adm = root.madm_adm;
+		adm.alarmConfigShow({
+		    'stream': process.stdout
+		});
+
+		root.finiAdm();
+		callback();
+	});
+
+};
+
+MantaAdmAlarmConfig.prototype.do_show.help = [
+    'Summarize configured probes and probe groups.',
+    '',
+    'Usage:',
+    '',
+    '    manta-adm alarm config show',
+    '',
+    '{{options}}'
+].join('\n');
+
+MantaAdmAlarmConfig.prototype.do_show.options = [
+    maCommonOptions.concurrency,
+    maCommonOptions.configFile
+];
+
+MantaAdmAlarmConfig.prototype.do_update =
+    function (subcmd, opts, args, callback)
+{
+	if (args.length > 0) {
+		callback(new Error('unexpected arguments'));
+		return;
+	}
+
+	this.amonUpdateSubcommand(opts, opts.dryrun, callback);
+};
+
+MantaAdmAlarmConfig.prototype.do_update.help = [
+    'Update and probes and probe groups that are out of date.',
+    '',
+    'Usage:',
+    '',
+    '    manta-adm alarm config update OPTIONS',
+    '    manta-adm alarm config update OPTIONS --unconfigure',
+    '',
+    '{{options}}'
+].join('\n');
+
+MantaAdmAlarmConfig.prototype.do_update.options = [
+    maCommonOptions.confirm,
+    maCommonOptions.concurrency,
+    maCommonOptions.configFile,
+    maCommonOptions.dryrun,
+    maCommonOptions.unconfigure
+];
+
+MantaAdmAlarmConfig.prototype.do_verify =
+    function (subcmd, opts, args, callback)
+{
+	if (args.length > 0) {
+		callback(new Error('unexpected arguments'));
+		return;
+	}
+
+	this.amonUpdateSubcommand(opts, true, callback);
+};
+
+MantaAdmAlarmConfig.prototype.do_verify.help = [
+    'Check that deployed probes and probe groups are up to date.',
+    '',
+    'Usage:',
+    '',
+    '    manta-adm alarm config verify OPTIONS',
+    '',
+    '{{options}}'
+].join('\n');
+
+MantaAdmAlarmConfig.prototype.do_verify.options = [
+    maCommonOptions.concurrency,
+    maCommonOptions.configFile,
+    maCommonOptions.unconfigure
+];
+
+MantaAdmAlarmConfig.prototype.amonUpdateSubcommand =
+    function (clioptions, dryrun, callback) {
+	var self = this;
+	var root, parent, sources, adm, plan;
+
+	assertplus.object(clioptions, 'clioptions');
+	assertplus.number(clioptions.concurrency, 'clioptions.concurrency');
+	assertplus.bool(clioptions.unconfigure, 'clioptions.unconfigure');
+
+	root = self.maac_root;
+	parent = self.maac_parent;
+	sources = {
+	    'configFull': true
+	};
+	vasync.pipeline({
+	    'arg': null,
+	    'funcs': [
+		function init(_, stepcb) {
+			parent.initAdmAndFetchAlarms({
+			    'clioptions': clioptions,
+			    'sources': sources
+			}, stepcb);
+		},
+		function generateAmonPlan(_, stepcb) {
+			var options;
+
+			adm = root.madm_adm;
+			options = {
+				'unconfigure': clioptions.unconfigure
+			};
+			plan = adm.amonUpdatePlanCreate(options);
+			if (plan instanceof Error) {
+				stepcb(plan);
+				return;
+			}
+
+			adm.amonUpdatePlanDump({
+			    'plan': plan,
+			    'stream': process.stderr,
+			    'verbose': false
+			});
+
+			if (!plan.needsChanges()) {
+				console.log('no changes to make');
+				stepcb();
+				return;
+			}
+
+			if (dryrun) {
+				console.log('To apply these changes, ' +
+				    'use the "update" subcommand without ' +
+				    'the -n/--dry-run option.');
+				stepcb();
+				return;
+			}
+
+			if (clioptions.confirm) {
+				stepcb();
+				return;
+			}
+
+			common.confirm(
+			    'Are you sure you want to proceed? (y/N): ',
+			    function (proceed) {
+				if (!proceed) {
+					stepcb(new Error('aborted by user'));
+				} else {
+					stepcb();
+				}
+			    });
+		},
+		function execAmonPlan(_, stepcb) {
+			if (dryrun || !plan.needsChanges()) {
+				stepcb();
+				return;
+			}
+
+			adm.amonUpdatePlanApply({
+			    'concurrency': clioptions.concurrency,
+			    'plan': plan,
+			    'stream': process.stderr
+			}, stepcb);
+		}
+	    ]
+	}, function (err) {
+		root.finiAdm();
+		callback(err);
+	});
+};
+
+function MantaAdmAlarmMetadata(parent)
+{
+	this.maam_parent = parent;
+	this.maam_root = parent.maa_parent;
+
+	cmdln.Cmdln.call(this, {
+	    'name': parent.name + ' metadata',
+	    'desc': 'View local metadata about alarm config.'
+	});
+}
+
+util.inherits(MantaAdmAlarmMetadata, cmdln.Cmdln);
+
+MantaAdmAlarmMetadata.prototype.do_events =
+    function cmdEvents(subcmd, opts, args, callback)
+{
+	var self = this;
+
+	if (args.length > 0) {
+		callback(new Error('unexpected arguments'));
+		return;
+	}
+
+	this.maam_parent.initAdmAndFetchAlarms({
+	    'clioptions': opts,
+	    'sources': {},
+	    'skipFetch': true
+	}, function () {
+		var events = self.maam_root.madm_adm.alarmEventNames();
+		events.forEach(function (eventName) {
+			console.log(eventName);
+		});
+		self.maam_root.finiAdm();
+		callback();
+	});
+};
+
+MantaAdmAlarmMetadata.prototype.do_events.help = [
+    'List known event names.',
+    '',
+    'Usage:',
+    '',
+    '    manta-adm alarm events'
+].join('\n');
+
+MantaAdmAlarmMetadata.prototype.do_events.options = [
+    maCommonOptions.configFile
+];
+
+MantaAdmAlarmMetadata.prototype.do_ka = function (subcmd, opts, args, callback)
+{
+	var self = this;
+
+	this.maam_parent.initAdmAndFetchAlarms({
+	    'clioptions': opts,
+	    'sources': {},
+	    'skipFetch': true
+	}, function () {
+		var events, nerrors;
+		var root = self.maam_root;
+
+		if (args.length === 0) {
+			events = root.madm_adm.alarmEventNames();
+		} else {
+			events = args;
+		}
+
+		nerrors = 0;
+		events.forEach(function (eventName) {
+			var error;
+			error = root.madm_adm.alarmKaPrint({
+			    'eventName': eventName,
+			    'stream': process.stdout
+			});
+
+			if (error instanceof Error) {
+				cmdutil.warn(error);
+				nerrors++;
+			}
+
+			console.log('');
+		});
+
+		if (nerrors > 0) {
+			process.exit(1);
+		}
+		root.finiAdm();
+		callback();
+	});
+};
+
+MantaAdmAlarmMetadata.prototype.do_ka.help = [
+    'Print information about events.',
+    '',
+    'Usage:',
+    '',
+    '    manta-adm alarm ka',
+    '    manta-adm alarm ka EVENT_NAME'
+].join('\n');
+
+MantaAdmAlarmMetadata.prototype.do_ka.options = [ maCommonOptions.configFile ];
+
+
+function MantaAdmAlarmProbeGroup(parent)
+{
+	this.maap_parent = parent;
+	this.maap_root = parent.maac_root;
+
+	cmdln.Cmdln.call(this, {
+	    'name': parent.name + ' probegroup',
+	    'desc': 'View and configure information about amon probe groups.'
+	});
+}
+
+util.inherits(MantaAdmAlarmProbeGroup, cmdln.Cmdln);
+
+MantaAdmAlarmProbeGroup.prototype.do_list = function (subcmd,
+    opts, args, callback)
+{
+	var self = this;
+	var options = {};
+	var sources;
+
+	if (args.length > 0) {
+		callback(new Error('unexpected arguments'));
+		return;
+	}
+
+	options = listPrepareArgs(opts, madm.probeGroupColumnNames());
+	if (options instanceof Error) {
+		callback(options);
+		return;
+	}
+
+	/*
+	 * We fetch the list of open alarms in order to count the alarms for
+	 * each probe group.
+	 */
+	sources = {
+	    'configFull': true,
+	    'alarms': {
+		'state': 'open'
+	    }
+	};
+
+	options.stream = process.stdout;
+	this.maap_parent.maac_parent.initAdmAndFetchAlarms({
+	    'clioptions': opts,
+	    'sources': sources
+	}, function () {
+		self.maap_root.madm_adm.alarmsProbeGroupsList(options);
+		self.maap_root.finiAdm();
+		callback();
+	});
+};
+
+MantaAdmAlarmProbeGroup.prototype.do_list.help = [
+    'List open alarms',
+    '',
+    'Usage:',
+    '',
+    '    manta-adm alarm config probegroup list OPTIONS',
+    '',
+    '{{options}}',
+    '',
+    'Available columns for -o:\n',
+    '    ' + madm.probeGroupColumnNames().join(', ')
+].join('\n');
+
+MantaAdmAlarmProbeGroup.prototype.do_list.options = [
+    maCommonOptions.omitHeader,
+    maCommonOptions.columns,
+    maCommonOptions.configFile
+];
+
+
+/*
+ * Named arguments:
+ *
+ *     opts		options provided by cmdln
+ *
+ *     allowed		allowed column names
+ *
+ * Returns either an Error describing invalid command-line arguments or an
+ * object with "columns" and "omitHeader" set according to the options.
+ */
+function listPrepareArgs(opts, allowed)
+{
+	var options, selected;
+
+	options = {};
+	if (opts.columns) {
+		selected = checkColumns(allowed, opts.columns);
+		if (selected instanceof Error) {
+			return (selected);
+		}
+
+		options.columns = selected;
+	}
+
+	if (opts.omit_header) {
+		options.omitHeader = true;
+	} else {
+		options.omitHeader = false;
+	}
+
+	return (options);
+}
 
 function checkColumns(allowed, columns)
 {

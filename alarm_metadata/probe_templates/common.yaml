@@ -1,0 +1,182 @@
+#
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+#
+
+#
+# Copyright (c) 2017, Joyent, Inc.
+#
+
+#
+# amon probes common to all services deployed to non-global zones
+#
+# For background information, see lib/alarms/index.js.  The format of this file
+# is described in lib/alarms/metadata.js.
+#
+
+-
+    #
+    # The CPU utilization probe notifies operators when any server is at high
+    # overall CPU utilization for an extended period of time (currently 23
+    # per-minute samples within 30 minutes).  This might be indicative of
+    # degraded service, though it doesn't react quickly enough to usefully
+    # identify that.  It's conceivably useful for capacity planning, but that
+    # would likely be better accomplished using a metric collection system that
+    # keeps historical data.
+    #
+    # Also of note: this probe is deliberately per-zone rather than per-CN.
+    # That helps identify which components are affected by heavy CPU
+    # utilization.
+    #
+    event: upset.manta.zone.cpu_utilized
+    legacyName: cpu utilization
+    scope:
+        service: all
+    checks:
+        -
+            type: cmd
+            config:
+                cmd: "test ! $(mpstat -a 1 2 | tail -n 1 | nawk '{total=$13+$14} END {print total}') -gt 80"
+                interval: 60
+                threshold: 23
+                period: 1800
+                timeout: 30
+    ka:
+        title: Excessive CPU utilization
+        description: Aggregate CPU usage has been high for several minutes
+        severity: minor
+        response: No automated response will be taken.
+        impact: Service provided by affected components may be degraded.
+        action: >-
+            Identify the source of excessive CPU utilization and resolve the
+            issue.  If components are behaving normally, consider adding
+            additional capacity using new servers.
+
+-
+    event: upset.manta.zone.filesystem_almost_full
+    legacyName: "free space on / below 20%"
+    scope:
+        service: all
+    checks:
+        -
+            type: disk-usage
+            config:
+                path: "/"
+                threshold: "20%"
+                interval: 3600
+    ka:
+        title: Filesystem almost full
+        description: A zone filesystem is running low on free space
+        severity: major
+        response: No automated response will be taken.
+        impact: >-
+            There is no immediate impact, but if the filesystem fills up,
+            service may become severely degraded.  End user requests may
+            experience high error rates or increased latency.
+        action: >-
+            Identify the cause of excessive disk usage and resolve the
+            underlying issue.
+
+-
+    event: upset.manta.registrar.log_error
+    legacyName: registrar-logscan
+    scope:
+        service: all
+    checks:
+        -
+            type: bunyan-log-scan
+            config:
+                smfServiceName: registrar
+                fields:
+                    level: FATAL
+                threshold: 1
+                period: 60
+    ka:
+        title: '"registrar" logged an error'
+        description: The "registrar" service has logged an error.
+        severity: major
+        response: No automated response will be taken.
+        impact: >-
+            If the problem was transient, there may be no impact.  Otherwise, a
+            component may no longer be registered for internal service
+            discovery.  Capacity may be affected, resulting in increased latency
+            or error rates for end user requests.  If enough instances
+            experience this issue, a major service disruption could result.
+        action: >-
+            Determine the scope of the problem based on the log message and
+            resolve the underlying issue.
+
+-
+    event: upset.manta.zone.logs_lingering
+    legacyName: logs not uploaded
+    scope:
+        service: all
+    checks:
+        -
+            type: cmd
+            config:
+                cmd: "test ! $(find /var/log/manta/upload -type f | wc -l) -gt 0"
+                interval: 300
+                threshold: 5
+                period: 1800
+    ka:
+        title: Log files not uploaded
+        description: Some log files have not been uploaded
+        severity: minor
+        response: >-
+            The system automatically retries hourly to upload any internal log
+            files that have not yet been uploaded.
+        impact: >-
+            There is no impact to end-user service.  However, failure to upload
+            files is often indicative of problems affecting end user requests.
+
+            If the affected logs are used for metering, then metering reports
+            and access logs for end users may be unavailable or incomplete until
+            the affected logs are uploaded and the relevant metering jobs re-run
+            by an operator.
+        action: >-
+            Identify the reason for the failure and resolve the underlying
+            issue.  If logs used for metering were affected, you may need to
+            re-run the relevant metering jobs once all logs are available.
+
+            In most components, the log "/var/log/mbackup.log" has a record of
+            recent upload attempts and results.  Another common cause of log
+            upload failure is when a component or service was offline during the
+            scheduled log upload time.
+
+-
+    event: upset.manta.$service.smf_maintenance
+    legacyName: "svcs: SMF maintenance"
+    #
+    # We use the scope "each" here (rather than "all") to make sure that we get
+    # different probe groups (and therefore different alarms) when SMF services
+    # from different SAPI services go into maintenance.
+    #
+    scope:
+        service: each
+    checks:
+        -
+            type: cmd
+            config:
+                cmd: "/usr/bin/svcs -x"
+                stdoutMatch:
+                    pattern: maintenance
+                    matchWord: true
+                threshold: 1
+                period: 60
+                timeout: 30
+    ka:
+        title: SMF service in maintenance
+        description: One or more SMF services are in maintenance
+        severity: major
+        response: No automated response will be taken.
+        impact: >-
+            The impact depends on which services are in maintenance.  In some
+            cases, overall request handling capacity may be reduced.  If enough
+            instances are in maintenance, end users could experience errors.
+        action: >-
+            In the affected zones, use "svcs -xv" to identify the services in
+            maintenance and to see basic instructions for tracking down the
+            problem.
+

@@ -1,0 +1,44 @@
+#
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+#
+
+#
+# Copyright (c) 2017, Joyent, Inc.
+#
+
+#
+# amon probes for the "moray" service
+#
+# For background information, see lib/alarms/index.js.  The format of this file
+# is described in lib/alarms/metadata.js.
+#
+
+-
+    event: upset.manta.moray.log_error
+    legacyName: moray-logscan
+    scope:
+        service: moray
+    checks:
+        -
+            type: bunyan-log-scan
+            config:
+                path: "/var/log/moray.log"
+                fields:
+                    level: ERROR
+                threshold: 1
+                period: 60
+    ka:
+        title: '"moray" logged an error'
+        description: The "moray" service has logged an error.
+        severity: major
+        response: No automated response will be taken.
+        impact: >-
+            If the problem was transient, there may be no impact.  Otherwise,
+            some end user requests may be experiencing errors or some jobs may
+            be experiencing errors or additional latency.
+        action: >-
+            Determine the scope of the problem based on the log message and
+            resolve the underlying issue.
+

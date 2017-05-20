@@ -1,0 +1,181 @@
+#
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+#
+
+#
+# Copyright (c) 2017, Joyent, Inc.
+#
+
+#
+# amon probes for the "authcache" service
+#
+# For background information, see lib/alarms/index.js.  The format of this file
+# is described in lib/alarms/metadata.js.
+#
+
+#
+# Log scanners
+#
+
+-
+    # log scan: "mahi-replicator" SMF service
+    event: upset.manta.authcache.mahi_replicator.log_error
+    legacyName: mahi-replicator-logscan-error
+    scope:
+        service: authcache
+    checks:
+        -
+            type: bunyan-log-scan
+            config:
+                smfServiceName: mahi-replicator
+                fields:
+                    level: ERROR
+                threshold: 1
+                period: 60
+    ka:
+        title: '"mahi-replicator" logged an error'
+        description: The "mahi-replicator" service has logged an error.
+        severity: major
+        response: No automated response will be taken.
+        impact: >-
+            If the problem was transient, there may be no impact.  Otherwise,
+            replication may be falling behind.  In that case, recent changes to
+            user accounts, sub-users, roles, and ssh keys may not be reflected
+            in Manta.  Newly-created accounts, users, roles, and keys may not be
+            available, and those that have recently been deleted may still be
+            working.  Service is unaffected for accounts, users, roles, and keys
+            that have not changed recently.
+        action: >-
+            Determine the scope of the problem based on the log message and
+            resolve the underlying issue.
+
+-
+    # log scan: "mahi-server" SMF service
+    event: upset.manta.authcache.mahi_server.log_error
+    legacyName: mahi-server-logscan-error
+    scope:
+        service: authcache
+    checks:
+        -
+            type: bunyan-log-scan
+            config:
+                smfServiceName: mahi-server
+                fields:
+                    level: ERROR
+                threshold: 1
+                period: 60
+    ka:
+        title: '"mahi-server" logged an error'
+        description: The "mahi-server" service has logged an error.
+        severity: major
+        response: No automated response will be taken.
+        impact: >-
+            Some end user requests may have failed due to authentiation
+            failures.  The problem may be ongoing.
+        action: >-
+            Determine the scope of the problem based on the log message and
+            resolve the underlying issue.
+
+#
+# Periodic checks
+#
+
+-
+    # Checks whether Redis is at least responding to its own pings.
+    event: upset.manta.authcache.redis.ping_fail
+    legacyName: redis-ok
+    scope:
+        service: authcache
+    checks:
+        -
+            type: cmd
+            config:
+                cmd: "/opt/local/bin/redis-cli PING"
+                stdoutMatch:
+                    pattern: PONG
+                    invert: true
+                threshold: 1
+                period: 60
+    ka:
+        title: Authcache Redis ping failed
+        description: >-
+            A periodic ping of an authentication cache's redis instance has
+            failed.
+        severity: critical
+        response: No automated response will be taken.
+        impact: >-
+            Some requests may be failing due to authentication failures.  The
+            impact is likely to be proportional to the number of "authcache"
+            instances that have experienced this problem.  Note that
+            authentication information is cached for a few minutes, so requests
+            may not start failing immediately.
+        action: >-
+            Root-cause the failure and resolve the underlying issue.  You may
+            need to restart the Redis service.
+
+-
+    # Checks for v1 are under the "v1" namespace.
+    event: upset.manta.authcache.v1.behind
+    legacyName: mahi v1 falling behind by more than 5000 changenumbers
+    scope:
+        service: authcache
+    checks:
+        -
+            type: cmd
+            config:
+                cmd: "if [ $(/opt/smartdc/mahi/bin/cn_delta) -gt 5000 ]; then exit 1; else exit 0; fi"
+                interval: 30
+                threshold: 10
+                period: 1800
+                timeout: 29
+    ka:
+        title: Authcache v1 replication has fallen behind
+        description: >-
+            Replication for the v1 authentication cache has fallen behind.
+        severity: major
+        response: No automated response will be taken.
+        impact: >-
+            Recent changes to user accounts, sub-users, roles, and ssh keys may
+            not be reflected in Manta.  Newly-created accounts, users, roles,
+            and keys may not be available, and those that have recently been
+            deleted may still be working.  Service is unaffected for accounts,
+            users, roles, and keys that have not changed recently.
+        action: >-
+            Check the log for the "mahi" SMF service inside the affected
+            authcache zone.  If necessary, restart the service.
+
+-
+    #
+    # Checks for the current authcache version ("v2") are not under
+    # version-specific namespace.
+    #
+    event: upset.manta.authcache.replicator.behind
+    legacyName: mahi v2 falling behind by more than 5000 changenumbers
+    scope:
+        service: authcache
+    checks:
+        -
+            type: cmd
+            config:
+                cmd: "if [ $(/opt/smartdc/mahi/bin/cn_delta2) -gt 5000 ]; then exit 1; else exit 0; fi"
+                interval: 30
+                threshold: 10
+                period: 1800
+                timeout: 29
+    ka:
+        title: Authcache replication has fallen behind
+        description: Replication for the authentication cache has fallen behind
+        severity: major
+        response: No automated response will be taken.
+        impact: >-
+            Recent changes to user accounts, sub-users, roles, and ssh keys may
+            not be reflected in Manta.  Newly-created accounts, users, roles,
+            and keys may not be available, and those that have recently been
+            deleted may still be working.  Service is unaffected for accounts,
+            users, roles, and keys that have not changed recently.
+        action: >-
+            Check the log for the "mahi-replicator" SMF service inside the
+            affected authcache zone.  If necessary, restart the service.
+

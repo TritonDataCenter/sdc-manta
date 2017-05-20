@@ -1,0 +1,42 @@
+#
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+#
+
+#
+# Copyright (c) 2017, Joyent, Inc.
+#
+
+#
+# amon probes for the "webapi" service
+#
+# For background information, see lib/alarms/index.js.  The format of this file
+# is described in lib/alarms/metadata.js.
+#
+
+-
+    event: upset.manta.webapi.log_error
+    legacyName: muskie-logscan
+    scope:
+        service: webapi
+    checks:
+        -
+            type: bunyan-log-scan
+            config:
+                path: "/var/log/muskie.log"
+                fields:
+                    level: ERROR
+                threshold: 1
+                period: 60
+    ka:
+        title: '"muskie" logged an error'
+        description: The "muskie" service has logged an error.
+        severity: major
+        response: No automated response will be taken.
+        impact: >-
+            If the problem was transient, there may be no impact.  Otherwise,
+            some end user requests may be experiencing an elevated error rate.
+        action: >-
+            Determine the scope of the problem based on the log message and
+            resolve the underlying issue.

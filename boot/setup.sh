@@ -34,7 +34,6 @@ chown -R nobody:nobody /opt/smartdc/manta-deployment
 # Add build/node/bin and node_modules/.bin to PATH
 echo "" >>/root/.profile
 echo "export PATH=\$PATH:/opt/smartdc/manta-deployment/build/node/bin:/opt/smartdc/manta-deployment/bin:/opt/smartdc/manta-deployment/node_modules/.bin:/opt/smartdc/sapi/node_modules/.bin" >>/root/.profile
-echo "export MANPATH=/opt/smartdc/manta-deployment/node_modules/mantamon/man:$MANPATH" >> /root/.profile
 echo 'export MANTA_DATACENTER=$(mdata-get "sdc:datacenter_name")' >> /root/.profile
 
 # All done, run boilerplate end-of-setup

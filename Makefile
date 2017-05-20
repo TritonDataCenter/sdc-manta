@@ -5,7 +5,7 @@
 #
 
 #
-# Copyright (c) 2016, Joyent, Inc.
+# Copyright (c) 2017, Joyent, Inc.
 #
 
 #
@@ -24,6 +24,7 @@
 # Programs
 #
 CATEST		 = deps/catest/catest
+PROBECHK	 = node ./tools/probecfgchk.js
 
 #
 # Options and overrides
@@ -50,6 +51,7 @@ JSON_FILES	 = package.json \
 		   $(shell find config \
 				manifests \
 				sapi_manifests -name '*.json*')
+PROBE_FILES	 = $(wildcard alarm_metadata/probe_templates/*.yaml)
 
 include ./tools/mk/Makefile.defs
 include ./tools/mk/Makefile.node_deps.defs
@@ -89,6 +91,17 @@ all: $(SMF_MANIFESTS) deps sdc-scripts
 manpages: $(MAN_OUTPUTS)
 
 check:: $(NODE_EXEC)
+
+#
+# We'd like to run "check-probe-files" under "check", but this requires
+# MANTA-3251 in order to work in the context of CI checks.  However, we can at
+# least put this under "prepush", which (for better or worse) already can't
+# generally be run in anonymous CI environments.
+#
+check-probe-files:
+	$(PROBECHK) $(PROBE_FILES)
+
+prepush: check-probe-files
 
 .PHONY: test
 test: | $(CATEST)

@@ -1,0 +1,131 @@
+#
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+#
+
+#
+# Copyright (c) 2017, Joyent, Inc.
+#
+
+#
+# amon probes for global zones of storage nodes
+#
+# For background information, see lib/alarms/index.js.  The format of this file
+# is described in lib/alarms/metadata.js.
+#
+
+-
+    event: upset.manta.marlin_agent.log_error
+    legacyName: marlin-agent-logscan-error, marlin-agent-logscan-fatal, marlin-agent-logscan-core
+    scope:
+        service: storage
+        global: true
+    checks:
+        -
+            type: bunyan-log-scan
+            config:
+                smfServiceName: marlin-agent
+                fields:
+                    level: error
+                threshold: 1
+                period: 60
+        -
+            type: bunyan-log-scan
+            config:
+                smfServiceName: marlin-agent
+                fields:
+                    level: fatal
+                threshold: 1
+                period: 60
+        -
+            type: log-scan
+            config:
+                smfServiceName: marlin-agent
+                match:
+                    pattern: Stopping because process dumped core.
+                threshold: 1
+                period: 60
+    ka:
+        title: '"marlin-agent" logged an error'
+        description: The "marlin-agent" service has logged an error.
+        severity: major
+        response: No automated response will be taken.
+        impact: >-
+            If the problem was transient, there may be no impact.  Otherwise,
+            some jobs may have experienced retries, errors, or additional
+            latency.  It is possible that some jobs are stuck.
+        action: >-
+            Determine the scope of the problem based on the log message and
+            resolve the underlying issue.
+
+-
+    event: upset.manta.global_zone.logs_lingering
+    legacyName: logs not uploaded
+    scope:
+        service: storage
+        global: true
+    checks:
+        -
+            type: cmd
+            config:
+                cmd: "test ! $(find /var/log/manta/upload -type f | wc -l) -gt 0"
+                interval: 300
+                threshold: 5
+                period: 1800
+                timeout: 30
+    ka:
+        title: Global zone log files not uploaded
+        description: Some global zone log files have not been uploaded
+        severity: minor
+        response: >-
+            The system automatically retries hourly to upload any internal log
+            files that have not yet been uploaded.
+        impact: >-
+            There is no impact to end-user service.  However, failure to upload
+            files is often indicative of problems affecting end user requests.
+
+            If the affected logs are used for metering, then metering reports
+            and access logs for end users may be unavailable or incomplete until
+            the affected logs are uploaded and the relevant metering jobs re-run
+            by an operator.
+        action: >-
+            Identify the reason for the failure and resolve the underlying
+            issue.  If logs used for metering were affected, you may need to
+            re-run the relevant metering jobs once all logs are available.
+
+            In most components, the log "/var/log/mbackup.log" has a record of
+            recent upload attempts and results.  Another common cause of log
+            upload failure is when a component or service was offline during the
+            scheduled log upload time.
+
+-
+    event: upset.manta.global_zone.smf_maintenance
+    legacyName: "svcs: SMF maintenance"
+    scope:
+        service: storage
+        global: true
+    checks:
+        -
+            type: cmd
+            config:
+                cmd: "/usr/bin/svcs -x"
+                stdoutMatch:
+                    pattern: maintenance
+                    matchWord: true
+                threshold: 1
+                period: 60
+                timeout: 30
+    ka:
+        title: Global zone SMF services in maintenance
+        description: One or more global zone SMF services are in maintenance
+        severity: major
+        response: No automated response will be taken.
+        impact: >-
+            The impact depends on which services are in maintenance.  In some
+            cases, overall request handling capacity may be reduced.  If enough
+            instances are in maintenance, end users could experience errors.
+        action: >-
+            In the affected global zones, use "svcs -xv" to identify the
+            services in maintenance and see basic instructions for tracking down
+            the problem.

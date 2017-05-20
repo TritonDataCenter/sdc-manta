@@ -1,0 +1,129 @@
+#
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+#
+
+#
+# Copyright (c) 2017, Joyent, Inc.
+#
+
+#
+# amon probes for the "nameservice" service
+#
+# For background information, see lib/alarms/index.js.  The format of this file
+# is described in lib/alarms/metadata.js.
+#
+
+-
+    event: upset.manta.nameservice.zookeeper.log_error
+    legacyName: "ZK: logscan 'ERROR'"
+    scope:
+        service: nameservice
+    checks:
+        -
+            type: log-scan
+            config:
+                path: "/var/log/zookeeper/zookeeper.out"
+                match:
+                    pattern: ERROR
+                threshold: 1
+                period: 60
+    ka:
+        title: '"zookeeper" logged an error'
+        description: The "zookeeper" service has logged an error.
+        severity: major
+        response: No automated response will be taken.
+        impact: >-
+            If the problem was transient, there may be no impact.  Otherwise,
+            Manatee shard fault tolerance may be affected and service discovery
+            may be offline.  Services should continue to function, but with
+            significantly reduced ability to respond to other failures.
+        action: >-
+            Determine the scope of the problem based on the log message and
+            resolve the underlying issue.
+
+-
+    event: upset.manta.nameservice.zookeeper.log_connrefused
+    legacyName: "ZK: logscan 'Connection refused'"
+    scope:
+        service: nameservice
+    checks:
+        -
+            type: log-scan
+            config:
+                path: "/var/log/zookeeper/zookeeper.out"
+                match:
+                    pattern: "java.net.ConnectException: Connection refused"
+                threshold: 1
+                period: 60
+    ka:
+        title: '"zookeeper" logged a connection failure'
+        description: The "zookeeper" service logged a connection failure.
+        severity: minor
+        response: No automated response will be taken.
+        impact: >-
+            If the problem was transient, there may be no impact.  Otherwise,
+            Manatee shard fault tolerance may be affected and service discovery
+            may be offline.  Services should continue to function, but with
+            significantly reduced ability to respond to other failures.
+        action: >-
+            Determine the scope of the problem based on the log message and
+            resolve the underlying issue.
+
+-
+    event: upset.manta.nameservice.binder.log_error
+    legacyName: "binder: logscan"
+    scope:
+        service: nameservice
+    checks:
+        -
+            type: bunyan-log-scan
+            config:
+                smfServiceName: binder
+                fields:
+                    level: ERROR
+                threshold: 1
+                period: 60
+    ka:
+        title: '"binder" logged an error'
+        description: The "binder" service has logged an error.
+        severity: major
+        response: No automated response will be taken.
+        impact: >-
+            If the problem was transient, there may be no impact.  Otherwise,
+            service discovery may be offline.  Services should continue to
+            function, but with significantly reduced ability to respond to other
+            failures.
+        action: >-
+            Determine the scope of the problem based on the log message and
+            resolve the underlying issue.
+
+-
+    event: upset.manta.nameservice.zookeeper.notok
+    legacyName: "ZK: ruok"
+    scope:
+        service: nameservice
+    checks:
+        -
+            type: cmd
+            config:
+                cmd: "echo 'ruok' | nc localhost 2181"
+                stdoutMatch:
+                    pattern: imok
+                    invert: true
+                threshold: 1
+                period: 60
+    ka:
+        title: ZooKeeper not okay
+        description: ZooKeeper reports that it is not okay
+        severity: major
+        response: No automated response will be taken.
+        impact: >-
+            If the problem was transient, there may be no impact.  Otherwise,
+            Manatee shard fault tolerance may be affected and service discovery
+            may be offline.  Services should continue to function, but with
+            significantly reduced ability to respond to other failures.
+        action: >-
+            Determine the scope of the problem and resolve the underlying issue.
+

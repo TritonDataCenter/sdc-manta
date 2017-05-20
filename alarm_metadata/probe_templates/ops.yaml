@@ -1,0 +1,503 @@
+#
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+#
+
+#
+# Copyright (c) 2017, Joyent, Inc.
+#
+
+#
+# amon probes for the "ops" service
+#
+# For background information, see lib/alarms/index.js.  The format of this file
+# is described in lib/alarms/metadata.js.
+#
+
+-
+    event: upset.manta.ops.log_error
+    legacyName: mackerel-logscan
+    scope:
+        service: ops
+    checks:
+        -
+            type: bunyan-log-scan
+            config:
+                path: "/var/log/mackerel.log"
+                fields:
+                    level: FATAL
+                threshold: 1
+                period: 60
+    ka:
+        title: '"mackerel" logged an error'
+        description: The "mackerel" subsystem has logged an error.
+        severity: minor
+        response: No automated response will be taken.
+        impact: >-
+            One or more metering reports may be missing or incomplete.
+        action: >-
+            Determine the scope of the problem based on the log message and
+            resolve the underlying issue.
+
+-
+    event: upset.manta.ops.backup_unpack.log_error
+    legacyName: mola-pg-transform-logscan-error,mola-pg-transform-logscan-fatal
+    scope:
+        service: ops
+    checks:
+        -
+            type: bunyan-log-scan
+            config:
+                path: "/var/log/mola-pg-transform.log"
+                fields:
+                    level: ERROR
+                threshold: 1
+                period: 60
+        -
+            type: bunyan-log-scan
+            config:
+                path: "/var/log/mola-pg-transform.log"
+                fields:
+                    level: FATAL
+                threshold: 1
+                period: 60
+    ka:
+        title: '"mola-pg-transform" logged an error'
+        description: The "mola-pg-transform" subsystem has logged an error.
+        severity: minor
+        response: No automated response will be taken.
+        impact: >-
+            The daily metadata backups may not have been unpacked.  As a result,
+            regularly scheduled garbage collection, audit, and metering jobs may
+            not be running or their results may be incomplete.  Disk usage may
+            accumulate on metadata and storage nodes until the problem is
+            resolved.
+        action: >-
+            Determine the scope of the problem based on the log message and
+            resolve the underlying issue.
+
+-
+    event: upset.manta.ops.gc.log_error
+    legacyName: mola-logscan-error,mola-logscan-fatal
+    scope:
+        service: ops
+    checks:
+        -
+            type: bunyan-log-scan
+            config:
+                path: "/var/log/mola.log"
+                fields:
+                    level: ERROR
+                threshold: 1
+                period: 60
+        -
+            type: bunyan-log-scan
+            config:
+                path: "/var/log/mola.log"
+                fields:
+                    level: FATAL
+                threshold: 1
+                period: 60
+    ka:
+        title: '"mola" logged an error'
+        description: The garbage collection subsystem has logged an error.
+        severity: minor
+        response: No automated response will be taken.
+        impact: >-
+            Garbage collection may not be running.  Disk space used may
+            accumulate on metadata and storage nodes until the problem is
+            repaired.
+        action: >-
+            Determine the scope of the problem based on the log message and
+            resolve the underlying issue.
+
+-
+    event: upset.manta.ops.gc.create_links_log_error
+    legacyName: mola-gc-create-links-logscan-error,mola-gc-create-links-logscan-fatal
+    scope:
+        service: ops
+    checks:
+        -
+            type: bunyan-log-scan
+            config:
+                path: "/var/log/mola-gc-create-links.log"
+                fields:
+                    level: ERROR
+                threshold: 1
+                period: 60
+        -
+            type: bunyan-log-scan
+            config:
+                path: "/var/log/mola-gc-create-links.log"
+                fields:
+                    level: FATAL
+                threshold: 1
+                period: 60
+    ka:
+        title: '"mola-gc-create-links" logged an error'
+        description: The "mola-gc-create-links" subsystem has logged an error.
+        severity: minor
+        response: No automated response will be taken.
+        impact: >-
+            Garbage collection may not be running.  Disk space used may
+            accumulate on metadata and storage  nodes until the problem is
+            repaired.
+        action: >-
+            Determine the scope of the problem based on the log message and
+            resolve the underlying issue.
+
+-
+    event: upset.manta.ops.gc.moray_gc_log_error
+    legacyName: mola-moray-gc-logscan-error,mola-moray-gc-logscan-fatal
+    scope:
+        service: ops
+    checks:
+        -
+            type: bunyan-log-scan
+            config:
+                path: "/var/log/mola-moray-gc.log"
+                fields:
+                    level: ERROR
+                threshold: 1
+                period: 60
+        -
+            type: bunyan-log-scan
+            config:
+                path: "/var/log/mola-moray-gc.log"
+                fields:
+                    level: FATAL
+                threshold: 1
+                period: 60
+    ka:
+        title: '"mola-moray-gc" logged an error'
+        description: The "mola-moray-gc" subsystem has logged an error.
+        severity: minor
+        response: No automated response will be taken.
+        impact: >-
+            Garbage collection may not be running.  Disk space used may
+            accumulate on metadata nodes until the problem is repaired.
+        action: >-
+            Determine the scope of the problem based on the log message and
+            resolve the underlying issue.
+
+-
+    event: upset.manta.ops.audit.log_error
+    legacyName: mola-audit-logscan-error
+    scope:
+        service: ops
+    checks:
+        -
+            type: bunyan-log-scan
+            config:
+                path: "/var/log/mola-audit.log"
+                fields:
+                    level: ERROR
+                threshold: 1
+                period: 60
+        -
+            type: bunyan-log-scan
+            config:
+                path: "/var/log/mola-audit.log"
+                fields:
+                    level: FATAL
+                threshold: 1
+                period: 60
+    ka:
+        title: '"mola-audit" logged an error'
+        description: The audit subsystem has logged an error.
+        severity: minor
+        response: No automated response will be taken.
+        impact: >-
+            The regularly scheduled audit job may not have been able to run.  If
+            the job did run and complete successfully, then it may have
+            identified objects with missing copies, which would indicate a data
+            integrity issue.
+        action: >-
+            Determine the scope of the problem based on the log message and
+            resolve the underlying issue.
+
+-
+    event: upset.manta.ops.gc.objects_lingering
+    legacyName: mola-create-link-files-piling-up
+    scope:
+        service: ops
+    checks:
+        -
+            type: cmd
+            config:
+                cmd: "export HOME=/root && . /root/.bashrc && test $(mfind /poseidon/stor/manta_gc/all/do | wc -l) -lt 150"
+                interval: 300
+                period: 1800
+                threshold: 6
+                timeout: 20
+    ka:
+        title: Garbage collection instructions piling up
+        description: Garbage collection instruction objects are piling up
+        severity: major
+        response: No automated response will be taken.
+        impact: >-
+            Garbage collection may not be running.  Disk space used may
+            accumulate on metadata and storage nodes until the problem is
+            repaired.
+        action: >-
+            Determine the scope of the problem and resolve the underlying issue.
+
+-
+    event: upset.manta.ops.gc.moray_objects_lingering
+    legacyName: mola-moray-files-piling-up
+    scope:
+        service: ops
+    checks:
+        -
+            type: cmd
+            config:
+                cmd: "set -o errexit && set -o pipefail && export HOME=/root && . /root/.bashrc && mfind /poseidon/stor/manta_gc/moray | sed s,^/poseidon/stor/manta_gc/moray/,, | awk -F/ 'NF == 1 { dirs[$1] = 1; } NF == 2 { counts[$1]++; } END { for (dir in dirs) { count = counts[dir]; if (count > 150) { printf(\"%s\\t%d\\n%s\\n\", dir, count, \"fail\"); } } }'"
+                interval: 300
+                period: 1800
+                threshold: 6
+                timeout: 20
+                stdoutMatch:
+                    pattern: fail
+                    type: substring
+    ka:
+        title: Garbage collection Moray instructions piling up
+        description: Garbage collection Moray instruction objects are piling up
+        severity: major
+        response: No automated response will be taken.
+        impact: >-
+            Garbage collection may not be running.  Disk space used may
+            accumulate on metadata nodes until the problem is repaired.
+        action: >-
+            Determine the scope of the problem and resolve the underlying issue.
+
+-
+    event: upset.manta.ops.gc.mako_objects_lingering
+    legacyName: mola-mako-files-piling-up
+    scope:
+        service: ops
+    checks:
+        -
+            type: cmd
+            config:
+                cmd: "set -o errexit && set -o pipefail && export HOME=/root && . /root/.bashrc && mfind /poseidon/stor/manta_gc/mako | sed s,^/poseidon/stor/manta_gc/mako/,, | awk -F/ 'NF == 1 { dirs[$1] = 1; } NF == 2 { counts[$1]++; } END { for (dir in dirs) { count = counts[dir]; if (count > 150) { printf(\"%s\\t%d\\n%s\\n\", dir, count, \"fail\"); } } }'"
+                interval: 300
+                period: 1800
+                threshold: 6
+                timeout: 20
+                stdoutMatch:
+                    pattern: fail
+                    type: substring
+    ka:
+        title: Garbage collection Mako instructions piling up
+        description: Garbage collection Mako instruction objects are piling up
+        severity: major
+        response: No automated response will be taken.
+        impact: >-
+            Garbage collection may not be running.  Disk space used may
+            accumulate on storage nodes until the problem is repaired.
+        action: >-
+            Determine the scope of the problem and resolve the underlying issue.
+
+-
+    event: upset.manta.ops.gc.job_lingering
+    legacyName: mola-job-running-too-long
+    scope:
+        service: ops
+    checks:
+        -
+            type: cmd
+            config:
+                cmd: "export HOME=/root && . /root/.bashrc && test $(expr $(date +%s) - $(mjob get $(mjob list -n manta_gc -s running | head -1 | tr -d '/') | json timeCreated | xargs -i date --utc --date \"{}\" +%s)) -lt 10800; if [[ $? -eq 1 ]]; then echo \"fail\"; else echo \"success\"; fi"
+                interval: 300
+                threshold: 1
+                timeout: 20
+                stdoutMatch:
+                    pattern: fail
+                    type: substring
+    ka:
+        title: Garbage collection job running too long
+        description: >-
+            The regularly-scheduled garbage collection job has been running for
+            longer than expected.
+        severity: major
+        response: No automated response will be taken.
+        impact:
+            Garbage collection may not be completing.  Disk space used may
+            accumulate on storage nodes until the problem is repaired.
+        action: >-
+            Determine the scope of the problem and resolve the underlying issue.
+
+-
+    event: upset.manta.ops.dumps_missing
+    legacyName: manatee-backups-failed
+    scope:
+        service: ops
+    checks:
+        -
+            type: cmd
+            config:
+                cmd: "export HOME=/root && . /root/.bashrc && export DATE=$(date +'%Y/%m/%d/00' --date='7 hours ago'); echo $DATE; for s in $(mls /poseidon/stor/manatee_backups | tr -d '/'); do /opt/local/bin/echo -n \"$s \"; until [[ \"$MLS\" != '' ]]; do export MLS=$(mls /poseidon/stor/manatee_backups/$s/$DATE 2>&1); done; echo \"$MLS\" | grep '\\(manta_delete_log-\\)\\|\\(marlin_tasks_v2-\\)' >/dev/null; if [[ $? == 0 ]]; then echo 'pass'; else echo 'fail'; fi; export MLS=''; done"
+                interval: 300
+                threshold: 1
+                period: 3600
+                timeout: 60
+                stdoutMatch:
+                    pattern: fail
+                    type: substring
+    ka:
+        title: Unpacked metadata dumps are missing
+        description: Regularly-scheduled metadata dumps have not been unpacked
+        severity: major
+        response: No automated response will be taken.
+        impact: >-
+            The regularly scheduled metadata backups may not have been unpacked.
+            As a result, regularly scheduled garbage collection, audit, and
+            metering jobs may not be running or their results may be incomplete.
+            Disk usage may accumulate on metadata and storage nodes until the
+            problem is resolved.
+        action: >-
+            The "manta-hk" tool can be used in the "ops" zone to determine
+            whether the regularly-scheduled dumps have been uploaded and
+            unpacked.
+
+-
+    event: upset.manta.ops.metering.summary_missing
+    legacyName: mackerel-summary-missing
+    scope:
+        service: ops
+    checks:
+        -
+            type: cmd
+            config:
+                cmd: "export HOME=/root && . /root/.bashrc && export DATE=$(date +'%Y/%m/%d' --date='30 hours ago'); echo $DATE; mls /poseidon/stor/usage/summary/$DATE 2>&1 | grep .json; if [[ $? == 0 ]]; then echo 'pass'; else echo 'fail'; fi;"
+                interval: 300
+                threshold: 1
+                period: 3600
+                timeout: 60
+                stdoutMatch:
+                    pattern: fail
+                    type: substring
+    ka:
+        title: Recent metering summary report missing
+        description: A metering summary report could not be found.
+        severity: minor
+        response: No automated response will be taken.
+        impact: >-
+            The metering subsystem may not be functioning.  Per-user access logs
+            and summary reports may be missing or incomplete.  In some
+            deployments, this can affect customer billing.
+        action:
+            Determine the scope of the problem and resolve the underlying issue.
+
+-
+    event: upset.manta.ops.metering.storage_missing
+    legacyName: mackerel-storage-missing
+    scope:
+        service: ops
+    checks:
+        -
+            type: cmd
+            config:
+                cmd: "export HOME=/root && . /root/.bashrc && export DATE=$(date +'%Y/%m/%d/00' --date='12 hours ago'); echo $DATE; mls /poseidon/stor/usage/storage/$DATE 2>&1 | grep h00.json; if [[ $? == 0 ]]; then echo 'pass'; else echo 'fail'; fi;"
+                interval: 300
+                threshold: 1
+                period: 3600
+                timeout: 60
+                stdoutMatch:
+                    pattern: fail
+                    type: substring
+    ka:
+        title: Recent metering storage report missing
+        description: A metering storage report could not be found.
+        severity: minor
+        response: No automated response will be taken.
+        impact: >-
+            The metering subsystem may not be functioning.  In some deployments,
+            this can affect customer billing.
+        action:
+            Determine the scope of the problem and resolve the underlying issue.
+
+-
+    event: upset.manta.ops.metering.request_missing
+    legacyName: mackerel-request-missing
+    scope:
+        service: ops
+    checks:
+        -
+            type: cmd
+            config:
+                cmd: "export HOME=/root && . /root/.bashrc && export DATE=$(date +'%Y/%m/%d/%H' --date='2 hours ago'); echo $DATE; mls /poseidon/stor/usage/request/$DATE 2>&1 | grep .json; if [[ $? == 0 ]]; then echo 'pass'; else echo 'fail'; fi;"
+                interval: 300
+                threshold: 1
+                period: 3600
+                timeout: 60
+                stdoutMatch:
+                    pattern: fail
+                    type: substring
+    ka:
+        title: Recent metering request report missing
+        description: A metering request report could not be found.
+        severity: minor
+        response: No automated response will be taken.
+        impact: >-
+            The metering subsystem may not be functioning.  Per-user access logs
+            and summary reports may be missing or incomplete.  In some
+            deployments, this can affect customer billing.
+        action:
+            Determine the scope of the problem and resolve the underlying issue.
+
+-
+    event: upset.manta.ops.metering.compute_missing
+    legacyName: mackerel-compute-missing
+    scope:
+        service: ops
+    checks:
+        -
+            type: cmd
+            config:
+                cmd: "export HOME=/root && . /root/.bashrc && export DATE=$(date +'%Y/%m/%d/%H' --date='2 hours ago'); echo $DATE; mls /poseidon/stor/usage/compute/$DATE 2>&1 | grep .json; if [[ $? == 0 ]]; then echo 'pass'; else echo 'fail'; fi;"
+                interval: 300
+                threshold: 1
+                period: 3600
+                timeout: 60
+                stdoutMatch:
+                    pattern: fail
+                    type: substring
+    ka:
+        title: Recent metering compute report missing
+        description: A metering compute report could not be found.
+        severity: minor
+        response: No automated response will be taken.
+        impact: >-
+            The metering subsystem may not be functioning.  Per-user access logs
+            and summary reports may be missing or incomplete.  In some
+            deployments, this can affect customer billing.
+        action:
+            Determine the scope of the problem and resolve the underlying issue.
+
+-
+    event: upset.manta.ops.jobpuller.falling_behind
+    legacyName: wrasse-behind
+    scope:
+        service: ops
+    checks:
+        -
+            type: cmd
+            config:
+                cmd: "/opt/smartdc/mola/amon/checks/check-wrasse-behind"
+                timeout: 180
+                interval: 3600
+                threshold: 1
+    ka:
+        title: Job archiver is falling behind
+        description: There are too many jobs that have not been archived.
+        severity: minor
+        response: No automated response will be taken.
+        impact: >-
+            The jobs database may be getting large, full of job data that is no
+            longer needed.  Over time, this can significantly decrease
+            performance of compute jobs.
+        action: >-
+            Check the logs for the job archiver to help debug the underlying
+            issue and then repair it.  See also known issue "MANTA-2277".
