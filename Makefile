@@ -118,7 +118,8 @@ release: all deps docs $(SMF_MANIFESTS)
 	@echo "Building $(RELEASE_TARBALL)"
 	@rm -rf $(PROTO)
 	@mkdir -p $(INSTDIR)
-	cp -r   $(TOP)/bin \
+	cp -r   $(TOP)/alarm_metadata \
+		$(TOP)/bin \
 		$(TOP)/build \
 		$(TOP)/cmd \
 		$(TOP)/config \
