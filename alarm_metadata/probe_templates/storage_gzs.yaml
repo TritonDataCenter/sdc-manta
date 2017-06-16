@@ -69,7 +69,7 @@
         -
             type: cmd
             config:
-                cmd: "test ! $(find /var/log/manta/upload -type f | wc -l) -gt 0"
+                cmd: "test ! $(find /var/log/manta/upload -type f -mmin +120 | wc -l) -gt 0"
                 interval: 300
                 threshold: 5
                 period: 1800

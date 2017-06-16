@@ -135,3 +135,29 @@
         action: >-
             Resolve the underlying issue.
 
+-
+    event: upset.manta.storage.filesystem_almost_full
+    legacyName: storage dataset space running low
+    scope:
+        service: storage
+    checks:
+        -
+            type: disk-usage
+            config:
+                path: "/manta"
+                threshold: "15%"
+                interval: 3600
+    ka:
+        title: Storage filesystem almost full
+        description: "A storage instance's filesystem is running low on free space"
+        severity: critical
+        response: No automated response will be taken.
+        impact: >-
+            If the filesystem exceeds 90% utilization, Manta will stop using the
+            affected storage instance.  This can result in imbalanced storage
+            allocation across the fleet.  If enough servers are affected by this
+            issue, Manta may become unavailable for new writes.
+        action: >-
+            Identify the cause of excessive disk usage and resolve the
+            underlying issue.
+

@@ -129,7 +129,7 @@
         -
             type: log-scan
             config:
-                path: "/var/log/manatee/pg_dump.log"
+                path: "/var/log/manatee/pgdump.log"
                 match:
                     pattern: fatal
                 threshold: 1
@@ -226,3 +226,41 @@
             There is likely no immediate action required, but it is recommended
             to verify the health of this shard using "manatee-adm".  You may
             need to rebuild a deposed peer.
+
+-
+    event: upset.manta.postgres.long_query
+    scope:
+        service: postgres
+    checks:
+        -
+            type: cmd
+            config:
+                cmd: "/opt/local/bin/psql -U postgres -c \"SELECT *, NOW() - query_start AS elapsed FROM pg_stat_activity WHERE state != 'idle' AND NOW() - query_start > interval '120 seconds'\""
+                interval: 60
+                timeout: 30
+                stdoutMatch:
+                    type: regex
+                    invert: true
+                    pattern: "\\(0 rows\\)"
+    ka:
+        title: Long-running query on metadata shard
+        description: >-
+            A database query has been running for several minutes.  Queries
+            executed by Manta itself are designed to run quickly, so
+            long-running queries are often indicative of an unhealthy shard.
+            It is also possible that an administrator is running an expensive
+            query.
+        severity: major
+        response: No automated response will be taken.
+        impact: >-
+            Besides being indicative of an unhealthy shard, long-running queries
+            can impact the performance of other database queries.  They can also
+            result in bloat in both the in-memory and on-disk database
+            representations, resulting in significantly degraded performance of
+            future queries.
+        action: >-
+            The alarm details include information about the long-running query.
+            If the query is being run by an administrator, it should probably be
+            cancelled.  Otherwise, assess the health of the shard and determine
+            why the query is taking so long to run.
+
