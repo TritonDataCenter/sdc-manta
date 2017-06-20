@@ -72,14 +72,14 @@ function runTestCase(testcase, callback)
 		    'num': zkid
 		});
 	    });
-	deployed.app.metadata.ZK_SERVERS[
-	    deployed.app.metadata.ZK_SERVERS.length - 1].last = true;
+	if (deployed.app.metadata.ZK_SERVERS.length > 0)
+		deployed.app.metadata.ZK_SERVERS[
+		    deployed.app.metadata.ZK_SERVERS.length - 1].last = true;
 
 	svcid = 'svc001';
 	deployed.services = {};
 	deployed.services[svcid] = { 'name': 'nameservice' };
 	deployed.instances = {};
-	deployed.instances[svcid] = [];
 
 	deployed.cns = {};
 	testcase.cns.forEach(function (cnid) {
@@ -102,30 +102,44 @@ function runTestCase(testcase, callback)
 		server_uuid = instance['cn'];
 		islocal = deployed.cns.hasOwnProperty(server_uuid) &&
 		    deployed.cns[server_uuid] !== null;
-		if (islocal) {
-			if (instance.zone_removed !== true) {
-				deployed.vms[uuid] = {
-				    'nics': [ {
-					'primary': true,
-					'ip': instance['ip']
-				    } ],
-				    'server_uuid': server_uuid
-				};
-			}
-		} else {
+
+		if (!islocal)
 			deployed.cns[server_uuid] = null;
+
+		/*
+		 * Here we build our zone and instance lists based on whether
+		 * our test case wants us to pretent whether or not the
+		 * zone/instance has been destroyed. The difference between
+		 * zone_removed and instance_removed is whether to fake removal
+		 * from VMAPI or SAPI (which also implies VMAPI removal),
+		 * respectively.
+		 */
+		if (instance.instance_removed !== true) {
+			if (!deployed.instances[svcid])
+			    deployed.instances[svcid] = [];
+
+			deployed.instances[svcid].push({
+			    'uuid': uuid,
+			    'params': {
+				'server_uuid': instance['cn']
+			    },
+			    'metadata': {
+				'ZK_ID': byip[instance['ip']],
+				'DATACENTER': islocal ? localDc : remoteDc
+			    }
+			});
 		}
 
-		deployed.instances[svcid].push({
-		    'uuid': uuid,
-		    'params': {
-			'server_uuid': instance['cn']
-		    },
-		    'metadata': {
-			'ZK_ID': byip[instance['ip']],
-		        'DATACENTER': islocal ? localDc : remoteDc
-		    }
-		});
+		if (instance.zone_removed !== true &&
+		    instance.instance_removed !== true) {
+			deployed.vms[uuid] = {
+			    'nics': [ {
+				'primary': true,
+				'ip': instance['ip']
+			    } ],
+			    'server_uuid': server_uuid
+			};
+		}
 	});
 
 	collector = new CollectorStream({});
@@ -501,6 +515,32 @@ vasync.forEachPipeline({
 	    new RegExp('nameservice instance "vm001": VM appears to have ' +
 		'been provisioned in this datacenter, but could not be ' +
 		'found in VMAPI')
+	]
+    }, {
+	'name': 'list zk servers, zk_servers populated, no instances',
+	'zk_servers': [ '10.0.0.5' ],
+	'cns': [ identCn(1) ],
+	'instances': [ {
+	    'instance_removed': true
+	} ],
+	'output': [
+	    outputHeader,
+	    outputRow(1, '-', '-', '10.0.0.5'),
+	    ''
+	].join('\n'),
+	'warnings': [
+	    new RegExp('ZK_SERVERS\\[0\\] has no associated SAPI instance')
+	]
+    }, {
+	'name': 'list zk servers, zk_servers empty, no instances',
+	'zk_servers': [],
+	'cns': [],
+	'instances': [ {
+	    'instance_removed': true
+	} ],
+	'output': '',
+	'warnings': [
+	    new RegExp('ZK_SERVERS.is.empty')
 	]
     } ]
 }, function (err) {
