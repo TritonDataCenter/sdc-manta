@@ -72,14 +72,14 @@ function runTestCase(testcase, callback)
 		    'num': zkid
 		});
 	    });
-	if (deployed.app.metadata.ZK_SERVERS.length > 0)
-		deployed.app.metadata.ZK_SERVERS[
-		    deployed.app.metadata.ZK_SERVERS.length - 1].last = true;
+	deployed.app.metadata.ZK_SERVERS[
+	    deployed.app.metadata.ZK_SERVERS.length - 1].last = true;
 
 	svcid = 'svc001';
 	deployed.services = {};
 	deployed.services[svcid] = { 'name': 'nameservice' };
 	deployed.instances = {};
+	deployed.instances[svcid] = [];
 
 	deployed.cns = {};
 	testcase.cns.forEach(function (cnid) {
@@ -108,7 +108,7 @@ function runTestCase(testcase, callback)
 
 		/*
 		 * Here we build our zone and instance lists based on whether
-		 * our test case wants us to pretent whether or not the
+		 * our test case wants us to pretend whether or not the
 		 * zone/instance has been destroyed. The difference between
 		 * zone_removed and instance_removed is whether to fake removal
 		 * from VMAPI or SAPI (which also implies VMAPI removal),
@@ -530,17 +530,6 @@ vasync.forEachPipeline({
 	].join('\n'),
 	'warnings': [
 	    new RegExp('ZK_SERVERS\\[0\\] has no associated SAPI instance')
-	]
-    }, {
-	'name': 'list zk servers, zk_servers empty, no instances',
-	'zk_servers': [],
-	'cns': [],
-	'instances': [ {
-	    'instance_removed': true
-	} ],
-	'output': '',
-	'warnings': [
-	    new RegExp('ZK_SERVERS.is.empty')
 	]
     } ]
 }, function (err) {
