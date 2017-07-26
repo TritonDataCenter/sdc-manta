@@ -1,0 +1,37 @@
+"list" for newly-created windows:
+<id_stripped_by_test_suite> 2038-01-06T17:00:00Z 2038-01-06T21:00:00Z all         tst.maint_windows.js test
+<id_stripped_by_test_suite> 2038-01-06T17:00:00Z 2038-01-06T21:00:00Z machines    tst.maint_windows.js test
+<id_stripped_by_test_suite> 2038-01-06T17:00:00Z 2038-01-06T21:00:00Z probes      tst.maint_windows.js test
+<id_stripped_by_test_suite> 2038-01-06T17:00:00Z 2038-01-06T21:00:00Z probegroups tst.maint_windows.js test
+"show" for newly-created windows:
+MAINTENANCE WINDOW <id_stripped_by_test_suite>: 2038-01-06T17:00:00.000Z for 4h00m00s
+    start:    2038-01-06T17:00:00.000Z
+    end:      2038-01-06T21:00:00.000Z
+    duration: 4h00m00s
+    notes:    tst.maint_windows.js test
+    affects:  all probes, probe groups, and machines
+
+MAINTENANCE WINDOW <id_stripped_by_test_suite>: 2038-01-06T17:00:00.000Z for 4h00m00s
+    start:    2038-01-06T17:00:00.000Z
+    end:      2038-01-06T21:00:00.000Z
+    duration: 4h00m00s
+    notes:    tst.maint_windows.js test
+    affects:  specific machines: 
+        machine1
+
+MAINTENANCE WINDOW <id_stripped_by_test_suite>: 2038-01-06T17:00:00.000Z for 4h00m00s
+    start:    2038-01-06T17:00:00.000Z
+    end:      2038-01-06T21:00:00.000Z
+    duration: 4h00m00s
+    notes:    tst.maint_windows.js test
+    affects:  specific probes: 
+        probe1
+        probe2
+
+MAINTENANCE WINDOW <id_stripped_by_test_suite>: 2038-01-06T17:00:00.000Z for 4h00m00s
+    start:    2038-01-06T17:00:00.000Z
+    end:      2038-01-06T21:00:00.000Z
+    duration: 4h00m00s
+    notes:    tst.maint_windows.js test
+    affects:  specific probe groups: 
+        group1

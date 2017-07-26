@@ -7,7 +7,7 @@
  */
 
 /*
- * Copyright (c) 2014, Joyent, Inc.
+ * Copyright (c) 2017, Joyent, Inc.
  */
 
 /*
@@ -39,6 +39,12 @@ var sprintf = require('util').format;
 var POSEIDON;
 var POSEIDON_LOGIN = 'poseidon';
 var POSEIDON_PASSWORD = 'trident123';
+
+/*
+ * If the -c option isn't specified, the default is to download 10 images in
+ * parallel.
+ */
+var CONCURRENCY = 10;
 
 optimist.usage('Usage:\tmanta-init -e <email>');
 
@@ -73,8 +79,12 @@ var ARGV = optimist.options({
 	}
 }).argv;
 
-function usage() {
+function usage(message) {
+	if (message) {
+		console.error(message);
+	}
 	optimist.showHelp();
+	process.exit(2);
 }
 
 // -- User management
@@ -383,10 +393,35 @@ self.log = new Logger({
 });
 
 /*
- * If the -c option isn't specified, the default is to download 10 images in
- * parallel.
+ * node-optimist infers the type of an argument from the way it was used.  For
+ * example:
+ *
+ *     -c foo        ARGV.c is the string "foo"
+ *     -c 37         ARGV.c is the number 37
+ *     -c ' 37'      ARGV.c is the number 37
+ *     -c 37invalid  ARGV.c is the string "37invalid"
+ *     -c            ARGV.c is the boolean true
+ *     -c ''         ARGV.c is the boolean true
+ *     -c ' '        ARGV.c is the number 0
+ *     (-c left out) ARGV.c is undefined
+ *
+ * Note that this has the usual problem of attempting to coerce a string to a
+ * number with Number: a string of all spaces is parsed as 0.  We should be
+ * using jsprim.parseInteger() here, but for now, we only handle the two cases
+ * that we intend to support.
  */
-ARGV.c = ARGV.c ? parseInt(ARGV.c, 10) : 10;
+if (typeof (ARGV.c) == 'number' && ARGV.c > 0 && ARGV.c < 128 &&
+    Math.floor(ARGV.c) == ARGV.c) {
+	CONCURRENCY = ARGV.c;
+} else if (ARGV.c !== undefined) {
+	/*
+	 * It would be nice to provide the user with value that we
+	 * failed to parse, but optimist has potentially mangled it
+	 * badly by the time we get here, so we don't bother.
+	 */
+	usage('unsupported value for "-c" option ' +
+	    '(must be a positive integer less than 128)');
+}
 
 async.waterfall([
 	function verifyArgs(cb) {
@@ -724,7 +759,8 @@ async.waterfall([
 		log.info({ images: images, remote_url: remote_url },
 			'downloading images');
 
-		async.forEachLimit(images, ARGV.c, function (image, subcb) {
+		async.forEachLimit(images, CONCURRENCY,
+		    function (image, subcb) {
 			var import_opts = {};
 			import_opts.skipOwnerCheck = true;
 

@@ -158,6 +158,7 @@ function main()
 				assertplus.equal(f.aflt_time.toISOString(),
 				    tsiso);
 				assertplus.equal(f.aflt_summary, 'boom (35)');
+				assertplus.strictEqual(f.aflt_ismaint, false);
 
 				/*
 				 * The second one is largely the same, but has
@@ -400,6 +401,7 @@ alarmsById['35'] = {
     'timeClosed': null,
     'timeLastEvent': timestamp,
     'numEvents': 3,
+    'maintFaults': [],
     'faults': [ {
 	    'type': 'probe',
 	    'probe': 'probe-uuid-35',
@@ -429,6 +431,7 @@ alarmsById['40'] = {
     'timeClosed': null,
     'timeLastEvent': timestamp,
     'numEvents': 3,
+    'maintFaults': [],
     'faults': [ {
 	'type': 'probe',
 	'probe': 'probe-uuid-40',
@@ -458,6 +461,7 @@ alarmsById['45'] = {
     'timeClosed': null,
     'timeLastEvent': timestamp,
     'numEvents': 3,
+    'maintFaults': [],
     'faults': [ {
 	'type': 'probe',
 	'probe': 'probe-uuid-nonexistent',
@@ -488,6 +492,7 @@ alarmsById['50'] = {
     'timeClosed': null,
     'timeLastEvent': timestamp,
     'numEvents': 3,
+    'maintFaults': [],
     'faults': [ {
 	'type': 'probe',
 	'probe': 'probe-uuid-nonexistent',
@@ -517,6 +522,7 @@ alarmsById['55'] = {
     'timeClosed': null,
     'timeLastEvent': timestamp,
     'numEvents': 3,
+    'maintFaults': [],
     'faults': [ {
 	'type': 'probe',
 	'probe': 'probe-uuid-nonexistent',

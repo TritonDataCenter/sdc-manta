@@ -18,7 +18,6 @@
 var assertplus = require('assert-plus');
 var bunyan = require('bunyan');
 var cmdutil = require('cmdutil');
-var forkexec = require('forkexec');
 var jsprim = require('jsprim');
 var path = require('path');
 var vasync = require('vasync');

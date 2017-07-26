@@ -32,7 +32,7 @@ function main()
  *
  *    name (string)	name of the test case
  *
- *    objtype (string)	one of "probe", "probe group", or "alarm"
+ *    objtype (string)	one of "probe", "probe group", "alarm", or "window"
  *
  *    input (object)	an object as it might be returned from Amon
  *
@@ -75,6 +75,10 @@ function runTestCase(tc)
 		load = amon_objects.loadProbeGroupObject;
 		break;
 
+	case 'window':
+		load = amon_objects.loadMaintWindow;
+		break;
+
 	default:
 		throw (new VError('unsupported object type: "%s"', tc.objtype));
 	}
@@ -101,7 +105,7 @@ function runTestCase(tc)
 
 function generateTestCases()
 {
-	var validAlarm, validProbeGroup, validProbe, input;
+	var validAlarm, validProbeGroup, validProbe, validWindow, input;
 
 	testCases = [];
 
@@ -151,6 +155,23 @@ function generateTestCases()
 			'message': 'a different summary message'
 		    }
 		}
+	    } ],
+	    'maintFaults': [ {
+		'type': 'probe',
+		'probe': 'probe-uuid-3',
+		'event': {
+		    'v': 1,
+		    'type': 'probe',
+		    'clear': true,
+		    'machine': 'machine-uuid-3',
+		    'uuid': 'event-uuid-3',
+		    'agent': 'agent-uuid-3',
+		    'agentAlias': 'anAgent3',
+		    'time': Date.parse('2017-04-26T08:54:32.876Z'),
+		    'data': {
+			'message': 'a maintenance summary message'
+		    }
+		}
 	    } ]
 	};
 
@@ -173,7 +194,7 @@ function generateTestCases()
 		    '2017-04-26T09:54:32.876Z');
 		assertplus.strictEqual(result.a_nevents, 14);
 		assertplus.arrayOfObject(result.a_faults);
-		assertplus.strictEqual(result.a_faults.length, 2);
+		assertplus.strictEqual(result.a_faults.length, 3);
 
 		/*
 		 * If new properties are added to alarm objects, they should be
@@ -208,6 +229,7 @@ function generateTestCases()
 		assertplus.strictEqual(fault.aflt_summary,
 		    'some summary message');
 		assertplus.object(fault.aflt_data);
+		assertplus.strictEqual(fault.aflt_ismaint, false);
 
 		/*
 		 * Similarly, if new properties are added to fault objects,
@@ -223,7 +245,8 @@ function generateTestCases()
 		    'aflt_agent_alias',
 		    'aflt_time',
 		    'aflt_summary',
-		    'aflt_data'
+		    'aflt_data',
+		    'aflt_ismaint'
 		]);
 		assertplus.deepEqual([], extras,
 		    'fault object has untested properties: ' +
@@ -231,6 +254,7 @@ function generateTestCases()
 
 		fault = result.a_faults[1];
 		assertplus.ok(fault.aflt_alarm == result);
+		assertplus.strictEqual(fault.aflt_ismaint, false);
 		assertplus.strictEqual(fault.aflt_probeid, 'probe-uuid-2');
 		assertplus.strictEqual(fault.aflt_clear, true);
 		assertplus.strictEqual(fault.aflt_uuid, 'event-uuid-2');
@@ -241,6 +265,21 @@ function generateTestCases()
 		    '2017-04-26T08:54:32.876Z');
 		assertplus.strictEqual(fault.aflt_summary,
 		    'a different summary message');
+
+		fault = result.a_faults[2];
+		assertplus.ok(fault.aflt_alarm == result);
+		assertplus.strictEqual(fault.aflt_ismaint, true);
+		assertplus.strictEqual(fault.aflt_probeid, 'probe-uuid-3');
+		assertplus.strictEqual(fault.aflt_clear, true);
+		assertplus.strictEqual(fault.aflt_uuid, 'event-uuid-3');
+		assertplus.strictEqual(fault.aflt_machine, 'machine-uuid-3');
+		assertplus.strictEqual(fault.aflt_agent, 'agent-uuid-3');
+		assertplus.strictEqual(fault.aflt_agent_alias, 'anAgent3');
+		assertplus.strictEqual(fault.aflt_time.toISOString(),
+		    '2017-04-26T08:54:32.876Z');
+		assertplus.strictEqual(fault.aflt_summary,
+		    'a maintenance summary message');
+
 	    }
 	} ];
 
@@ -490,6 +529,7 @@ function generateTestCases()
 
 	input = jsprim.deepCopy(validAlarm);
 	input.faults = [];
+	input.maintFaults = [];
 	testCases.push({
 	    'name': 'alarm: open with no faults',
 	    'objtype': 'alarm',
@@ -673,6 +713,142 @@ function generateTestCases()
 		        '": number.*found.*required')
 		});
 	    });
+
+	/*
+	 * Maintenance window objects
+	 */
+
+	validWindow = {
+	    'id': 3,
+	    'user': 'account-one',
+	    'start': Date.parse('2017-04-25T01:23:45.678Z'),
+	    'end': Date.parse('2017-04-25T03:23:45.678Z'),
+	    'all': true
+	};
+
+	input = jsprim.deepCopy(validWindow);
+	testCases.push({
+	    'name': 'window: basic case (all)',
+	    'objtype': 'window',
+	    'input': input,
+	    'verify': function verifyBasicWindowAll(w) {
+		assertplus.equal(w.win_id, 3);
+		assertplus.equal(w.win_user, 'account-one');
+		assertplus.equal(w.win_tstart.toISOString(),
+		    '2017-04-25T01:23:45.678Z');
+		assertplus.equal(w.win_tend.toISOString(),
+		    '2017-04-25T03:23:45.678Z');
+		assertplus.strictEqual(w.win_notes, null);
+		assertplus.strictEqual(w.win_targets, null);
+		assertplus.strictEqual(w.win_scope,
+		    amon_objects.AmonMaintWindow.WIN_SCOPE_ALL);
+	    }
+	});
+
+	input = jsprim.deepCopy(validWindow);
+	delete (input['all']);
+	input['notes'] = 'my note';
+	input['machines'] = [ 'machine-1', 'machine-2' ];
+	testCases.push({
+	    'name': 'window: basic case (machines)',
+	    'objtype': 'window',
+	    'input': input,
+	    'verify': function verifyBasicWindowMachine(w) {
+		assertplus.equal(w.win_id, 3);
+		assertplus.strictEqual(w.win_notes, 'my note');
+		assertplus.deepEqual(w.win_targets,
+		    [ 'machine-1', 'machine-2' ]);
+		assertplus.strictEqual(w.win_scope,
+		    amon_objects.AmonMaintWindow.WIN_SCOPE_MACHINES);
+	    }
+	});
+
+	input = jsprim.deepCopy(validWindow);
+	delete (input['all']);
+	input['probes'] = [ 'probe-1' ];
+	testCases.push({
+	    'name': 'window: basic case (probes)',
+	    'objtype': 'window',
+	    'input': input,
+	    'verify': function verifyBasicWindowProbe(w) {
+		assertplus.equal(w.win_id, 3);
+		assertplus.strictEqual(w.win_notes, null);
+		assertplus.deepEqual(w.win_targets, [ 'probe-1' ]);
+		assertplus.strictEqual(w.win_scope,
+		    amon_objects.AmonMaintWindow.WIN_SCOPE_PROBES);
+	    }
+	});
+
+	input = jsprim.deepCopy(validWindow);
+	delete (input['all']);
+	input['probeGroups'] = [];
+	testCases.push({
+	    'name': 'window: basic case (probe groups)',
+	    'objtype': 'window',
+	    'input': input,
+	    'verify': function verifyBasicWindowGroup(w) {
+		assertplus.equal(w.win_id, 3);
+		assertplus.strictEqual(w.win_notes, null);
+		assertplus.deepEqual(w.win_targets, []);
+		assertplus.strictEqual(w.win_scope,
+		    amon_objects.AmonMaintWindow.WIN_SCOPE_PROBEGROUPS);
+	    }
+	});
+
+	/* Exercise what happens when we provide more than one scope. */
+	input = jsprim.deepCopy(validWindow);
+	input['probeGroups'] = [];
+	testCases.push({
+	    'name': 'window: "all" and "probeGroups"',
+	    'objtype': 'window',
+	    'input': input,
+	    'errmsg': new RegExp('^maintenance window 3: expected exactly ' +
+	        'one of "all", "machines", "probes", or "probeGroups" ' +
+		'properties, but found 2$')
+	});
+
+	/* Exercise what happens when we provide no scope. */
+	input = jsprim.deepCopy(validWindow);
+	delete (input['all']);
+	testCases.push({
+	    'name': 'window: missing scope',
+	    'objtype': 'window',
+	    'input': input,
+	    'errmsg': new RegExp('^maintenance window 3: expected exactly ' +
+	        'one of "all", "machines", "probes", or "probeGroups" ' +
+		'properties, but found 0$')
+	});
+
+	/*
+	 * For each required property, create a test case that exercises what
+	 * happens when that property is missing.
+	 */
+	[ 'id', 'start', 'end' ].forEach(function (prop) {
+		input = jsprim.deepCopy(validWindow);
+		delete (input[prop]);
+		testCases.push({
+		    'name': 'window: missing "' + prop + '"',
+		    'objtype': 'window',
+		    'input': input,
+		    'errmsg': new RegExp(
+		        'property "' + prop + '": .* missing and.*required')
+		});
+	});
+
+	/*
+	 * "Bad type" test cases
+	 */
+	[ 'id', 'start', 'end' ].forEach(function (prop) {
+		input = jsprim.deepCopy(validWindow);
+		input[prop] = 'asdf';
+		testCases.push({
+		    'name': 'window: bad type for "' + prop + '"',
+		    'objtype': 'window',
+		    'input': input,
+		    'errmsg': new RegExp(
+		        'property "' + prop + '": string value found.*required')
+		});
+	});
 }
 
 main();

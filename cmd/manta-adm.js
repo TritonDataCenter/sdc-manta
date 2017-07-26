@@ -54,6 +54,12 @@ var maArg0 = path.basename(process.argv[1]);
 var maDefaultAlarmConcurrency = 10;
 
 /*
+ * We will warn when the user attempts to create a maintenance window that's
+ * longer than this value (in milliseconds).  This is currently 4 hours.
+ */
+var maMaintWindowLong = 4 * 60 * 60 * 1000;
+
+/*
  * These node-cmdln options are used by multiple subcommands.  They're defined
  * in one place to ensure consistency in names, aliases, and help message.
  */
@@ -1048,6 +1054,8 @@ MantaAdmAlarm.prototype.do_list.options = [
     }
 ];
 
+MantaAdmAlarm.prototype.do_maint = MantaAdmAlarmMaint;
+
 MantaAdmAlarm.prototype.do_metadata = MantaAdmAlarmMetadata;
 
 MantaAdmAlarm.prototype.do_notify = function (subcmd, opts, args, callback)
@@ -1364,6 +1372,387 @@ MantaAdmAlarmConfig.prototype.amonUpdateSubcommand =
 		callback(err);
 	});
 };
+
+
+/*
+ * Maintenance windows
+ */
+
+function MantaAdmAlarmMaint(parent)
+{
+	this.mam_parent = parent;
+	this.mam_root = parent.maa_parent;
+
+	cmdln.Cmdln.call(this, {
+	    'name': parent.name + ' maint',
+	    'desc': 'View and manage maintenance windows.'
+	});
+
+}
+
+util.inherits(MantaAdmAlarmMaint, cmdln.Cmdln);
+
+MantaAdmAlarmMaint.prototype.do_create = function (subcmd, opts, args, callback)
+{
+	var nscopes, scopeProp, targets;
+	var params, i;
+	var tstart, tend, tnow;
+	var parent, root;
+
+	/*
+	 * We accept no non-option arguments.
+	 */
+	if (args.length > 0) {
+		callback(new Error('unexpected arguments'));
+		return;
+	}
+
+	/*
+	 * Parse and validate the scope options.
+	 */
+	nscopes = 0;
+	targets = [];
+	if (opts.probe) {
+		nscopes++;
+		targets = opts.probe.slice(0);
+		scopeProp = 'probes';
+	}
+	if (opts.probegroup) {
+		nscopes++;
+		targets = opts.probegroup.slice(0);
+		scopeProp = 'probeGroups';
+	}
+	if (opts.machine) {
+		nscopes++;
+		targets = opts.machine.slice(0);
+		scopeProp = 'machines';
+	}
+
+	if (nscopes > 1) {
+		callback(new VError('only one of --probe, --probegroup, or ' +
+		    '--machine may be specified'));
+		return;
+	}
+
+	/*
+	 * We cannot easily validate these identifiers against the set of
+	 * deployed probes, probe groups, or machines, but we can detect some
+	 * cases of obviously bogus input.
+	 */
+	params = {};
+	if (nscopes > 0) {
+		for (i = 0; i < targets.length; i++) {
+			if (!/^[a-zA-Z0-9_-]+$/.test(targets[i])) {
+				callback(new VError('identifier "%s": ' +
+				    'does not look like a valid uuid',
+				    targets[i]));
+				return;
+			}
+		}
+
+		params[scopeProp] = targets;
+	} else {
+		params['all'] = true;
+	}
+
+	tnow = Date.now();
+
+	/*
+	 * The "--start" and "--end" options are required.
+	 *
+	 * "--start" may have the special value "now", in which case we'll
+	 * generate a start timestamp based on the current time.  That means we
+	 * have to parse it here and not rely on dashdash's "date" type.
+	 */
+	if (!opts.start) {
+		callback(new VError('argument is required: --start'));
+		return;
+	}
+	if (opts.start == 'now') {
+		params['start'] = new Date(tnow);
+	} else {
+		var d = Date.parse(opts.start);
+		if (isNaN(d)) {
+			callback(new VError('unsupported value for --start: %s',
+			    opts.start));
+			return;
+		}
+
+		params['start'] = new Date(d);
+	}
+
+	if (!opts.end) {
+		callback(new VError('argument is required: --end'));
+		return;
+	}
+	params['end'] = opts.end;
+
+	/*
+	 * --notes is required unless the user specifies the undocumented
+	 * --no-notes option.  The rationale is that we want to require
+	 * operators to provide some kind of note, but it's useful in
+	 * development to have a tool for creating a window with no note so that
+	 * we can test the CLI's behavior when encountering such windows.
+	 */
+	if (!opts.notes && !opts.no_notes) {
+		callback(new VError('argument is required: --notes'));
+		return;
+	}
+	if (opts.notes) {
+		params['notes'] = opts.notes;
+	}
+
+	/*
+	 * Validate the semantics of the time window.
+	 */
+	tstart = params['start'].getTime();
+	assertplus.number(tstart);
+	assertplus.ok(!isNaN(tstart));
+
+	tend = params['end'].getTime();
+	assertplus.number(tend);
+	assertplus.ok(!isNaN(tend));
+
+	if (tend <= tstart) {
+		callback(new VError('specified window does not start ' +
+		    'before it ends'));
+		return;
+	}
+
+	if (tend < tnow) {
+		callback(new VError('cannot create windows in the past'));
+		return;
+	}
+
+	console.log('creating maintenance window of duration %s:',
+	    common.fmtDuration(tend - tstart));
+	console.log('    from %s', params['start'].toISOString());
+	console.log('    to   %s', params['end'].toISOString());
+
+	if (tstart < tnow) {
+		console.error('note: maintenance window starts in the past');
+	}
+
+	if (tend - tstart > maMaintWindowLong) {
+		console.error('note: maintenance window exceeds expected ' +
+		    'maximum (%s)', common.fmtDuration(maMaintWindowLong));
+	}
+
+	root = this.mam_root;
+	parent = this.mam_parent;
+	parent.initAdmAndFetchAlarms({
+	    'clioptions': opts,
+	    'sources': {}
+	}, function () {
+		var adm = root.madm_adm;
+		adm.alarmsMaintWindowCreate({
+		    'windef': params
+		}, function (err, maintwin) {
+			if (err) {
+				fatal(err.message);
+			}
+
+			console.log('window created: %d', maintwin.win_id);
+			root.finiAdm();
+			callback();
+		});
+	});
+
+};
+
+MantaAdmAlarmMaint.prototype.do_create.help = [
+    'Create (schedule) a future maintenance window.',
+    '',
+    'Usage:',
+    '',
+    '    manta-adm alarm maint create OPTIONS',
+    '',
+    'The --start, --end, and --notes options are required.  See the manual',
+    'page for details.',
+    '',
+    '{{options}}'
+].join('\n');
+
+MantaAdmAlarmMaint.prototype.do_create.options = [
+    maCommonOptions.configFile,
+{
+    'names': [ 'start' ],
+    'type': 'string',
+    'help': 'Start time of the window (use "now" to start immediately)'
+}, {
+    'names': [ 'end' ],
+    'type': 'date',
+    'help': 'End time of the window'
+}, {
+    'names': [ 'notes' ],
+    'type': 'string',
+    'help': 'Notes (typically use a JIRA ticket number)'
+}, {
+    'names': [ 'no-notes' ],
+    'type': 'bool',
+    'hidden': true,
+    'help': 'Omit "notes" field (for dev only)'
+}, {
+    'names': [ 'probe' ],
+    'type': 'arrayOfString',
+    'helpArg': 'PROBEID...',
+    'help': 'List of probes affected by window (default: all)'
+}, {
+    'names': [ 'probegroup' ],
+    'type': 'arrayOfString',
+    'helpArg': 'GROUPID...',
+    'help': 'List of probe groups affected by window (default: all)'
+}, {
+    'names': [ 'machine' ],
+    'type': 'arrayOfString',
+    'helpArg': 'MACHINEID...',
+    'help': 'List of machines affected by window (default: all)'
+} ];
+
+MantaAdmAlarmMaint.prototype.do_delete = function (subcmd, opts, args, callback)
+{
+	var parent, root;
+
+	if (args.length < 1) {
+		callback(new Error('expected WINID'));
+		return;
+	}
+
+	root = this.mam_root;
+	parent = this.mam_parent;
+	parent.initAdmAndFetchAlarms({
+	    'clioptions': opts,
+	    'sources': {}
+	}, function () {
+		var adm = root.madm_adm;
+		adm.alarmsMaintWindowsDelete({
+		    'winIds': args,
+		    'concurrency': opts.concurrency
+		}, function (err) {
+			if (err) {
+				VError.errorForEach(err, function (e) {
+					console.error('error: %s', e.message);
+				});
+
+				process.exit(1);
+			}
+
+			root.finiAdm();
+			callback();
+		});
+	});
+};
+
+MantaAdmAlarmMaint.prototype.do_delete.help = [
+    'Delete (cancel) pending maintenance windows.',
+    '',
+    'Usage:',
+    '',
+    '    manta-adm alarm maint delete WINID...',
+    '',
+    '{{options}}'
+].join('\n');
+
+MantaAdmAlarmMaint.prototype.do_delete.options = [
+    maCommonOptions.concurrency,
+    maCommonOptions.configFile
+];
+
+MantaAdmAlarmMaint.prototype.do_list =
+    function cmdMaintList(subcmd, opts, args, callback)
+{
+	var self = this;
+	var options = {};
+	var sources;
+
+	if (args.length > 0) {
+		callback(new Error('unexpected arguments'));
+		return;
+	}
+
+	options = listPrepareArgs(opts, madm.maintWindowColumnNames());
+	if (options instanceof Error) {
+		callback(options);
+		return;
+	}
+
+	options.stream = process.stdout;
+	sources = { 'windows': true };
+	this.mam_parent.initAdmAndFetchAlarms({
+	    'clioptions': opts,
+	    'sources': sources
+	}, function () {
+		self.mam_root.madm_adm.alarmsMaintWindowsList(options);
+		self.mam_root.finiAdm();
+		callback();
+	});
+};
+
+
+MantaAdmAlarmMaint.prototype.do_list.help = [
+    'List maintenance windows',
+    '',
+    'Usage:',
+    '',
+    '    manta-adm alarm maint list OPTIONS',
+    '',
+    '{{options}}',
+    '',
+    'Available columns for -o:\n',
+    '    ' + madm.maintWindowColumnNames().join(', ')
+].join('\n');
+
+MantaAdmAlarmMaint.prototype.do_list.options = [
+    maCommonOptions.omitHeader,
+    maCommonOptions.columns,
+    maCommonOptions.configFile
+];
+
+MantaAdmAlarmMaint.prototype.do_show =
+    function cmdMaintShow(subcmd, opts, args, callback)
+{
+	var self = this;
+	var options = {};
+	var sources;
+
+	if (args.length > 0) {
+		callback(new Error('unexpected arguments'));
+		return;
+	}
+
+	options.stream = process.stdout;
+	sources = { 'windows': true };
+	this.mam_parent.initAdmAndFetchAlarms({
+	    'clioptions': opts,
+	    'sources': sources
+	}, function () {
+		self.mam_root.madm_adm.alarmsMaintWindowsShow(options);
+		self.mam_root.finiAdm();
+		callback();
+	});
+};
+
+MantaAdmAlarmMaint.prototype.do_show.help = [
+    'Show details about maintenance windows',
+    '',
+    'Usage:',
+    '',
+    '    manta-adm alarm maint show OPTIONS',
+    '',
+    '{{options}}',
+    '',
+    'Available columns for -o:\n',
+    '    ' + madm.maintWindowColumnNames().join(', ')
+].join('\n');
+
+MantaAdmAlarmMaint.prototype.do_show.options = [
+    maCommonOptions.configFile
+];
+
+
+/*
+ * Local alarm metadata
+ */
 
 function MantaAdmAlarmMetadata(parent)
 {

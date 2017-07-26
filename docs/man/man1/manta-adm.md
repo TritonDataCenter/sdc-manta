@@ -172,6 +172,14 @@ status of the program to determine success or failure.
 
 `manta-adm alarm list [-H] [-o FIELD...] [--state=STATE]`
 
+`manta-adm alarm maint create CREATE_OPTIONS`
+
+`manta-adm alarm maint delete WIN_ID...`
+
+`manta-adm alarm maint list [-H] [-o FIELD...]`
+
+`manta-adm alarm maint show`
+
 `manta-adm alarm metadata events`
 
 `manta-adm alarm metadata ka [EVENT_NAME...]`
@@ -186,6 +194,7 @@ The `manta-adm alarm` subcommand provides several tools that allow operators to:
 * view open alarms (`show`, `list`, `details`, and `faults` subcommands)
 * configure notifications for open alarms (`notify` subcommand)
 * view local metadata about alarms and probes (`metadata` subcommand)
+* view and configure amon maintenance windows (`maint` subcommand)
 
 The primary commands for working with alarms are:
 
@@ -222,6 +231,11 @@ almost immediately.  In other cases, it may take many hours for the problem to
 resurface.  In the case of transient issues, a new alarm may not open again
 until the issue occurs again, which could be days, weeks, or months later.  That
 does not mean the underlying issue was actually resolved.
+
+As mentioned above, this command attempts to separately close each of the
+specified alarms.  It's possible for some of the specified alarms to be closed
+even if others were not.
+
 
 `manta-adm alarm config probegroup list [-H] [-o FIELD...]`
 
@@ -290,6 +304,98 @@ Lists alarms in tabular form.  `STATE` controls which alarms are listed, which
 may be any of "open", "closed", "all", or "recent".  The default is "open".
 
 See also the `manta-adm alarm show` command.
+
+`manta-adm alarm maint create CREATE_OPTIONS`
+
+Creates (schedules) an Amon maintenance window, which is a period of time and a
+scope for which alarm notifications are suspended.  Maintenance windows have a
+start time, an end time, and an operator-provided notes field (typically used to
+reference a ticket number in some other system).  By default, maintenance
+windows affect all notifications for an account (and so Manta maintenance
+windows affect all Manta-related notifications), but they can be scoped to a
+specific set of probes, probe groups, or machines.
+
+During maintenance windows, Amon continues to execute all probe checks and it
+continues to open new alarms for failing probe checks.  However, faults created
+during a maintenance window that are within the scope of that window are
+reported as "maintenance faults", and such faults do not trigger notifications.
+
+As an example, suppose an operator creates a maintenance window for the period
+today between 0200Z and 0400Z scoped to machine "lb7".  At 0214Z, Amon detects a
+failure for a "log-scan" probe on machine "lb7" that would normally open a new
+alarm and send notifications.  The alarm is opened as usual.  Because the event
+happened within the maintenance window's time period and within its scope
+(namely, machine "lb7"), a new maintenance fault is created, not a regular
+fault, and no notifications are sent out.  But the alarm remains open until an
+operator closes it.  A probe check failure for "lb7" after 0400Z would result in
+a normal fault being created for the same alarm, and notifications would be
+sent.  Similarly, a probe check failure at 0300Z for a different machine would
+result in notifications being sent, even if the resulting fault would be
+attached to the same alarm (e.g., because the "lb7" probe and this new probe are
+in the same probe group).
+
+The following three option-arguments are always required:
+
+`--start START_TIME`
+  Specifies the start time of the maintenance window.  `START_TIME` should be an
+  ISO 8601 timestamp, or else the special string `now`, which means that the
+  window should begin immediately.
+
+`--end END_TIME`
+  Specifies the end time of the maintenance window.  `END_TIME` should be an ISO
+  8601 timestamp, and it must be later than the specified start time.
+
+`--notes NOTES`
+  Provides arbitrary notes to be recorded with the window.  This is intended for
+  operators to reference tickets or other identifiers in other systems.  The
+  system ignores the contents of this field except to report it back via the
+  other subcommands.
+
+You may also specify:
+
+`--machine MACHINE_UUID, --probe PROBE_UUID, --probegroup GROUP_UUID`
+  Limits the scope of the maintenance window so that it only affects the
+  specified machines, probes, or probe groups.  You can specify any one of these
+  options multiple times (e.g., to specify multiple machines), but you cannot
+  mix these options together.  The values are only validated for basic syntax.
+  They are not validated against the set of deployed machines, probes, or probe
+  groups.
+
+Note that Amon automatically deletes maintenance windows whose end time has
+passed.  This tool does not allow you to create maintenance windows whose end
+time is in the past.
+
+Example: create an alarm for the period between 0200Z and 0400Z on July 17,
+2017 associated with ticket `CM-123`
+
+    # manta-adm alarm maint create --start=2017-07-17T02:00:00Z \
+        --end=2017-07-17T04:00:00Z --notes "CM-123"
+
+`manta-adm alarm maint delete WIN_ID...`
+
+Deletes (cancels) the maintenance windows with identifiers `WIN_ID...`.  The
+windows will no longer show up in the `manta-adm alarm maint list` or `manta-adm
+alarm maint show` output, and Amon will resume sending notifications for events
+that would have fallen within the window's time period and scope.
+
+`WIN_ID` is Amon's integer identifier for the window.  You can retrieve this
+from the `manta-adm alarm maint list` or `manta-adm alarm maint show` commands.
+
+This command attempts to separately delete each of the specified windows.  If it
+fails to delete any of them (e.g., because they're not valid window identifiers
+or because of a transient problem with Amon), it may still have deleted others.
+
+`manta-adm alarm maint list [-H] [-o FIELD...]`
+
+Lists basic information about outstanding maintenance windows.  This command is
+intended when you want tabular output or specific fields.  See the `manta-adm
+alarm maint show` command for a more useful human-readable summary.
+
+`manta-adm alarm maint show`
+
+Summarizes each outstanding maintenance window.  This is intended for human
+operators, not programmatic tools.  The output format may change in future
+versions.
 
 `manta-adm alarm metadata events`
 

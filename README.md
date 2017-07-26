@@ -49,6 +49,12 @@ Directories specific to this repo include:
 
 # Development
 
+It's convenient during development and testing to set up your PATH to include
+the Node.js executables and other commands provided by this repository.  You can
+do that with:
+
+    source env.sh
+
 Before committing and pushing a change, run:
 
     make prepush
