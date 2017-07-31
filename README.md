@@ -5,7 +5,7 @@
 -->
 
 <!--
-    Copyright (c) 2016, Joyent, Inc.
+    Copyright (c) 2017, Joyent, Inc.
 -->
 
 # sdc-manta
@@ -65,7 +65,26 @@ and if warranted, get a code review.
 configuration file in etc/config.json.  The easiest way to create one is to copy
 the template in sapi\_manifests/manta/template and fill in the details for your
 environment, or else copy the configuration file directly out of a deployed
-sdc-manta zone in your environment.
+sdc-manta zone in your environment.  This assumes that you are developing on
+SmartOS. Read the next section if not.
+
+
+## `make prepush` if you build on non-SmartOS
+
+If you build on, say, MacOS, you will not be able to run the test suite
+(which is part of `make prepush`). An alternative is to:
+
+1. run `make prepush` on your Mac (ignoring the test failures); and
+
+2. sync your local changes to a deployed `manta0` zone (e.g. in COAL) and test
+   there. This can be done as follows:
+
+        ./tools/rsync-to $HEADNODE   # e.g. ./tools/rsync-to root@10.99.99.7
+        ssh $HEADNODE
+        sdc-login -l manta
+        cd /opt/smartdc/manta-deployment
+        pkgin in -y make
+        make test
 
 
 ## Adding a new Manta service

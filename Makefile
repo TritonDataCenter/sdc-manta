@@ -59,7 +59,16 @@ include ./tools/mk/Makefile.node_deps.defs
 NODE_PREBUILT_VERSION=v0.10.32
 NODE_PREBUILT_TAG=zone
 NODE_PREBUILT_IMAGE=fd2cc906-8938-11e3-beab-4359c665ac99
-include ./tools/mk/Makefile.node_prebuilt.defs
+ifeq ($(shell uname -s),SunOS)
+	include ./tools/mk/Makefile.node_prebuilt.defs
+	NODE_EXEC_DIR=$(TOP)/build/node/bin
+else
+	NPM=npm
+	NODE=node
+	NPM_EXEC=$(shell which npm)
+	NODE_EXEC=$(shell which node)
+	NODE_EXEC_DIR=$(shell dirname $(NODE_EXEC))
+endif
 
 MAN_INROOT	 = docs/man
 MAN_OUTROOT	 = man
@@ -105,7 +114,7 @@ prepush: check-probe-files
 
 .PHONY: test
 test: | $(CATEST)
-	PATH="$(TOP)/build/node/bin:$$PATH" $(CATEST) -a
+	PATH="$(NODE_EXEC_DIR):$$PATH" $(CATEST) -a
 
 $(CATEST): deps/catest/.git
 
@@ -155,7 +164,9 @@ publish: release
 CLEAN_FILES += node_modules
 
 include ./tools/mk/Makefile.deps
-include ./tools/mk/Makefile.node_prebuilt.targ
+ifeq ($(shell uname -s),SunOS)
+	include ./tools/mk/Makefile.node_prebuilt.targ
+endif
 include ./tools/mk/Makefile.node_deps.targ
 include ./tools/mk/Makefile.targ
 

@@ -1,0 +1,40 @@
+#!/bin/bash
+#
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+#
+
+#
+# Copyright (c) 2017, Joyent, Inc.
+#
+
+#
+# Rsync the master in this working copy to the install on the given HN.
+#
+
+#set -o xtrace
+set -o errexit
+
+TOP=$(cd $(dirname $0)/../; pwd)
+NODE=$1
+
+if [[ -z "$MANTA_ZONE" ]]; then
+    MANTA_ZONE=$(ssh $NODE "vmadm lookup -1 alias=manta0" 2>/dev/null)
+fi
+echo "MANTA_ZONE: $MANTA_ZONE"
+
+extraOpts=
+if [[ $(uname -s) != "SunOS" ]]; then
+    extraOpts="--exclude *.node --exclude build"
+fi
+
+# Note that we include tools/ and deps/ here to support running the test suite
+# in the rsync'd-to manta0 zone.
+rsync -av ${TOP}/ \
+    $NODE:/zones/$MANTA_ZONE/root/opt/smartdc/manta-deployment/ \
+    $extraOpts \
+    --exclude .git/ \
+    --exclude /boot/ \
+    --exclude /deps/ \
+    --exclude /tmp/
