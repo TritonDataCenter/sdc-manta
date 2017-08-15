@@ -243,7 +243,7 @@
         -
             type: cmd
             config:
-                cmd: "/opt/local/bin/psql -U postgres -c \"SELECT pid,usename,client_addr,client_port,waiting,state,NOW() - query_start AS elapsed, query FROM pg_stat_activity WHERE state != 'idle' AND query NOT LIKE 'autovacuum: %' AND NOW() - query_start > interval '120 seconds'\" | tail +3"
+                cmd: "PATH=/opt/postgresql/current/bin:/opt/local/bin:$PATH psql -U postgres -c \"SELECT pid,usename,client_addr,client_port,waiting,state,NOW() - query_start AS elapsed, query FROM pg_stat_activity WHERE state != 'idle' AND query NOT LIKE 'autovacuum: %' AND NOW() - query_start > interval '120 seconds'\" | tail +3"
                 interval: 60
                 timeout: 30
                 threshold: 2
