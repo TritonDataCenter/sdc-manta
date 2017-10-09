@@ -471,6 +471,10 @@ Example: list hostnames in form suitable for "sdc-oneachnode -n":
 
     # manta-adm cn -n
 
+Example: list storage CNs with their associated storage id (used in object
+metadata) and compute ids (used by the compute jobs subsystem):
+
+    # manta-adm cn -o host,admin_ip,compute_id,storage_ids storage
 
 ### "genconfig" subcommand
 
