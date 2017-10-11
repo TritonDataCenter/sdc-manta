@@ -112,8 +112,6 @@ function runTestCase(testcase, callback)
 				    'server_uuid': server_uuid
 				};
 			}
-		} else {
-			deployed.cns[server_uuid] = null;
 		}
 
 		deployed.instances[svcid].push({
