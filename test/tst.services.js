@@ -5,7 +5,7 @@
  */
 
 /*
- * Copyright (c) 2017, Joyent, Inc.
+ * Copyright (c) 2018, Joyent, Inc.
  */
 
 /*
@@ -38,7 +38,8 @@ var knownServices = [
     'madtom',
     'marlin-dashboard',
     'marlin',
-    'propeller'
+    'propeller',
+    'reshard'
 ];
 
 function main()
