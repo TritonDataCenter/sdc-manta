@@ -273,6 +273,15 @@ function findLatestImage(service, cb) {
 	filters.version = '~' + version_substr;
 	log.info({ filters: filters }, 'search for images');
 
+	/*
+	 * XXX Until the "manta-reshard" service is available as a "master"
+	 * build, we need to grab the latest build from the "experimental"
+	 * channel.
+	 */
+	if (image_name === 'manta-reshard') {
+		filters.channel = 'experimental';
+	}
+
 	remote_imgapi.listImages(filters, function (err, images) {
 		if (err) {
 			log.error(err, 'failed to search for images with ' +
@@ -731,7 +740,8 @@ async.waterfall([
 				var images = rs.map(function (im) {
 					return ({
 						'uuid': im.uuid,
-						'name': im.name
+						'name': im.name,
+						'channels': im.channels
 					});
 				});
 
@@ -764,7 +774,18 @@ async.waterfall([
 			var import_opts = {};
 			import_opts.skipOwnerCheck = true;
 
-			log.info('downloading image %s', image.uuid);
+			var ru = remote_url;
+			if (image.channels && image.channels.length >= 1) {
+				var ch = image.channels[
+				    image.channels.length - 1];
+
+				ru += '?channel=' + ch;
+
+				log.info('downloading image %s (channel "%s")',
+				    image.uuid, ch);
+			} else {
+				log.info('downloading image %s', image.uuid);
+			}
 
 			function onDone(err, img, res) {
 				if (err && err.name !==
@@ -786,8 +807,8 @@ async.waterfall([
 			if (ARGV.m && image.name === 'manta-marlin')
 				image.uuid = ARGV.m;
 
-			imgapi.adminImportRemoteImageAndWait(
-				image.uuid, remote_url, import_opts, onDone);
+			imgapi.adminImportRemoteImageAndWait(image.uuid, ru,
+			    import_opts, onDone);
 
 		}, function (err) {
 			return (cb(err, images));
