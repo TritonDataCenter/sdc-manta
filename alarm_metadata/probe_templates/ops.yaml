@@ -5,7 +5,7 @@
 #
 
 #
-# Copyright (c) 2017, Joyent, Inc.
+# Copyright (c) 2018, Joyent, Inc.
 #
 
 #
@@ -146,7 +146,76 @@
         action: >-
             Determine the scope of the problem based on the log message and
             resolve the underlying issue.
-
+-
+    event: upset.manta.ops.gc.mpu_gc_log_error
+    scope:
+        service: ops
+    checks:
+        -
+            type: bunyan-log-scan
+            config:
+                path: "/var/log/mola-mpu-gc.log"
+                fields:
+                    level: ERROR
+                threshold: 1
+                period: 60
+        -
+            type: bunyan-log-scan
+            config:
+                path: "/var/log/mola-mpu-gc.log"
+                fields:
+                    level: FATAL
+                threshold: 1
+                period: 60
+    ka:
+        title: '"mola-mpu-gc" logged an error'
+        description:
+            The garbage collection subsystem responsible for garbage collecting
+            multipart uploads has logged an error.
+        severity: minor
+        response: No automated response will be taken.
+        impact: >-
+            Garbage collection of multipart uploads may not be running. Disk
+            space used may accumulate on metadata and storage nodes until the
+            problem is repaired.
+        action: >-
+            Determine the scope of the problem based on the log message and
+            resolve the underlying issue.
+-
+    event: upset.manta.ops.gc.mpu_cleanup_log_error
+    scope:
+        service: ops
+    checks:
+        -
+            type: bunyan-log-scan
+            config:
+                path: "/var/log/mola-mpu-cleanup.log"
+                fields:
+                    level: ERROR
+                threshold: 1
+                period: 60
+        -
+            type: bunyan-log-scan
+            config:
+                path: "/var/log/mola-mpu-cleanup.log"
+                fields:
+                    level: FATAL
+                threshold: 1
+                period: 60
+    ka:
+        title: '"mola-mpu-cleanup" logged an error'
+        description:
+            The garbage collection subsystem responsible for garbage collecting
+            multipart uploads has logged an error.
+        severity: minor
+        response: No automated response will be taken.
+        impact: >-
+            Garbage collection of multipart uploads may not be running. Disk
+            space used may accumulate on metadata and storage nodes until the
+            problem is repaired.
+        action: >-
+            Determine the scope of the problem based on the log message and
+            resolve the underlying issue.
 -
     event: upset.manta.ops.gc.moray_gc_log_error
     legacyName: mola-moray-gc-logscan-error,mola-moray-gc-logscan-fatal
@@ -298,7 +367,32 @@
             accumulate on storage nodes until the problem is repaired.
         action: >-
             Determine the scope of the problem and resolve the underlying issue.
-
+-
+    event: upset.manta.ops.gc.mpu_cleanup_instructions_lingering
+    scope:
+        service: ops
+    checks:
+        -
+            type: cmd
+            config:
+                cmd: "export HOME=/root && . /root/.bashrc && if OUT=$(mfind /poseidon/stor/manta_mpu_gc/cleanup 2>&1); then test $(echo \"$OUT\" | wc -l) -lt 150; else echo \"$OUT\" | grep \"NotFoundError\"; fi"
+                interval: 300
+                period: 1800
+                threshold: 6
+                timeout: 20
+    ka:
+        title: Multipart upload garbage collection instructions piling up
+        description:
+            Garbage collection instruction objects for multipart upload cleanup
+            are piling up
+        severity: major
+        response: No automated response will be taken.
+        impact: >-
+            Garbage collection for multipart uploads may not be running.  Disk
+            space used may accumulate on metadata and storage nodes until the
+            problem is repaired.
+        action: >-
+            Determine the scope of the problem and resolve the underlying issue.
 -
     event: upset.manta.ops.gc.job_lingering
     legacyName: mola-job-running-too-long
