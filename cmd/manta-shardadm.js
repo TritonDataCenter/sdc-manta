@@ -6,7 +6,7 @@
  */
 
 /*
- * Copyright (c) 2014, Joyent, Inc.
+ * Copyright (c) 2018, Joyent, Inc.
  */
 
 /*
@@ -27,53 +27,43 @@ var util = require('util');
 var Cmdln = cmdln.Cmdln;
 var Logger = require('bunyan');
 
-var VERSION = '1.0.0';
 
 function Shardadm() {
 	Cmdln.call(this, {
-	    name: 'manta-shardadm',
-	    desc: 'Manage manta shards',
-	    // Custom options. By default you get -h/--help.
-	    options: [
-		{names: ['help', 'h'], type: 'bool',
-		    help: 'Print help and exit.'},
-		{name: 'version', type: 'bool',
-		    help: 'Print version and exit.'}
-	    ]
+		name: 'manta-shardadm',
+		desc: 'Manage manta shards'
 	});
 }
 util.inherits(Shardadm, Cmdln);
 
 Shardadm.prototype.init = function (opts, args, cb) {
-	if (opts.version) {
-		console.log(this.name, VERSION);
-		cb(false);
-		return;
-	}
+	assert.object(opts, 'opts');
+	assert.object(args, 'args');
+	assert.func(cb, 'cb');
 
 	this.log = new Logger({
-	    name: __filename,
-	    serializers: Logger.stdSerializers,
-	    streams: [ {
-		level: 'debug',
-		path: '/var/log/manta-shardadm.log'
-	    } ]
+		name: __filename,
+		serializers: Logger.stdSerializers,
+		streams: [ {
+			level: 'debug',
+			path: '/var/log/manta-shardadm.log'
+		} ]
 	});
 
 	var CFG = path.resolve(__dirname, '../etc/config.json');
 	var config = JSON.parse(fs.readFileSync(CFG, 'utf8'));
 
 	this.client = new sdc.SAPI({
-	    url: config.sapi.url,
-	    log: this.log,
-	    agent: false
+		url: config.sapi.url,
+		log: this.log,
+		agent: false
 	});
 
 	Cmdln.prototype.init.apply(this, arguments);
 };
 
-
 Shardadm.prototype.do_list = function (subcmd, opts, args, cb) {
+	var fmt = '%-12s %-28s %s';
 	var search_opts = {};
 	search_opts.name = 'manta';
 
@@ -85,12 +75,39 @@ Shardadm.prototype.do_list = function (subcmd, opts, args, cb) {
 			console.log('No manta application configured');
 			return (cb(null));
 		}
+		var metadata = apps[0].metadata;
+		var indexShards = metadata[common.INDEX_SHARDS];
 
-		printShards(apps[0].metadata, cb);
+		console.log(sprintf(fmt,
+			'TYPE', 'SHARD NAME', 'READ ONLY STATUS'));
+
+		if (indexShards) {
+			for (var i = 0; i < indexShards.length; i++) {
+				var roStatus = indexShards[i].readOnly ?
+					indexShards[i].readOnly.toString() :
+					'false';
+				console.log(sprintf(fmt,
+					'Index',
+					indexShards[i].host,
+					roStatus));
+			}
+		}
+
+		if (metadata[common.MARLIN_SHARD])
+			console.log(sprintf(fmt,
+				'Marlin',
+				metadata[common.MARLIN_SHARD],
+				'--'));
+
+		if (metadata[common.STORAGE_SHARD])
+			console.log(sprintf(fmt,
+				'Storage',
+				metadata[common.STORAGE_SHARD],
+				'--'));
+
+		return (cb(null));
 	});
 };
-Shardadm.prototype.do_list.help = 'List shards';
-
 Shardadm.prototype.do_list.help = (
 	'List Manta shards.\n'
 	+ '\n'
@@ -98,32 +115,11 @@ Shardadm.prototype.do_list.help = (
 	+ '     manta-shardadm list \n'
 );
 
-function printShards(metadata, cb) {
-	var fmt = '%-12s %s';
-
-	console.log(sprintf(fmt, 'TYPE', 'SHARD NAME'));
-
-	if (metadata[common.INDEX_SHARDS]) {
-		for (var i = 0; i < metadata[common.INDEX_SHARDS].length; i++) {
-			console.log(sprintf(fmt,
-			    'Index', metadata[common.INDEX_SHARDS][i].host));
-		}
-	}
-
-	if (metadata[common.MARLIN_SHARD])
-		console.log(sprintf(fmt,
-		    'Marlin', metadata[common.MARLIN_SHARD]));
-	if (metadata[common.STORAGE_SHARD])
-		console.log(sprintf(fmt,
-		    'Storage', metadata[common.STORAGE_SHARD]));
-
-	return (cb(null));
-}
-
 Shardadm.prototype.do_set = function (subcmd, opts, args, cb) {
 	var self = this;
 
-	if (args.length !== 0 || (!opts.i && !opts.m && !opts.s)) {
+	if (args.length !== 0 || (!opts.i && !opts.m && !opts.s && !opts.r &&
+		!opts.w)) {
 		this.do_help('help', {}, [subcmd], cb);
 		return;
 	}
@@ -144,27 +140,59 @@ Shardadm.prototype.do_set = function (subcmd, opts, args, cb) {
 		var domain_name = '.' + app.metadata['DOMAIN_NAME'];
 
 		var metadata = {};
+		var shards;
+		var optsShards;
+		var key;
 
 		if (opts.m) {
 			metadata[common.MARLIN_SHARD] =
-			    addSuffix(opts.m, domain_name);
+				addSuffix(opts.m, domain_name);
 		}
 
 		if (opts.s) {
 			metadata[common.STORAGE_SHARD] =
-			    addSuffix(opts.s, domain_name);
+				addSuffix(opts.s, domain_name);
 		}
 
 		if (opts.i) {
-			var names = opts.i.split(' ');
-			var shards = [];
+			var indexShards = indexShardHash(opts.i, domain_name);
+			metadata[common.INDEX_SHARDS] = indexShards;
+		}
 
-			names.forEach(function (name) {
-				var shard = addSuffix(name, domain_name);
-				shards.push({ host: shard });
+		if (opts.r) {
+			/*
+			 * Allow a user to pass comma-separated,
+			 * space-separated, or comma-and-space-separated
+			 * input.
+			 */
+			optsShards = opts.r.split(/[, ]+/);
+			shards = app.metadata[common.INDEX_SHARDS].slice();
+			optsShards.map(function (oshard) {
+				for (key in shards) {
+					if (oshard === shards[key].host)
+						shards[key].readOnly = true;
+				}
 			});
-			shards[shards.length - 1].last = true;
+			metadata[common.INDEX_SHARDS] = shards;
+		}
 
+		if (opts.w) {
+			/*
+			 * Allow a user to pass comma-separated,
+			 * space-separated, or comma-and-space-separated
+			 * input.
+			 */
+			optsShards = opts.w.split(/[, ]+/);
+			shards = app.metadata[common.INDEX_SHARDS].slice();
+			optsShards.map(function (oshard) {
+				for (key in shards) {
+					if ((oshard === shards[key].host) &&
+						shards[key].readOnly === true)
+					{
+						delete shards[key].readOnly;
+					}
+				}
+			});
 			metadata[common.INDEX_SHARDS] = shards;
 		}
 
@@ -173,29 +201,39 @@ Shardadm.prototype.do_set = function (subcmd, opts, args, cb) {
 			return (cb(null));
 		}
 
-		self.client.updateApplication(app.uuid, { metadata: metadata },
-		    function (suberr) {
-			if (suberr)
-				return (cb(suberr));
+		self.client.updateApplication(app.uuid,
+			{ metadata: metadata },
+				function (suberr) {
+				if (suberr)
+					return (cb(suberr));
 
-			console.log('Updated Manta shards successfully');
-			return (cb(null));
-		    });
+				console.log(
+					'Updated Manta shards successfully');
+				return (cb(null));
+				});
 	});
 };
 Shardadm.prototype.do_set.options = [
 	{
-	    names: [ 'i' ],
-	    type: 'string',
-	    help: 'shards for indexing tier'
+		names: [ 'i' ],
+		type: 'string',
+		help: 'shards for indexing tier'
 	}, {
-	    names: [ 'm' ],
-	    type: 'string',
-	    help: 'shard for marlin job records'
+		names: [ 'm' ],
+		type: 'string',
+		help: 'shard for marlin job records'
 	}, {
-	    names: [ 's' ],
-	    type: 'string',
-	    help: 'shard for minnow (manta_storage) records'
+		names: [ 's' ],
+		type: 'string',
+		help: 'shard for minnow (manta_storage) records'
+	}, {
+		names: [ 'r' ],
+		type: 'string',
+		help: 'shard(s) to place in read-only mode'
+	}, {
+		names: [ 'w' ],
+		type: 'string',
+		help: 'shard(s) to place in writable mode'
 	}
 ];
 Shardadm.prototype.do_set.help = (
@@ -212,9 +250,26 @@ Shardadm.prototype.do_set.help = (
  */
 function addSuffix(str, suffix) {
 	return (str.indexOf(suffix, str.length - suffix.length) === -1 ?
-	    str + suffix : str);
+		str + suffix : str);
 }
 
+/*
+ * Creates a hash of shards as host keys, and a key to designate the last shard
+ * in the list for index shards.
+ */
+function indexShardHash(shardList, domainName) {
+	assert.arrayOfString(shardList, 'shardList');
+
+	var names = shardList.split(' ');
+	var shards = [];
+
+	names.forEach(function (name) {
+		var shard = addSuffix(name, domainName);
+		shards.push({ host: shard });
+	});
+	shards[shards.length - 1].last = true;
+	return (shards);
+}
 
 var cli = new Shardadm();
 cmdln.main(cli);
