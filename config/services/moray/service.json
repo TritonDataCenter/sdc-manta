@@ -1,9 +1,16 @@
 {
-	"params": {
-		"networks": [ "manta", "admin" ],
-		"ram": 256
-	},
-	"metadata": {
-		"MORAY_MAX_PG_CONNS": 16
-	}
+    "params": {
+        "ram": 256,
+        "networks": [
+            {
+                "name": "manta"
+            },
+            {
+                "name": "admin"
+            }
+        ]
+    },
+    "metadata": {
+        "MORAY_MAX_PG_CONNS": 16
+    }
 }
