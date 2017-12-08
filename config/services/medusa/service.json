@@ -1,6 +1,13 @@
 {
-	"params": {
-		"networks": [ "manta", "admin" ],
-		"ram": 512
-	}
+    "params": {
+        "ram": 512,
+        "networks": [
+            {
+                "name": "manta"
+            },
+            {
+                "name": "admin"
+            }
+        ]
+    }
 }

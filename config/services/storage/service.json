@@ -1,8 +1,15 @@
 {
-	"params": {
-		"networks": [ "manta", "admin" ],
-		"ram": 256,
-		"quota": 0,
-		"zfs_io_priority": 0
-	}
+    "params": {
+        "ram": 256,
+        "quota": 0,
+        "zfs_io_priority": 0,
+        "networks": [
+            {
+                "name": "manta"
+            },
+            {
+                "name": "admin"
+            }
+        ]
+    }
 }

@@ -1,7 +1,14 @@
 {
-	"params": {
-		"networks": [ "manta", "admin" ],
-		"ram": 2048,
-		"mdata_exec_timeout": 3600
-	}
+    "params": {
+        "ram": 2048,
+        "mdata_exec_timeout": 3600,
+        "networks": [
+            {
+                "name": "manta"
+            },
+            {
+                "name": "admin"
+            }
+        ]
+    }
 }
