@@ -1,4 +1,4 @@
-.TH MANTA\-ADM 1 "2017" Manta "Manta Operator Commands"
+.TH MANTA\-ADM 1 "2018" Manta "Manta Operator Commands"
 .SH NAME
 .PP
 manta\-adm \- administer a Manta deployment
@@ -90,6 +90,9 @@ Manages asynchronous operations like garbage collection, metering, and auditing
 .TP
 \fBpostgres\fP
 PostgreSQL databases used for storing object and job metadata
+.TP
+\fBreshard\fP
+Automated resharding system for Manta
 .TP
 \fBstorage\fP
 Stores actual object data
@@ -869,7 +872,7 @@ Generic failure.
 The command\-line options were not valid.
 .SH COPYRIGHT
 .PP
-Copyright (c) 2017 Joyent Inc.
+Copyright (c) 2018, Joyent Inc.
 .SH SEE ALSO
 .PP
 .BR json (1), 

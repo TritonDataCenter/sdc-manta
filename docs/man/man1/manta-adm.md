@@ -1,4 +1,4 @@
-# MANTA-ADM 1 "2017" Manta "Manta Operator Commands"
+# MANTA-ADM 1 "2018" Manta "Manta Operator Commands"
 
 ## NAME
 
@@ -94,6 +94,9 @@ Services that are part of the Manta application include:
 
 **postgres**
   PostgreSQL databases used for storing object and job metadata
+
+**reshard**
+  Automated resharding system for Manta
 
 **storage**
   Stores actual object data
@@ -779,7 +782,7 @@ and `-y/--confirm` options described above.
 
 ## COPYRIGHT
 
-Copyright (c) 2017 Joyent Inc.
+Copyright (c) 2018, Joyent Inc.
 
 ## SEE ALSO
 
