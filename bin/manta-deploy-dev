@@ -6,7 +6,7 @@
 #
 
 #
-# Copyright (c) 2014, Joyent, Inc.
+# Copyright (c) 2018, Joyent, Inc.
 #
 
 #
@@ -62,7 +62,7 @@ case "$1" in
 		;;
 	lab)
 		mdl_genconfig="lab"
-		mdl_topo_size=10000000
+		mdl_topo_size=131072
 		mdl_index_shards="1.moray 2.moray"
 		;;
 	*)
