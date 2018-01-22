@@ -80,11 +80,16 @@ function main()
 	 */
 	knownServices.forEach(function (svcname) {
 		if (services.serviceIsSharded(svcname)) {
+			assertplus.deepEqual(services.mSvcPropertiesPrivate,
+			    services.serviceConfigProperties(svcname));
 			assertplus.deepEqual([ 'SH', 'IMAGE' ],
-			    services.serviceConfigProperties(svcname));
+			    services.serviceConfigProperties(svcname, 1));
 		} else {
-			assertplus.deepEqual([ 'IMAGE' ],
+			assertplus.deepEqual(services.mSvcPropertiesPrivate.
+			    filter(function (p) { return p !== 'SH'; }),
 			    services.serviceConfigProperties(svcname));
+			assertplus.deepEqual([ 'IMAGE' ],
+			    services.serviceConfigProperties(svcname, 1));
 		}
 	});
 

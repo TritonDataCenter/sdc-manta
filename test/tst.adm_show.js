@@ -36,12 +36,17 @@ function main() {
 function runTestCase(t, callback) {
 	assertplus.string(t.name);
 	assertplus.ok(typeof (t.config) == 'object');
-	assertplus.ok(typeof (t.func) == 'function');
+	assertplus.optionalNumber(t.version);
+
+	var adm = new madm.MantaAdm(log);
+	adm.loadFakeDeployed(common.generateFakeBase(fakeDeployed, 3),
+	    (t.version || 2));
+	assertplus.ok(typeof (adm[t.func]) == 'function');
 
 	console.log(separator);
 	console.log('test case "%s"', t.name);
 
-	t.func.call(adm, process.stdout, t.config);
+	adm[t.func].call(adm, process.stdout, t.config);
 
 	console.log(separator);
 	nrun++;
@@ -99,44 +104,46 @@ var log = new bunyan({
     'serializers': bunyan.stdSerializers
 });
 
-var adm = new madm.MantaAdm(log);
-adm.loadFakeDeployed(common.generateFakeBase(fakeDeployed, 3));
-
 var testCases = [ {
 	'name': 'manta-adm show',
-	'func': adm.dumpDeployedZonesByService,
+	'func': 'dumpDeployedZonesByService',
 	'config': {}
 }, {
 	'name': 'manta-adm show -c',
-	'func': adm.dumpDeployedZonesByCn,
+	'func': 'dumpDeployedZonesByCn',
 	'config': {}
 }, {
 	'name': 'manta-adm show -s',
-	'func': adm.dumpDeployedConfigByService,
+	'func': 'dumpDeployedConfigByService',
 	'config': {}
 }, {
 	'name': 'manta-adm show -a',
-	'func': adm.dumpDeployedZonesByService,
+	'func': 'dumpDeployedZonesByService',
 	'config': {
 	    'doall': true
 	}
 }, {
 	'name': 'manta-adm show -H',
-	'func': adm.dumpDeployedZonesByService,
+	'func': 'dumpDeployedZonesByService',
 	'config': {
 	    'omitHeader': true
 	}
 }, {
 	'name': 'manta-adm show -a -o service,datacenter,shard,version',
-	'func': adm.dumpDeployedZonesByService,
+	'func': 'dumpDeployedZonesByService',
 	'config': {
 	    'doall': true,
 	    'columns': ['service', 'datacenter', 'shard', 'version']
 	}
 }, {
+	'name': 'manta-adm show -jsv1',
+	'func': 'dumpDeployedConfigByServiceJson',
+	'config': {},
+	'version': 1
+}, {
 	'name': 'manta-adm show -js',
-	'func': adm.dumpDeployedConfigByServiceJson,
+	'func': 'dumpDeployedConfigByServiceJson',
 	'config': {}
-}];
+} ];
 
 main();

@@ -367,6 +367,11 @@ MantaAdm.prototype.do_show = function (subcmd, opts, args, callback)
 		}
 	}
 
+	if (!(opts.version >= 1 && opts.version <= 2)) {
+		callback(new VError('version %s not supported', opts.version));
+		return;
+	}
+
 	if (args.length > 1) {
 		callback(new Error('unexpected arguments'));
 		return;
@@ -399,8 +404,12 @@ MantaAdm.prototype.do_show = function (subcmd, opts, args, callback)
 			    'filter': filter,
 			    'columns': opts.columns ? selected : null
 			});
+			if (opts.version === 1)
+				process.stderr.write('warning: output may ' +
+				    'not fully represent the current ' +
+				    'deployment\'s configuration\n');
 			self.finiAdm();
-		});
+		}, opts.version);
 	});
 };
 
@@ -420,7 +429,8 @@ MantaAdm.prototype.do_show.help =
     '    # show only postgres zones in the current datacenter\n' +
     '    manta-adm show postgres\n\n' +
     '{{options}}\n' +
-    'Available columns for -o:\n    ' + madm.columnNames().join(', ');
+    'Available columns for -o:\n    ' + madm.columnNames().join(', ') + '\n' +
+    'Available versions for -v: 1, 2';
 
 MantaAdm.prototype.do_show.options = [ {
     'names': [ 'all', 'a' ],
@@ -443,6 +453,11 @@ MantaAdm.prototype.do_show.options = [ {
     'names': [ 'summary', 's' ],
     'type': 'bool',
     'help': 'Show summary of deployed zones rather than each zone separately.'
+}, {
+    'names': [ 'version', 'v' ],
+    'type': 'number',
+    'help': 'Sets the version of the layout when dumping JSON configuration.',
+    'default': 2
 } ];
 
 /*

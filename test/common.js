@@ -12,6 +12,8 @@
  * common.js: common code for various tests
  */
 var assertplus = require('assert-plus');
+var jsprim = require('jsprim');
+var services = require('../lib/services');
 var sdc = require('../lib/sdc');
 
 /* Public interface */
@@ -93,7 +95,7 @@ function generateFakeBase(fakeDeployed, azCount) {
 	    'azCount must be a positive integer');
 
 	var ids, svcids, fakeBase, azNum, cnid, azName, cnUuid, cnHostname,
-	    cnIp, svcname, shardid, svc, svcid, imgid, vmsCount;
+	    cnIp, svcname, svc, svcid, version, svckey, cfgs;
 
 	ids = {};
 	svcids = {};
@@ -105,9 +107,12 @@ function generateFakeBase(fakeDeployed, azCount) {
 		'cns': { /* filled in below */ },
 		'images': { /* filled in below */ }
 	};
+	version = jsprim.pluck(fakeDeployed, 'metadata.v') || 1;
 
 	for (azNum = 1; azNum <= azCount; azNum++) {
 		for (cnid in fakeDeployed) {
+			if (cnid === 'metadata')
+				continue;
 			if (azCount > 1) {
 				azName = 'test-' + azNum.toString();
 				cnUuid = azName + '-' + cnid;
@@ -149,38 +154,63 @@ function generateFakeBase(fakeDeployed, azCount) {
 					svcids[svcname] = nextId('service');
 				svcid = svcids[svcname];
 				svc = fakeDeployed[cnid][svcname];
+				svckey = services.serviceConfigProperties(
+				    svcname, version);
 
 				fakeBase['services'][svcid] = {
-					'name': svcname
+					'name': svcname,
+					'params': {
+					    'networks': [
+						'admin',
+						'manta'
+					    ]
+					}
 				};
-				if (svcname == 'postgres' ||
-				    svcname == 'moray') {
-					for (shardid in svc) {
-						for (imgid in svc[shardid]) {
-							vmsCount =
-							    svc[shardid][imgid];
-							populateVms({
-							    'cnid': cnUuid,
-							    'svcid': svcid,
-							    'shardid': shardid,
-							    'imgid': imgid,
-							    'count': vmsCount,
-							    'az': azName
-							}, (azNum == 1));
-						}
-					}
+
+				if (svcname === 'loadbalancer')
+					fakeBase['services'][svcid]['params']
+					    ['networks'].push('external');
+				if (svcname === 'marlin')
+					fakeBase['services'][svcid]['params']
+					    ['networks'] = [ 'mantanat' ];
+
+				if (version > 1) {
+					cfgs = svc;
 				} else {
-					for (imgid in svc) {
-						populateVms({
-						    'cnid': cnUuid,
-						    'svcid': svcid,
-						    'shardid': 1,
-						    'imgid': imgid,
-						    'count': svc[imgid],
-						    'az': azName
-						}, (azNum == 1));
-					}
+					cfgs = jsprim.flattenObject(
+					    svc, svckey.length);
 				}
+				cfgs.forEach(function (cfg) {
+					var nic_tags = null;
+					/*
+					 * network uuids are assumed to be
+					 * nic_tag names in the test suite.
+					 */
+					if (cfg.hasOwnProperty(
+					    ['untrusted_networks'])) {
+					    nic_tags = cfg['untrusted_networks']
+						.map(function (net) {
+							return (net.ipv4_uuid);
+						});
+					}
+					if (nic_tags === null) {
+						nic_tags = fakeBase['services']
+						    [svcid]['params']
+						    ['networks'];
+					}
+					populateVms({
+					    'cnid': cnUuid,
+					    'svcid': svcid,
+					    'shardid': cfg['shard'] ||
+						cfg[svckey.indexOf('SH')] || 1,
+					    'imgid': cfg['image_uuid'] ||
+						cfg[svckey.indexOf('IMAGE')],
+					    'count': cfg['count'] ||
+						cfg[cfg.length - 1],
+					    'az': azName,
+					    'nics': nic_tags
+					}, (azNum == 1));
+				});
 			}
 		}
 	}
@@ -221,11 +251,20 @@ function generateFakeBase(fakeDeployed, azCount) {
 				fakeBase['vms'][id] = {
 					'image_uuid': params['imgid'],
 					'server_uuid': params['cnid'],
-					'nics': [ {
-						'primary': true,
-						'ip4addr': '0.0.0.0'
-					} ]
+					'nics': []
 				};
+				params.nics.forEach(function (nic_tag) {
+					var nic = {
+					    'ip4addr': '0.0.0.0',
+					    'network_uuid': nic_tag,
+					    'nic_tag': nic_tag
+					};
+					if (nic_tag == 'external' ||
+					    nic_tag == 'mantanat') {
+					    nic.primary = true;
+					}
+					fakeBase['vms'][id]['nics'].push(nic);
+				});
 			}
 		}
 	}

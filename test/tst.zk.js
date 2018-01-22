@@ -77,7 +77,15 @@ function runTestCase(testcase, callback)
 
 	svcid = 'svc001';
 	deployed.services = {};
-	deployed.services[svcid] = { 'name': 'nameservice' };
+	deployed.services[svcid] = {
+	    'name': 'nameservice',
+	    'params': {
+		'networks': [
+		    'admin',
+		    'manta'
+		]
+	    }
+	};
 	deployed.instances = {};
 	deployed.instances[svcid] = [];
 

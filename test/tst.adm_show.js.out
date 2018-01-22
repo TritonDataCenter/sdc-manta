@@ -884,7 +884,7 @@ postgres         test-3      3 -
 postgres         test-3      3 -                                         
 --------------------------------------------------
 --------------------------------------------------
-test case "manta-adm show -js"
+test case "manta-adm show -jsv1"
 {
     "test-1-cn001": {
         "marlin": {
@@ -979,6 +979,165 @@ test case "manta-adm show -js"
                 "img003": 1
             }
         }
+    }
+}
+--------------------------------------------------
+--------------------------------------------------
+test case "manta-adm show -js"
+{
+    "metadata": {
+        "v": 2
+    },
+    "test-1-cn001": {
+        "marlin": [
+            {
+                "image_uuid": "img001",
+                "count": 10
+            }
+        ],
+        "medusa": [
+            {
+                "image_uuid": "img004",
+                "count": 2
+            }
+        ],
+        "moray": [
+            {
+                "shard": "1",
+                "image_uuid": "img002",
+                "count": 3
+            },
+            {
+                "shard": "2",
+                "image_uuid": "img002",
+                "count": 3
+            },
+            {
+                "shard": "3",
+                "image_uuid": "img002",
+                "count": 3
+            }
+        ]
+    },
+    "test-1-cn002": {
+        "marlin": [
+            {
+                "image_uuid": "img001",
+                "count": 10
+            }
+        ],
+        "moray": [
+            {
+                "shard": "1",
+                "image_uuid": "img002",
+                "count": 3
+            },
+            {
+                "shard": "2",
+                "image_uuid": "img002",
+                "count": 3
+            },
+            {
+                "shard": "3",
+                "image_uuid": "img002",
+                "count": 3
+            },
+            {
+                "shard": "4",
+                "image_uuid": "img002",
+                "count": 3
+            },
+            {
+                "shard": "5",
+                "image_uuid": "img002",
+                "count": 3
+            },
+            {
+                "shard": "6",
+                "image_uuid": "img002",
+                "count": 3
+            },
+            {
+                "shard": "7",
+                "image_uuid": "img002",
+                "count": 3
+            },
+            {
+                "shard": "8",
+                "image_uuid": "img002",
+                "count": 3
+            },
+            {
+                "shard": "9",
+                "image_uuid": "img002",
+                "count": 3
+            },
+            {
+                "shard": "10",
+                "image_uuid": "img002",
+                "count": 3
+            },
+            {
+                "shard": "11",
+                "image_uuid": "img002",
+                "count": 3
+            },
+            {
+                "shard": "12",
+                "image_uuid": "img002",
+                "count": 3
+            },
+            {
+                "shard": "13",
+                "image_uuid": "img002",
+                "count": 3
+            }
+        ]
+    },
+    "test-1-cn003": {
+        "marlin": [
+            {
+                "image_uuid": "img001",
+                "count": 10
+            }
+        ],
+        "postgres": [
+            {
+                "shard": "1",
+                "image_uuid": "img003",
+                "count": 3
+            },
+            {
+                "shard": "2",
+                "image_uuid": "img003",
+                "count": 3
+            },
+            {
+                "shard": "3",
+                "image_uuid": "img003",
+                "count": 3
+            }
+        ]
+    },
+    "test-1-cn004": {
+        "marlin": [
+            {
+                "image_uuid": "img001",
+                "count": 2
+            }
+        ],
+        "postgres": [
+            {
+                "shard": "1",
+                "image_uuid": "img003",
+                "count": 1
+            },
+            {
+                "shard": "2",
+                "image_uuid": "img003",
+                "count": 1
+            }
+        ]
     }
 }
 --------------------------------------------------

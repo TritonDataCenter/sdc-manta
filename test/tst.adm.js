@@ -24,12 +24,14 @@ var madm = require('../lib/adm');
 
 function runTestCase(t, callback)
 {
-	var adm, collector, desired;
+	var version, adm, collector, desired;
 
 	console.log('test case "%s"', t['name']);
+	version = t.version || 2;
 	adm = new madm.MantaAdm(log);
-	adm.loadFakeDeployed(common.generateFakeBase(fakeDeployed, 1));
-	desired = jsprim.deepCopy(fakeDeployed);
+	adm.loadFakeDeployed(common.generateFakeBase(
+	    fakeDeployed[version], 1), t.version);
+	desired = jsprim.deepCopy(fakeDeployed[version]);
 
 	/* Sanity-check that we created the fake config properly */
 	collector = new CollectorStream({});
@@ -81,36 +83,86 @@ var log = new bunyan({
  * objects.
  */
 var fakeDeployed = {
-    'cn001': {
-	'marlin': { 'img001': 10 },
-	'moray': {
-	    '1': { 'img002': 3 },
-	    '2': { 'img002': 3 },
-	    '3': { 'img002': 3 }
+    1: {
+	'cn001': {
+	    'marlin': { 'img001': 10 },
+	    'moray': {
+		'1': { 'img002': 3 },
+		'2': { 'img002': 3 },
+		'3': { 'img002': 3 }
+	    },
+	    'medusa': { 'img004': 2 }
 	},
-	'medusa': { 'img004': 2 }
-    },
-    'cn002': {
-	'marlin': { 'img001': 10 },
-	'moray': {
-	    '1': { 'img002': 3 },
-	    '2': { 'img002': 3 },
-	    '3': { 'img002': 3 }
+	'cn002': {
+	    'marlin': { 'img001': 10 },
+	    'moray': {
+		'1': { 'img002': 3 },
+		'2': { 'img002': 3 },
+		'3': { 'img002': 3 }
+	    }
+	},
+	'cn003': {
+	    'marlin': { 'img001': 10 },
+	    'postgres': {
+		'1': { 'img003': 3 },
+		'2': { 'img003': 3 },
+		'3': { 'img003': 3 }
+	    }
+	},
+	'cn004': {
+	    'marlin': { 'img001': 2 },
+	    'postgres': {
+		'1': { 'img003': 1 },
+		'2': { 'img003': 1 }
+	    }
 	}
     },
-    'cn003': {
-	'marlin': { 'img001': 10 },
-	'postgres': {
-	    '1': { 'img003': 3 },
-	    '2': { 'img003': 3 },
-	    '3': { 'img003': 3 }
-	}
-    },
-    'cn004': {
-	'marlin': { 'img001': 2 },
-	'postgres': {
-	    '1': { 'img003': 1 },
-	    '2': { 'img003': 1 }
+    2: {
+	'metadata': { 'v': 2 },
+	'cn001': {
+	    'marlin': [ { 'image_uuid': 'img001', 'count': 10 } ],
+	    'moray': [
+		{ 'shard': '1', 'image_uuid': 'img002', 'count': 3 },
+		{ 'shard': '2', 'image_uuid': 'img002', 'count': 3 },
+		{ 'shard': '3', 'image_uuid': 'img002', 'count': 3 }
+	    ],
+	    'medusa': [ { 'image_uuid': 'img004', 'count': 2 } ]
+	},
+	'cn002': {
+	    'marlin': [ { 'image_uuid': 'img001', 'count': 10 } ],
+	    'moray': [
+		{ 'shard': '1', 'image_uuid': 'img002', 'count': 3 },
+		{ 'shard': '2', 'image_uuid': 'img002', 'count': 3 },
+		{ 'shard': '3', 'image_uuid': 'img002', 'count': 3 }
+	    ]
+	},
+	'cn003': {
+	    'marlin': [ { 'image_uuid': 'img001', 'count': 10 } ],
+	    'postgres': [
+		{ 'shard': '1', 'image_uuid': 'img003', 'count': 3 },
+		{ 'shard': '2', 'image_uuid': 'img003', 'count': 3 },
+		{ 'shard': '3', 'image_uuid': 'img003', 'count': 3 }
+	    ]
+	},
+	'cn004': {
+	    'loadbalancer': [ {
+		'image_uuid': 'img004',
+		'count': 2
+	    }, {
+		'image_uuid': 'img004',
+		'count': 1,
+		'untrusted_networks': [ {
+		    'ipv4_uuid': 'external',
+		    'primary': true
+		}, {
+		    'ipv4_uuid': 'net002'
+		} ]
+	    } ],
+	    'marlin': [ { 'image_uuid': 'img001', 'count': 2 } ],
+	    'postgres': [
+		{ 'shard': '1', 'image_uuid': 'img003', 'count': 1 },
+		{ 'shard': '2', 'image_uuid': 'img003', 'count': 1 }
+	    ]
 	}
     }
 };
@@ -120,7 +172,8 @@ vasync.forEachPipeline({
     'inputs': [ {
 	'name': 'no change',
 	'changefunc': function (config) {},
-	'expect': []
+	'expect': [],
+	'version': 1
     }, {
 	'name': 'remove one instance',
 	'changefunc': function (config) {
@@ -131,7 +184,8 @@ vasync.forEachPipeline({
 	    'service': 'medusa',
 	    'action': 'deprovision',
 	    'image': 'img004'
-	} ]
+	} ],
+	'version': 1
     }, {
 	'name': 'deploy two instances',
 	'changefunc': function (config) {
@@ -147,7 +201,8 @@ vasync.forEachPipeline({
 	    'service': 'medusa',
 	    'action': 'provision',
 	    'image': 'img004'
-	} ]
+	} ],
+	'version': 1
     }, {
 	'name': 'remove a service',
 	'changefunc': function (config) {
@@ -163,7 +218,8 @@ vasync.forEachPipeline({
 	    'service': 'medusa',
 	    'action': 'deprovision',
 	    'image': 'img004'
-	} ]
+	} ],
+	'version': 1
     }, {
 	'name': 'remove a CN',
 	'changefunc': function (config) {
@@ -191,7 +247,8 @@ vasync.forEachPipeline({
 	    'service': 'marlin',
 	    'action': 'deprovision',
 	    'image': 'img001'
-	} ]
+	} ],
+	'version': 1
     }, {
 	'name': 'add a service',
 	'changefunc': function (config) {
@@ -207,7 +264,8 @@ vasync.forEachPipeline({
 	    'service': 'medusa',
 	    'action': 'provision',
 	    'image': 'img004'
-	} ]
+	} ],
+	'version': 1
     }, {
 	'name': 'add a CN',
 	'changefunc': function (config) {
@@ -218,7 +276,8 @@ vasync.forEachPipeline({
 	    'service': 'medusa',
 	    'action': 'provision',
 	    'image': 'img004'
-	} ]
+	} ],
+	'version': 1
     }, {
 	'name': 'upgrade a service (non-marlin)',
 	'changefunc': function (config) {
@@ -235,7 +294,8 @@ vasync.forEachPipeline({
 	    'service': 'medusa',
 	    'action': 'provision',
 	    'image': 'img005'
-	} ]
+	} ],
+	'version': 1
     }, {
 	'name': 'upgrade a service (marlin)',
 	'changefunc': function (config) {
@@ -263,7 +323,8 @@ vasync.forEachPipeline({
 	    'action': 'deprovision',
 	    'image': 'img001'
 
-	} ]
+	} ],
+	'version': 1
     }, {
 	'name': 'upgrade a service (with shard)',
 	'changefunc': function (config) {
@@ -282,7 +343,8 @@ vasync.forEachPipeline({
 	    'shard': '2',
 	    'action': 'deprovision',
 	    'image': 'img002'
-	} ]
+	} ],
+	'version': 1
     }, {
 	'name': 'provision/deprovision in different shards (not upgrade)',
 	'changefunc': function (config) {
@@ -301,7 +363,89 @@ vasync.forEachPipeline({
 	    'shard': '2',
 	    'action': 'provision',
 	    'image': 'img003'
+	} ],
+	'version': 1
+    }, {
+	'name': 'v2: provision with specific networks',
+	'changefunc': function (config) {
+	    config['cn001']['marlin'].push({
+		'image_uuid': 'img001',
+		'untrusted_networks': [ {
+		    'ipv4_uuid': 'net002',
+		    'primary': true
+		}, {
+		    'ipv4_uuid': 'net003'
+		} ],
+		'count': 1
+	    });
+	},
+	'expect': [ {
+	    'cnid': 'cn001',
+	    'service': 'marlin',
+	    'action': 'provision',
+	    'image': 'img001',
+	    'networks': [ {
+		'ipv4_uuid': 'net002',
+		'primary': true
+	    }, {
+		'ipv4_uuid': 'net003'
+	    } ]
 	} ]
+    }, {
+	'name': 'v2: provision with default networks',
+	'changefunc': function (config) {
+	    config['cn002']['marlin'][0]['count']++;
+	},
+	'expect': [ {
+	    'cnid': 'cn002',
+	    'service': 'marlin',
+	    'action': 'provision',
+	    'image': 'img001',
+	    'networks': '-'
+	} ]
+    }, {
+	'name': 'v2: provision with no networks (where default >=1)',
+	'changefunc': function (config) {
+	    config['cn002']['marlin'].push({
+		'image_uuid': 'img001',
+		'count': 1,
+		'untrusted_networks': []
+	    });
+	},
+	'expect': [ {
+	    'cnid': 'cn002',
+	    'service': 'marlin',
+	    'action': 'provision',
+	    'image': 'img001',
+	    'networks': []
+	} ]
+    }, {
+	'name': 'v2: upgrade a service (non-marlin)',
+	'changefunc': function (config) {
+	    config['cn001']['medusa'][0]['image_uuid'] = 'img999';
+	},
+	'expect': [ {
+	    'cnid': 'cn001',
+	    'service': 'medusa',
+	    'action': 'reprovision',
+	    'image': 'img999'
+	}, {
+	    'cnid': 'cn001',
+	    'service': 'medusa',
+	    'action': 'reprovision',
+	    'image': 'img999'
+	} ]
+    }, {
+	'name': 'v2: re-order networks',
+	'changefunc': function (config) {
+	    config['cn004']['loadbalancer'][1]['untrusted_networks'] = [ {
+		'ipv4_uuid': 'net002'
+	    }, {
+		'ipv4_uuid': 'external',
+		'primary': true
+	    } ];
+	},
+	'expect': []
     } ]
 }, function (err) {
 	if (err)

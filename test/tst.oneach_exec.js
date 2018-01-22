@@ -436,9 +436,32 @@ function setupMockManta(_, callback)
 	fakeDeployedTopology.app = {};
 	fakeDeployedTopology.app.name = 'manta';
 	fakeDeployedTopology.services = {
-	    'svc001': { 'name': 'webapi' },
-	    'svc002': { 'name': 'postgres' },
-	    'svc003': { 'name': 'marlin' }
+	    'svc001': {
+		'name': 'webapi',
+		'params': {
+		    'networks': [
+			'admin',
+			'manta'
+		    ]
+		}
+	    },
+	    'svc002': {
+		'name': 'postgres',
+		'params': {
+		    'networks': [
+			'admin',
+			'manta'
+		    ]
+		}
+	    },
+	    'svc003': {
+		'name': 'marlin',
+		'params': {
+		    'networks': [
+			'mantanat'
+		    ]
+		}
+	    }
 	};
 	fakeDeployedTopology.instances = {
 	    'svc001': [],
