@@ -95,6 +95,9 @@ Services that are part of the Manta application include:
 **postgres**
   PostgreSQL databases used for storing object and job metadata
 
+**pgstatsmon**
+  Monitoring system for Postgres
+
 **reshard**
   Automated resharding system for Manta
 

@@ -39,7 +39,8 @@ var knownServices = [
     'marlin-dashboard',
     'marlin',
     'propeller',
-    'reshard'
+    'reshard',
+    'pgstatsmon'
 ];
 
 function main()
@@ -91,8 +92,8 @@ function main()
 	/*
 	 * Test serviceSupportsProbes().
 	 */
-	assertplus.deepEqual([ 'marlin', 'propeller' ], knownServices.filter(
-	    function (svcname) {
+	assertplus.deepEqual([ 'marlin', 'propeller' ],
+	    knownServices.filter(function (svcname) {
 		return (!services.serviceSupportsProbes(svcname));
 	    }));
 	assertplus.deepEqual(services.mSvcNamesProbes,

@@ -1,0 +1,14 @@
+{
+	"params": {
+		"networks": ["manta", "admin"],
+		"ram": 2048
+	},
+        "metadata": {
+                "DATABASE_USER": "moray",
+                "VM_TAG_NAME": "manta_role",
+                "VM_TAG_VALUE": "postgres",
+                "NIC_TAG": "manta",
+                "VMAPI_POLL_INTERVAL": "60000",
+                "SCRAPE_INTERVAL": "60000"
+	}
+}
