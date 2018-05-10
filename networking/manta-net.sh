@@ -6,7 +6,7 @@
 #
 
 #
-# Copyright (c) 2016, Joyent, Inc.
+# Copyright (c) 2018, Joyent, Inc.
 #
 
 #
@@ -812,7 +812,7 @@ EOF
 	    || fatal "failed to install manta-nic.sh"
 
 	sdc-oneachnode -n $server -d /tmp -g ./smf/manta-nic.xml \
-	    || fatal "failed to copy over manta-nic.sh"
+	    || fatal "failed to copy over manta-nic.xml"
 	sdc-oneachnode -n $server 'mv /tmp/manta-nic.xml /opt/custom/smf' \
 	    || fatal "failed to install manta-nic.xml manifest"
 	sdc-oneachnode -n $server 'svccfg import \

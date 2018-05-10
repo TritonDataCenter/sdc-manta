@@ -6,7 +6,7 @@
  */
 
 /*
- * Copyright (c) 2014, Joyent, Inc.
+ * Copyright (c) 2018, Joyent, Inc.
  */
 
 /*
@@ -24,6 +24,9 @@ var sdc = require('sdc-clients');
 var sprintf = require('util').format;
 var stdin = process.openStdin();
 var vasync = require('vasync');
+var verror = require('verror');
+
+var VError = verror.VError;
 
 
 // -- Globals
@@ -49,59 +52,32 @@ function usage() {
 
 // -- Helpers
 
-function removeUserFromNetwork(name, owner_uuid, cb) {
-	var napi = self.NAPI;
-	var log = self.log;
+/*
+ * Callback method for common.updateNetworkUsers.
+ */
+function removeUserFromNetwork(owner_uuid, network_owners, callback) {
+	var uuids = [];
+	var foundUser = false;
 
-	assert.string(name, 'name');
-	assert.string(owner_uuid, 'owner_uuid');
-	assert.func(cb, 'cb');
-
-	log.info('remove user %s from network "%s"', owner_uuid, name);
-
-	napi.listNetworks({ name: name }, function (err, networks) {
-		if (err) {
-			log.error(err, 'failed to list networks');
-			return (cb(err));
+	network_owners.forEach(function (uuid) {
+		if (uuid === owner_uuid) {
+			foundUser = true;
+		} else {
+			uuids.push(uuid);
 		}
-
-		if (networks.length === 0) {
-			log.info('network "%s" not found', name);
-			return (cb(null));
-		}
-
-		var network = networks[0];
-
-		var uuids = network.owner_uuids || [];
-
-		var foundUser = false;
-		var newUuids = [];
-		uuids.forEach(function (uuid) {
-			if (uuid === owner_uuid) {
-				foundUser = true;
-			} else {
-				newUuids.push(uuid);
-			}
-		});
-
-		if (!foundUser) {
-			log.info('user %s not owner of network "%s"',
-				owner_uuid, name);
-			return (cb(null));
-		}
-
-		napi.updateNetwork(network.uuid, { owner_uuids : newUuids },
-			function (suberr) {
-			if (suberr) {
-				log.error(suberr, 'failed to update network');
-				return (cb(suberr));
-			}
-
-			log.info('removed user %s from network "%s"',
-				owner_uuid, name);
-			return (cb(null));
-		});
 	});
+
+	if (!foundUser) {
+		var e = new VError({
+		    name: 'UserNotFoundError',
+		    info: { errno: 'ENOENT' }
+		}, 'User %s is not an owner of this network', owner_uuid);
+
+		callback(e);
+		return;
+	}
+
+	callback(null, uuids);
 }
 
 // -- Mainline
@@ -463,8 +439,14 @@ async.waterfall([
 
 		vasync.forEachParallel({
 			func: function (network, subcb) {
-				removeUserFromNetwork.call(self,
-					network, POSEIDON.uuid, subcb);
+				common.updateNetworkUsers({
+				    name: network,
+				    owner_uuid: POSEIDON.uuid,
+				    napi: self.NAPI,
+				    log: self.log,
+				    action: 'remove',
+				    update_func: removeUserFromNetwork
+				}, subcb);
 			},
 			inputs: networks
 		}, function (err, results) {

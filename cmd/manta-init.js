@@ -7,7 +7,7 @@
  */
 
 /*
- * Copyright (c) 2017, Joyent, Inc.
+ * Copyright (c) 2018, Joyent, Inc.
  */
 
 /*
@@ -27,12 +27,15 @@ var ssh = require('../lib/ssh');
 var url = require('url');
 var node_uuid = require('node-uuid');
 var vasync = require('vasync');
+var verror = require('verror');
 
 var Logger = require('bunyan');
 
 var exec = require('child_process').exec;
 var sprintf = require('util').format;
 
+
+var VError = verror.VError;
 
 // -- Globals
 
@@ -170,60 +173,29 @@ function updateEmail(user, email, cb) {
 // -- Network management
 
 /*
- * Update the specified network to include owner_uuid in the set of users
- * allowed to provision zones on this network.
+ * Update the specified network, network_pool, and any networks that are part
+ * of the named network_pool to include owner_uuid in the set of users allowed
+ * to provision zones on this network.
  */
-function addUserToNetwork(name, owner_uuid, cb) {
-	var napi = self.NAPI;
-	var log = self.log;
 
-	assert.string(name, 'name');
-	assert.string(owner_uuid, 'owner_uuid');
-	assert.func(cb, 'cb');
+/*
+ * Callback method for common.updateNetworkUsers.
+ */
+function addUserToNetwork(owner_uuid, network_owners, callback) {
+	var uuids = [];
 
-	log.info('adding user %s to network "%s"', owner_uuid, name);
+	if (network_owners.indexOf(owner_uuid) !== -1) {
+		var e = new VError({
+		    name: 'UserExistsError',
+		    info: { errno: 'EEXISTS' }
+		}, 'user %s already allowed for this network', owner_uuid);
+		callback(e);
+		return;
+	}
 
-	napi.listNetworks({ name: name }, function (err, networks) {
-		if (err) {
-			log.error(err, 'failed to list networks');
-			return (cb(err));
-		}
+	uuids = network_owners.concat(owner_uuid);
 
-		if (networks.length === 0) {
-			log.info('network "%s" not found', name);
-			return (cb(null));
-		}
-
-		var network = networks[0];
-
-		var uuids = network.owner_uuids || [];
-
-		var foundUser = false;
-		uuids.forEach(function (uuid) {
-			if (uuid === owner_uuid)
-				foundUser = true;
-		});
-
-		if (foundUser) {
-			log.info('user %s already allowed for network "%s"',
-			    owner_uuid, name);
-			return (cb(null));
-		}
-
-		uuids.push(owner_uuid);
-
-		napi.updateNetwork(network.uuid, { owner_uuids : uuids },
-		    function (suberr) {
-			if (suberr) {
-				log.error(suberr, 'failed to update network');
-				return (cb(suberr));
-			}
-
-			log.info('updated network "%s" with user %s',
-			    name, owner_uuid);
-			return (cb(null));
-		});
-	});
+	callback(null, uuids);
 }
 
 
@@ -530,8 +502,14 @@ async.waterfall([
 
 		vasync.forEachParallel({
 			func: function (network, subcb) {
-				addUserToNetwork.call(self,
-				    network, POSEIDON.uuid, subcb);
+				common.updateNetworkUsers({
+				    name: network,
+				    owner_uuid: POSEIDON.uuid,
+				    napi: self.NAPI,
+				    log: self.log,
+				    action: 'add',
+				    update_func: addUserToNetwork
+				}, subcb);
 			},
 			inputs: networks
 		}, function (err, results) {

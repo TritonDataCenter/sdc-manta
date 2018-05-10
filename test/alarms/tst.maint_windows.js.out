@@ -1,4 +1,5 @@
 "list" for newly-created windows:
+WIN START                END                  SCOPE       NOTES
 <id_stripped_by_test_suite> 2038-01-06T17:00:00Z 2038-01-06T21:00:00Z all         tst.maint_windows.js test
 <id_stripped_by_test_suite> 2038-01-06T17:00:00Z 2038-01-06T21:00:00Z machines    tst.maint_windows.js test
 <id_stripped_by_test_suite> 2038-01-06T17:00:00Z 2038-01-06T21:00:00Z probes      tst.maint_windows.js test
