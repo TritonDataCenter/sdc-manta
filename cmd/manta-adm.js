@@ -7,7 +7,7 @@
  */
 
 /*
- * Copyright (c) 2017, Joyent, Inc.
+ * Copyright (c) 2018, Joyent, Inc.
  */
 
 /*
@@ -538,13 +538,15 @@ MantaAdm.prototype.do_update = function (subcmd, opts, args, callback)
 };
 
 MantaAdm.prototype.do_update.help =
-    'Update deployment to match a JSON configuration.\n\n{{options}}';
+    'Update deployment to match a JSON configuration.\n\n' +
+    'Usage:\n\n' +
+    '    manta-adm update [OPTIONS] CONFIG-FILE [SERVICE]\n\n' +
+    '{{options}}';
 
 MantaAdm.prototype.do_update.options = [
     maCommonOptions.logFile,
     maCommonOptions.dryrun,
     maCommonOptions.confirm,
-    maCommonOptions.configFile,
 {
     'names': [ 'no-reprovision' ],
     'type': 'bool',
