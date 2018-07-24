@@ -5,7 +5,7 @@
 #
 
 #
-# Copyright (c) 2017, Joyent, Inc.
+# Copyright (c) 2018, Joyent, Inc.
 #
 
 #
@@ -63,7 +63,15 @@ NODE_PREBUILT_VERSION=v0.10.48
 NODE_PREBUILT_TAG=gz
 # sdc-minimal-multiarch-lts 15.4.1
 NODE_PREBUILT_IMAGE=18b094b0-eb01-11e5-80c1-175dac7ddf02
-include ./tools/mk/Makefile.node_prebuilt.defs
+
+ifeq ($(shell uname -s),SunOS)
+	include ./tools/mk/Makefile.node_prebuilt.defs
+else
+	NPM=npm
+	NODE=node
+	NPM_EXEC=$(shell which npm)
+	NODE_EXEC=$(shell which node)
+endif
 
 MAN_INROOT	 = docs/man
 MAN_OUTROOT	 = man
