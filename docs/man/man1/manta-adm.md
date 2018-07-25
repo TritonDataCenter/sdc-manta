@@ -62,6 +62,9 @@ Services that are part of the Manta application include:
 **electric-moray**
   Moray proxy that handles sharding using consistent hashing
 
+**garbage-collector**
+  Processes delete records in specialized Postgres tables
+
 **jobpuller**
   Manages the archival of completed user compute jobs
 

@@ -230,6 +230,7 @@ summary:
      marlin               -               32
      reshard              -                 
      pgstatsmon           -                 
+     garbage-collector    -                 
      postgres             1                3
      postgres             2                3
      postgres             3                3
@@ -612,6 +613,7 @@ summary:
      marlin               -               16
      reshard              -                 
      pgstatsmon           -                 
+     garbage-collector    -                 
      postgres             1                3
      moray                1                3
 --------------------------------------------------
@@ -723,6 +725,7 @@ summary:
      marlin               -               16
      reshard              -                 
      pgstatsmon           -                 
+     garbage-collector    -                 
      postgres             1                3
      postgres             2                3
      postgres             3                3
@@ -1039,6 +1042,7 @@ summary:
      marlin               -               48
      reshard              -                 
      pgstatsmon           -                 
+     garbage-collector    -                 
      postgres             1                3
      postgres             2                3
      moray                1                3
@@ -1523,6 +1527,7 @@ summary:
      marlin               -               96
      reshard              -                 
      pgstatsmon           -                 
+     garbage-collector    -                 
      postgres             1                3
      postgres             2                3
      postgres             3                3
@@ -1736,6 +1741,7 @@ summary:
      marlin               -               16               16               16
      reshard              -                                                   
      pgstatsmon           -                                                   
+     garbage-collector    -                                                   
      postgres             1                1                1                1
      moray                1                1                1                1
 --------------------------------------------------
@@ -1962,6 +1968,7 @@ summary:
      marlin               -               16               16               16
      reshard              -                                                   
      pgstatsmon           -                                                   
+     garbage-collector    -                                                   
      postgres             1                1                1                1
      postgres             2                1                1                1
      moray                1                1                1                1
@@ -2429,6 +2436,7 @@ summary:
      marlin               -               48               48               48
      reshard              -                                                   
      pgstatsmon           -                                                   
+     garbage-collector    -                                                   
      postgres             1                1                1                1
      postgres             2                1                1                1
      postgres             3                1                1                1

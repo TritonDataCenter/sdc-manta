@@ -40,7 +40,8 @@ var knownServices = [
     'marlin',
     'propeller',
     'reshard',
-    'pgstatsmon'
+    'pgstatsmon',
+    'garbage-collector'
 ];
 
 function main()
