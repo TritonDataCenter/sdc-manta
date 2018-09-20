@@ -6,6 +6,8 @@ manta-adm - administer a Manta deployment
 
 ## SYNOPSIS
 
+`manta-adm accel-gc SUBCOMMAND... [OPTIONS...]`
+
 `manta-adm alarm SUBCOMMAND... [OPTIONS...]`
 
 `manta-adm cn [-l LOG_FILE] [-H] [-o FIELD...] [-n] [-s] CN_FILTER`
@@ -31,6 +33,9 @@ The `manta-adm` command is used to administer various aspects of a Manta
 deployment.  This command only operates on zones within the same datacenter.
 The command may need to be repeated in other datacenters in order to execute it
 across an entire Manta deployment.
+
+`manta-adm accel-gc`
+  Administer garbage-collector zones and accelerated gc-enabled accounts.
 
 `manta-adm alarm`
   List and configure amon-based alarms for Manta.
@@ -162,6 +167,101 @@ status of the program to determine success or failure.
 
 
 ## SUBCOMMANDS
+
+### "accel-gc" subcommand
+
+`manta-adm accel-gc show [-j]`
+
+`manta-adm accel-gc update CONFIG_FILE`
+
+`manta-adm accel-gc gen-shard-assignment`
+
+`manta-adm accel-gc genconfig [-m MAX_CNS] [-a SERVICE...] [-i] IMAGE_UUID
+NCOLLECTORS`
+
+`manta-adm accel-gc enable ACCOUNT_LOGIN`
+
+`manta-adm accel-gc disable ACCOUNT_LOGIN`
+
+`manta-adm accel-gc accounts [-H] [-o FIELD...]`
+
+Accelerated garbage-collection is a low-latency alternative to the backup-based
+garbage-collection pipeline in the Mola software consolidation. The system
+allows users to trade Manta's snaplink functionality for faster storage space
+reclamation.
+
+Accounts that do not have any snaplinks can be marked as snaplink-disabled,
+indicating that all of the objects owned by the account have a single reference
+in the metadata tier. This constrained setting allows garbage-collector zones,
+each of which is responsible for processing deleted objects on some subset of
+the index shards, to coordinate object file cleanup as soon as a front-door
+delete request completes.
+
+The `manta-adm accel-gc` subcommand provides tools that allow operators:
+
+* manage the assignment of metadata shards to garbage-collector instances
+* toggle accelerated garbage-collection for individual accounts
+
+`manta-adm accel-gc show -j`
+
+Dump a mapping that shows which shards are assigned to which garbage-collectors.
+The output of this command can be re-purposed as input to `manta-adm
+accel-gc update`. The interaction between these commands is similar to that
+between `manta-adm show` and `manta-adm update`.
+
+`manta-adm accel-gc update CONFIG_FILE`
+
+Update the mapping from shards to garbage-collectors. This will require restarting
+the garbage-collectors so that they pick up the new assigned shards. CONFIG_FILE
+here should have the same format as the output of `manta-adm accel-gc show -j`.
+
+`manta-adm accel-gc genconfig [-m MAX_CNS] [-a SERVICE...] [-i] IMAGE_UUID
+NCOLLECTORS`
+
+Generate a service deployment layout (interpretable by manta-adm update) by
+layering NCOLLECTORS garbage-collector zones onto the existing deployment
+layout in a minimally disruptive fashion. By default, this means the command
+will:
+
+* avoid colocating garbage-collector zones with loadbalancer or nameservice
+  zones.
+* add garbage-collectors to at most MAX_CNS CNs meeting the previous criterion
+  if specified, otherwise use as many CNs meeting the above criterion as are
+  available.
+* distribute garbage-collectors as evenly as possible amongest the CNs between
+  the above criteria.
+
+In some deployments these criteria cannot be met. To generate a layout that
+does not meet the criteria pass the -i flag. The flag should not be used in
+production deployments.
+
+To change the list of services to avoid, pass multiple SERVICEs in a
+comma-separated list or with repeated -a flags.
+
+`manta-adm accel-gc gen-shard-assignment`
+
+Generate a mapping from shards to garbage-collectors based on SAPI metadata that
+distributes index shards to garbage-collectors as evenly as possible.
+
+`manta-adm accel-gc enable ACCOUNT_LOGIN`
+
+Enable accelerated garbage-collection for the account. No snaplinks to data
+owned by this account will be allowed after this command completes. Note that
+this command does not get rid of any existing snaplinks to objects owned by the
+account. It is not safe to use accelerated garbage-collection for an account
+that may own snaplinked data.
+
+`manta-adm accel-gc disable ACCOUNT_LOGIN`
+
+Disable accelerated garbage-collection for the account. Objects owned by the
+account which are deleted while the account has accelerated garbage-collection
+disabled will have to be garbage-collected with the offline garbage-collection
+defined in the Mola software consolidation.
+
+`manta-adm accel-gc accounts [-H] [-o FIELD]`
+
+List accounts for which accelerated garbage-collection is enabled in a
+human-readable format.
 
 ### "alarm" subcommand
 
