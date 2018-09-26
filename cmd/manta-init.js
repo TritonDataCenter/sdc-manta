@@ -575,6 +575,19 @@ async.waterfall([
 		extra.metadata['MANTA_TLS_INSECURE'] = '1';
 		extra.metadata['MUSKIE_MULTI_DC'] = false;
 
+		/*
+		 * Because of a series of unfortunate bugs, there was a flag
+		 * day between mako (storage) and muskie (webapi) related to
+		 * HTTP keepalives. It's unsafe to enable keepalives at the mako
+		 * end until the muskies are sufficiently up to date. As a
+		 * result, this SAPI metadata key has to be set to do so. For
+		 * new deploys, we assume the muskie image used will be new
+		 * enough and we can safely set it here.
+		 *
+		 * See also MANTA-3966, MANTA-3083, MANTA-3084
+		 */
+		extra.metadata['MAKO_HTTP_KEEPALIVE_TIMEOUT'] = 86400;
+
 		// This is filled in when marlin is deployed.
 		extra.metadata['SERVER_COMPUTE_ID_MAPPING'] = {};
 
