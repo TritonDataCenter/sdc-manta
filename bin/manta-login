@@ -6,7 +6,7 @@
 #
 
 #
-# Copyright (c) 2016, Joyent, Inc.
+# Copyright (c) 2018, Joyent, Inc.
 #
 
 #
@@ -53,8 +53,7 @@ elif [[ "$1" == "-h" || "$1" == "--help" ]]; then
 fi
 
 IFS=$'\n'
-results=($(manta-adm show -H -o service,shard,zonename,gz_admin_ip | \
-    grep $1 | sort))
+results=($(manta-adm show -H -o service,shard,zonename,gz_admin_ip | grep $1))
 if [[ ${#results[@]} -gt 1 ]]; then
     c=0
     if [[ -n $2 ]]; then
