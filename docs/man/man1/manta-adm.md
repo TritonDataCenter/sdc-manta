@@ -106,6 +106,9 @@ Services that are part of the Manta application include:
 **pgstatsmon**
   Monitoring system for Postgres
 
+**prometheus**
+  Time-series database that aggregates Manta and Triton metrics
+
 **reshard**
   Automated resharding system for Manta
 
