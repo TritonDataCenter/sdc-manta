@@ -1,0 +1,15 @@
+{
+	"params": {
+		"networks": [ "external", "manta", "admin"],
+		"ram": 1024,
+		"firewall_enabled": true
+	},
+	"metadata": {
+		"is_manta_service": true,
+		"OVERRIDE_RESOLVERS": [
+			{
+				"host": "127.0.0.1"
+			}
+		]
+	}
+}

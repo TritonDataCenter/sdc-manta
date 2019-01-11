@@ -1,7 +1,7 @@
 {
     "name": "manta-deployment",
     "description": "Manta deployment configuration",
-    "version": "0.0.3",
+    "version": "0.0.4",
     "author": "Joyent (joyent.com)",
     "license": "MPL-2.0",
     "private": true,
@@ -28,6 +28,7 @@
         "sdc-clients": "git+https://github.com/joyent/node-sdc-clients.git#42ea07d3ca",
         "sprintf-js": "0.0.7",
         "tab": "0.1.0",
+        "triton-netconfig": "1.4.0",
         "urclient": "1.0.0",
         "vasync": "1.6.3",
         "verror": "1.10.0",

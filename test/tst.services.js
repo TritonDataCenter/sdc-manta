@@ -5,7 +5,7 @@
  */
 
 /*
- * Copyright (c) 2018, Joyent, Inc.
+ * Copyright 2019 Joyent, Inc.
  */
 
 /*
@@ -40,7 +40,8 @@ var knownServices = [
     'marlin',
     'reshard',
     'pgstatsmon',
-    'garbage-collector'
+    'garbage-collector',
+    'prometheus'
 ];
 
 function main()

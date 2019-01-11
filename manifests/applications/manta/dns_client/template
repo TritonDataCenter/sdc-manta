@@ -1,7 +1,12 @@
 domain {{REGION}}.{{DNS_DOMAIN}}
+{{#OVERRIDE_RESOLVERS}}
+nameserver {{host}}
+{{/OVERRIDE_RESOLVERS}}
+{{^OVERRIDE_RESOLVERS}}
 {{#ZK_SERVERS}}
 nameserver {{host}}
 {{/ZK_SERVERS}}
 {{#SDC_NAMESERVERS}}
 nameserver {{host}}
 {{/SDC_NAMESERVERS}}
+{{/OVERRIDE_RESOLVERS}}
