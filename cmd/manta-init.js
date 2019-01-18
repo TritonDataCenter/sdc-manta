@@ -7,7 +7,7 @@
  */
 
 /*
- * Copyright (c) 2018, Joyent, Inc.
+ * Copyright (c) 2019, Joyent, Inc.
  */
 
 /*
@@ -222,8 +222,10 @@ function findLatestImage(service, cb) {
 	    image_name, version_substr, service);
 
 	var onSearchFinish = function (err, image) {
-		if (err)
+		if (err) {
+			log.error(err);
 			return (cb(err));
+		}
 
 		log.info({ image: image }, 'found image %s for %s',
 		    image_name, service);
