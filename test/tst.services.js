@@ -38,7 +38,6 @@ var knownServices = [
     'madtom',
     'marlin-dashboard',
     'marlin',
-    'propeller',
     'reshard',
     'pgstatsmon',
     'garbage-collector'
@@ -93,7 +92,7 @@ function main()
 	/*
 	 * Test serviceSupportsProbes().
 	 */
-	assertplus.deepEqual([ 'marlin', 'propeller' ],
+	assertplus.deepEqual([ 'marlin' ],
 	    knownServices.filter(function (svcname) {
 		return (!services.serviceSupportsProbes(svcname));
 	    }));
