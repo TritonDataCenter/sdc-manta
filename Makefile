@@ -5,7 +5,7 @@
 #
 
 #
-# Copyright (c) 2018, Joyent, Inc.
+# Copyright (c) 2019, Joyent, Inc.
 #
 
 #
@@ -53,8 +53,10 @@ JSON_FILES	 = package.json \
 				sapi_manifests -name '*.json*')
 PROBE_FILES	 = $(wildcard alarm_metadata/probe_templates/*.yaml)
 
-include ./tools/mk/Makefile.defs
-include ./tools/mk/Makefile.node_deps.defs
+ENGBLD_USE_BUILDIMAGE	= true
+ENGBLD_REQUIRE		:= $(shell git submodule update --init deps/eng)
+include ./deps/eng/tools/mk/Makefile.defs
+TOP ?= $(error Unable to access eng.git submodule Makefiles.)
 
 NODE_PREBUILT_VERSION=v0.10.48
 # Even though sdc-manta is deployed in its own zone, the executable programs
@@ -65,7 +67,8 @@ NODE_PREBUILT_TAG=gz
 NODE_PREBUILT_IMAGE=18b094b0-eb01-11e5-80c1-175dac7ddf02
 
 ifeq ($(shell uname -s),SunOS)
-	include ./tools/mk/Makefile.node_prebuilt.defs
+	include ./deps/eng/tools/mk/Makefile.node_prebuilt.defs
+	include ./deps/eng/tools/mk/Makefile.agent_prebuilt.defs
 else
 	NPM=npm
 	NODE=node
@@ -76,14 +79,19 @@ endif
 MAN_INROOT	 = docs/man
 MAN_OUTROOT	 = man
 MAN_SECTION	:= 1
-include ./tools/mk/Makefile.manpages.defs
+include ./deps/eng/tools/mk/Makefile.manpages.defs
 
 #
 # MG variables
 #
 NAME		= manta-deployment
-RELEASE_TARBALL := $(NAME)-pkg-$(STAMP).tar.bz2
+RELEASE_TARBALL := $(NAME)-pkg-$(STAMP).tar.gz
 
+BASE_IMAGE_UUID = 04a48d7d-6bb5-4e83-8c3b-e60a99e0f48f
+BUILDIMAGE_NAME = $(NAME)
+BUILDIMAGE_DESC	= Manta deployment tools
+BUILDIMAGE_PKGSRC = openldap-client-2.4.44nb2
+AGENTS		= amon config
 
 #
 # Packaging variables
@@ -152,26 +160,22 @@ release: all deps docs $(SMF_MANIFESTS)
 	mkdir -p $(PROTO)/root/opt/smartdc/boot
 	cp -R $(TOP)/deps/sdc-scripts/* $(PROTO)/root/opt/smartdc/boot/
 	cp -R $(TOP)/boot/* $(PROTO)/root/opt/smartdc/boot/
-	(cd $(PROTO) && $(TAR) -jcf $(TOP)/$(RELEASE_TARBALL) root site)
+	(cd $(PROTO) && $(TAR) -I pigz -cf $(TOP)/$(RELEASE_TARBALL) root site)
 
 .PHONY: publish
 publish: release
-	@if [[ -z "$(BITS_DIR)" ]]; then \
-    echo "error: 'BITS_DIR' must be set for 'publish' target"; \
-    exit 1; \
-  fi
-	mkdir -p $(BITS_DIR)/$(NAME)
-	cp $(TOP)/$(RELEASE_TARBALL) $(BITS_DIR)/$(NAME)/$(RELEASE_TARBALL)
+	mkdir -p $(ENGBLD_BITS_DIR)/$(NAME)
+	cp $(TOP)/$(RELEASE_TARBALL) $(ENGBLD_BITS_DIR)/$(NAME)/$(RELEASE_TARBALL)
 
 
 CLEAN_FILES += node_modules
 
-include ./tools/mk/Makefile.deps
-include ./tools/mk/Makefile.node_prebuilt.targ
-include ./tools/mk/Makefile.node_deps.targ
-include ./tools/mk/Makefile.targ
+include ./deps/eng/tools/mk/Makefile.deps
+include ./deps/eng/tools/mk/Makefile.node_prebuilt.targ
+include ./deps/eng/tools/mk/Makefile.agent_prebuilt.targ
+include ./deps/eng/tools/mk/Makefile.targ
 
 MAN_SECTION	:= 1
-include ./tools/mk/Makefile.manpages.targ
+include ./deps/eng/tools/mk/Makefile.manpages.targ
 
 sdc-scripts: deps/sdc-scripts/.git
