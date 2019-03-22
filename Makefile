@@ -171,8 +171,10 @@ publish: release
 CLEAN_FILES += node_modules
 
 include ./deps/eng/tools/mk/Makefile.deps
-include ./deps/eng/tools/mk/Makefile.node_prebuilt.targ
-include ./deps/eng/tools/mk/Makefile.agent_prebuilt.targ
+ifeq ($(shell uname -s),SunOS)
+    include ./deps/eng/tools/mk/Makefile.node_prebuilt.targ
+    include ./deps/eng/tools/mk/Makefile.agent_prebuilt.targ
+endif
 include ./deps/eng/tools/mk/Makefile.targ
 
 MAN_SECTION	:= 1
