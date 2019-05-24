@@ -6,7 +6,7 @@
 #
 
 #
-# Copyright (c) 2018, Joyent, Inc.
+# Copyright 2019 Joyent, Inc.
 #
 
 #
@@ -509,6 +509,7 @@ function append_routes
 	[[ $? -eq 0 ]] || fatal "failed to extract route keys"
 	[[ -z "$keys" ]] && fatal "no keys are defined"
 	for k in $keys; do
+		# BASHSTYLED
 		gw=$(echo $routes | json "[ \"$k\" ]")
 		[[ $? -eq 0 ]] || fatal "failed to get gateway via json"
 		[[ -z "$gw" ]] && fatal "got a null gateway"

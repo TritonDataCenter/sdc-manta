@@ -5,7 +5,7 @@
 #
 
 #
-# Copyright (c) 2019, Joyent, Inc.
+# Copyright 2019 Joyent, Inc.
 #
 
 #
@@ -38,7 +38,6 @@ NPM_ENV		 = MAKE_OVERRIDES="CTFCONVERT=/bin/true CTFMERGE=/bin/true"
 #
 # Files
 #
-BASHSTYLE	 = $(NODE) tools/bashstyle
 BASH_FILES	 = scripts/user-script.sh  \
 		   tools/add-dev-user      \
 		   bin/manta-deploy-lab \
@@ -52,6 +51,10 @@ JSON_FILES	 = package.json \
 				manifests \
 				sapi_manifests -name '*.json*')
 PROBE_FILES	 = $(wildcard alarm_metadata/probe_templates/*.yaml)
+
+# Set these just so that 'make check' validates the xml
+SMF_MANIFESTS	= networking/smf/manta-nic.xml \
+		  networking/smf/xdc-route.xml
 
 ENGBLD_USE_BUILDIMAGE	= true
 ENGBLD_REQUIRE		:= $(shell git submodule update --init deps/eng)
@@ -69,6 +72,7 @@ NODE_PREBUILT_IMAGE=18b094b0-eb01-11e5-80c1-175dac7ddf02
 ifeq ($(shell uname -s),SunOS)
 	include ./deps/eng/tools/mk/Makefile.node_prebuilt.defs
 	include ./deps/eng/tools/mk/Makefile.agent_prebuilt.defs
+	include ./deps/eng/tools/mk/Makefile.smf.defs
 else
 	NPM=npm
 	NODE=node
@@ -174,6 +178,7 @@ include ./deps/eng/tools/mk/Makefile.deps
 ifeq ($(shell uname -s),SunOS)
     include ./deps/eng/tools/mk/Makefile.node_prebuilt.targ
     include ./deps/eng/tools/mk/Makefile.agent_prebuilt.targ
+    include ./deps/eng/tools/mk/Makefile.smf.targ
 endif
 include ./deps/eng/tools/mk/Makefile.targ
 
