@@ -724,7 +724,8 @@ async.waterfall([
 				var images = rs.map(function (im) {
 					return ({
 						'uuid': im.uuid,
-						'name': im.name
+						'name': im.name,
+						'origin': im.origin
 					});
 				});
 
@@ -741,7 +742,81 @@ async.waterfall([
 		});
 	},
 
-	function installImages(images, cb) {
+	/*
+	 * Importing all the Manta images into this DC's IMGAPI hits a common
+	 * issue. We do concurrent image imports to speed up the process.
+	 * However, if two concurrent image imports have the same *origin*
+	 * image, IMGAPI can hit a limitation: IMGAPI will be importing the
+	 * origin for the first image. Then, when the second image begins
+	 * importing, IMGAPI can, with unlucky timing, notice that the origin
+	 * image *exists* but is incomplete (state=unactivated), and it will
+	 * error out:
+	 *
+	 * 	OriginIsNotActiveError: origin image "..." is not active
+	 *
+	 * or hit this similar unlucky timing error:
+	 *
+	 * 	Error: image uuid "<origin image uuid>" already exists
+	 *
+	 * Until IMGAPI supports this, some work around options are:
+	 *
+	 * 1. Retry the failed image imports.
+	 * 2. Have a leading stage that determines all the shared origin
+	 *    images and imports those serially first.
+	 *
+	 * This step does #2.
+	 */
+	function importImageOrigins(images, cb) {
+		var imgapi = self.IMGAPI;
+		var log = self.log;
+		var origin_images;
+		var remote_url = self.config.remote_imgapi.url;
+
+		assert.arrayOfObject(images, 'images');
+		assert.func(cb, 'cb');
+
+		origin_images = {};
+		images.forEach(function (im) {
+			if (im.origin) {
+				origin_images[im.origin] = true;
+			}
+		});
+		origin_images = Object.keys(origin_images);
+
+		log.info({origin_images: origin_images, remote_url: remote_url},
+			'downloading origin images');
+
+		vasync.forEachPipeline({
+			inputs: origin_images,
+			func: function importOneOriginImage(uuid, subcb) {
+				log.info('downloading origin image %s', uuid);
+				function onDoneOneImage(err) {
+					if (err && err.name !==
+					    'ImageUuidAlreadyExistsError') {
+						log.error({err: err,
+						    image_uuid: uuid},
+						    'failed to download image');
+						subcb(err);
+						return;
+					} else if (err) {
+						log.info('origin image %s ' +
+							'already downloaded',
+							uuid);
+					} else {
+						log.info('downloaded origin ' +
+							'image %s', uuid);
+					}
+					subcb();
+				}
+				imgapi.adminImportRemoteImageAndWait(
+					uuid, remote_url, {}, onDoneOneImage);
+			}
+		}, function (err) {
+			cb(err, images);
+		});
+	},
+
+	function importImages(images, cb) {
 		var imgapi = self.IMGAPI;
 		var log = self.log;
 		var remote_url = self.config.remote_imgapi.url;
