@@ -6,7 +6,7 @@
  */
 
 /*
- * Copyright (c) 2014, Joyent, Inc.
+ * Copyright 2019 Joyent, Inc.
  */
 
 /*
@@ -66,7 +66,8 @@ Shardadm.prototype.init = function (opts, args, cb) {
 	this.client = new sdc.SAPI({
 	    url: config.sapi.url,
 	    log: this.log,
-	    agent: false
+		agent: false,
+		version: '~2'
 	});
 
 	Cmdln.prototype.init.apply(this, arguments);
