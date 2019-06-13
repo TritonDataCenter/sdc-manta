@@ -23,6 +23,7 @@ var fs = require('fs');
 var optimist = require('optimist');
 var path = require('path');
 var sdc = require('sdc-clients');
+var services = require('../lib/services');
 var ssh = require('../lib/ssh');
 var url = require('url');
 var node_uuid = require('node-uuid');
@@ -215,7 +216,7 @@ function findLatestImage(service, cb) {
 	var remote_imgapi = self.REMOTE_IMGAPI;
 	var log = self.log;
 
-	var image_name = 'manta-' + service;
+	var image_name = services.serviceNameToImageName(service);
 	var version_substr = 'master';
 
 	log.info('finding image %s (version substr "%s") for service %s',
@@ -343,7 +344,6 @@ function addConfig(dirname, updatefunc, cb) {
 	});
 }
 
-
 // -- Mainline
 
 var self = this;
@@ -397,8 +397,8 @@ if (typeof (ARGV.c) == 'number' && ARGV.c > 0 && ARGV.c < 128 &&
 	    '(must be a positive integer less than 128)');
 }
 
-async.waterfall([
-	function verifyArgs(cb) {
+var pipelineFuncs = [
+	function verifyArgs(_, cb) {
 		if (ARGV.s &&
 		    ['coal', 'lab', 'production'].indexOf(ARGV.s) === -1) {
 			return (cb(new Error('size option must be one of,' +
@@ -408,11 +408,11 @@ async.waterfall([
 		return (cb(null));
 	},
 
-	function initClients(cb) {
+	function initClients(_, cb) {
 		common.initSdcClients.call(self, cb);
 	},
 
-	function ensureFullMode(cb) {
+	function ensureFullMode(_, cb) {
 		var sapi = self.SAPI;
 		var log = self.log;
 
@@ -443,17 +443,24 @@ async.waterfall([
 		});
 	},
 
-	function getOrCreatePoseidon(cb) {
+	function getOrCreatePoseidon(ctx, cb) {
 		var user = {};
 		user.login = POSEIDON_LOGIN;
 		user.userpassword = POSEIDON_PASSWORD;
 		if (ARGV.e)
 			user.email = ARGV.e;
 
-		getOrCreateUser(user, cb);
+		getOrCreateUser(user, function gotUser(err, userRes) {
+			if (err) {
+				return (cb(err));
+			}
+			ctx.user = userRes;
+			return (cb(null));
+		});
 	},
 
-	function updatePoseidonEmail(user, cb) {
+	function updatePoseidonEmail(ctx, cb) {
+		var user = ctx.user;
 		assert.object(user, 'user');
 		assert.string(user.login, 'user.login');
 
@@ -470,7 +477,7 @@ async.waterfall([
 		return (null);
 	},
 
-	function addPoseidonToOperators(cb) {
+	function addPoseidonToOperators(_, cb) {
 		var ufds = self.UFDS;
 		var log = self.log;
 
@@ -499,7 +506,7 @@ async.waterfall([
 		});
 	},
 
-	function enableAdminProvisioning(cb) {
+	function enableAdminProvisioning(_, cb) {
 		var networks = [ 'manta', 'mantanat', 'admin' ];
 
 		vasync.forEachParallel({
@@ -519,7 +526,7 @@ async.waterfall([
 		});
 	},
 
-	function getMantaApplication(cb) {
+	function getMantaApplication(_, cb) {
 		var log = self.log;
 		log.info('fetching manta application from sapi');
 
@@ -531,7 +538,7 @@ async.waterfall([
 		});
 	},
 
-	function createMantaApplication(cb) {
+	function createMantaApplication(_, cb) {
 		var log = self.log;
 		var sapi = self.SAPI;
 
@@ -611,7 +618,7 @@ async.waterfall([
 					    extra, onResponse);
 	},
 
-	function addAdminKey(cb) {
+	function addAdminKey(_, cb) {
 		var log = self.log;
 		var sapi = self.SAPI;
 		var app = self.sapi_application;
@@ -662,13 +669,13 @@ async.waterfall([
 			 * Even if there's an error, remove the SSH public key
 			 * file.
 			 */
-			fs.unlink(pubfile, function (_) {
+			fs.unlink(pubfile, function () {
 				cb(err);
 			});
 		});
 	},
 
-	function addApplicationConfigs(cb) {
+	function addApplicationConfigs(_, cb) {
 		var log = self.log;
 		var sapi = self.SAPI;
 
@@ -689,56 +696,47 @@ async.waterfall([
 		});
 	},
 
-	function findLatestImages(cb) {
+	function findLatestImages(ctx, cb) {
 		var log = self.log;
 
-		var dirname = path.join(path.dirname(__filename),
-		    '../config/services');
+		log.info({ services: services.mSvcNames },
+		    'finding images for services');
 
-		fs.readdir(dirname, function (err, services)  {
-			if (err) {
-				log.error(err, 'failed to read dirname %s',
-				    dirname);
-				return (cb(err));
+		/*
+		 * If the marlin image was given, we filter it out and add it
+		 * manually later.
+		 */
+		var filtered = services.mSvcNames.filter(function f(svcname) {
+			if (ARGV.m && svcname === 'marlin') {
+				return (false);
 			}
+			return (true);
+		});
 
-			log.info({ services: services },
-			    'finding images for services');
-
-			var filtered = [];
-			for (var i in services) {
-				var s = services[i];
-				// If the marlin image was given, we filter out
-				// and add it manually later.
-				if (ARGV.m && s === 'marlin') {
-					continue;
-				}
-				filtered.push(s);
-			}
-
-			vasync.forEachParallel({
-				func: findLatestImage,
-				inputs: filtered
-			}, function (suberr, results) {
-				var rs = results.successes;
-				var images = rs.map(function (im) {
-					return ({
-						'uuid': im.uuid,
-						'name': im.name,
-						'origin': im.origin
-					});
+		vasync.forEachParallel({
+			func: findLatestImage,
+			inputs: filtered
+		}, function (suberr, results) {
+			var rs = results.successes;
+			var images = rs.map(function (im) {
+				return ({
+					'uuid': im.uuid,
+					'name': im.name,
+					'origin': im.origin
 				});
-
-				// Adding the marlin image manually.
-				if (ARGV.m) {
-					images.push({
-						'uuid': ARGV.m,
-						'name': 'manta-marlin'
-					});
-				}
-
-				return (cb(suberr, images));
 			});
+
+			// Adding the marlin image manually.
+			if (ARGV.m) {
+				images.push({
+					'uuid': ARGV.m,
+					'name': services.serviceNameToImageName(
+					    'marlin')
+				});
+			}
+
+			ctx.images = images;
+			return (cb(suberr));
 		});
 	},
 
@@ -766,11 +764,12 @@ async.waterfall([
 	 *
 	 * This step does #2.
 	 */
-	function importImageOrigins(images, cb) {
+	function importImageOrigins(ctx, cb) {
 		var imgapi = self.IMGAPI;
 		var log = self.log;
 		var origin_images;
 		var remote_url = self.config.remote_imgapi.url;
+		var images = ctx.images;
 
 		assert.arrayOfObject(images, 'images');
 		assert.func(cb, 'cb');
@@ -812,14 +811,15 @@ async.waterfall([
 					uuid, remote_url, {}, onDoneOneImage);
 			}
 		}, function (err) {
-			cb(err, images);
+			cb(err);
 		});
 	},
 
-	function importImages(images, cb) {
+	function importImages(ctx, cb) {
 		var imgapi = self.IMGAPI;
 		var log = self.log;
 		var remote_url = self.config.remote_imgapi.url;
+		var images = ctx.images;
 
 		assert.arrayOfObject(images, 'images');
 		assert.func(cb, 'cb');
@@ -858,34 +858,35 @@ async.waterfall([
 				image.uuid, remote_url, import_opts, onDone);
 
 		}, function (err) {
-			return (cb(err, images));
+			return (cb(err));
 		});
 	},
 
-	function createMantaServices(images, cb) {
+	function createMantaServices(ctx, cb) {
 		var sapi = self.SAPI;
 		var log = self.log;
+		var app_uuid = self.sapi_application.uuid;
+		var images = ctx.images;
 
-		var array = [];
+		assert.arrayOfObject(images, 'images');
+		assert.func(cb, 'cb');
 
 		log.debug({ images: images }, 'creating services');
 
-		for (var ii = 0; ii < images.length; ii++) {
-			assert.object(images[ii]);
-			array.push(images[ii]);
-		}
+		/*
+		 * We're going to look up images by name below, so we put them
+		 * in an object now to avoid doing repeated linear lookups.
+		 */
+		var imgMap = {};
+		images.forEach(function addToMap(img) {
+			imgMap[img.name] = img;
+		});
 
 		vasync.forEachParallel({
-			func: function (image, subcb) {
-				var name = image.name;
-				if (name.substr(0, 6) === 'manta-')
-					name = name.substr(6);
-
-				var app_uuid = self.sapi_application.uuid;
-
+			func: function (svcname, subcb) {
 				var file = sprintf(
 				    '%s/../config/services/%s/service.json',
-				    path.dirname(__filename), name);
+				    path.dirname(__filename), svcname);
 				file = path.resolve(file);
 				var override = file + '.' + ARGV.s;
 
@@ -893,47 +894,58 @@ async.waterfall([
 
 				var extra = {};
 				extra.params = {};
-				extra.params.image_uuid = image.uuid;
+
+				var imgName =
+				    services.serviceNameToImageName(svcname);
+				assert.object(imgMap[imgName],
+				    'imgMap[imgName]');
+				extra.params.image_uuid = imgMap[imgName].uuid;
 
 				extra.master = true;
 				extra.include_master = true;
 
 				log.info('getting or creating service %s ' +
-					'with uuid %s', name, app_uuid);
+					'with uuid %s', svcname, app_uuid);
 
-				sapi.getOrCreateService(name, app_uuid,
+				sapi.getOrCreateService(svcname, app_uuid,
 				    files, extra, function (err, svc) {
+					/*
+					 * We hang the image off of the service
+					 * object so we can get a service's
+					 * image in the next function.
+					 */
 					if (!err)
-						image.service = svc;
+						svc.image = imgMap[imgName];
 					return (subcb(err, svc));
 				});
 			},
-			inputs: array
+			inputs: services.mSvcNames
 		}, function (err, results) {
 			if (err)
 				return (cb(err));
 
-			self.sapi_services = results.successes;
+			ctx.sapi_services = results.successes;
 
 			log.debug('created %d SAPI services',
-			    self.sapi_services.length);
+			    ctx.sapi_services.length);
 
-			return (cb(null, images));
+			return (cb(null));
 		});
 	},
 
-	function updateServiceImages(images, cb) {
+	function updateServiceImages(ctx, cb) {
 		var log = self.log;
+		var sapi_services = ctx.sapi_services;
 
-		assert.arrayOfObject(images, 'images');
+		assert.arrayOfObject(sapi_services);
 		assert.func(cb, 'cb');
 
 		vasync.forEachParallel({
-			func: function (image, subcb) {
+			func: function (svc, subcb) {
 				updateServiceImage.call(self,
-				    image.service, image.uuid, subcb);
+				    svc, svc.image.uuid, subcb);
 			},
-			inputs: images
+			inputs: sapi_services
 		}, function (err) {
 			if (err)
 				return (cb(err));
@@ -942,17 +954,21 @@ async.waterfall([
 		});
 	},
 
-	function addMuskieAes(cb) {
+	function addMuskieAes(ctx, cb) {
 		var log = self.log;
 		var sapi = self.SAPI;
 		var cmd = 'openssl enc -aes-128-cbc -k ' + node_uuid.v4() +
 			' -P';
 		var pfx = 'MUSKIE_JOB_TOKEN_AES_';
 		var svc, i, m;
+		var sapi_services = ctx.sapi_services;
 
-		for (i = 0; i < self.sapi_services.length; i++) {
-			if (self.sapi_services[i].name == 'webapi') {
-				svc = self.sapi_services[i];
+		assert.arrayOfObject(sapi_services);
+		assert.func(cb, 'cb');
+
+		for (i = 0; i < sapi_services.length; i++) {
+			if (sapi_services[i].name == 'webapi') {
+				svc = sapi_services[i];
 				break;
 			}
 		}
@@ -1026,10 +1042,15 @@ async.waterfall([
 		], cb);
 	},
 
-	function finiClients(cb) {
+	function finiClients(_, cb) {
 		common.finiSdcClients.call(self, cb);
 	}
-], function (err) {
+];
+
+vasync.pipeline({
+	arg: {}, // ctx
+	funcs: pipelineFuncs
+}, function (err) {
 	if (err) {
 		console.error('Error: ' + err.message);
 		process.exit(1);
