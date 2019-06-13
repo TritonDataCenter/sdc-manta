@@ -1,0 +1,11 @@
+{
+	"params": {
+		"networks": [ "manta", "admin" ],
+		"ram": 2048,
+		"max_lwps": 256000
+	},
+	"metadata": {
+		"PG_DEFAULT_VERSION": "11",
+		"PG_DIR": "/manatee/pg/data"
+	}
+}

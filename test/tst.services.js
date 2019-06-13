@@ -41,7 +41,10 @@ var knownServices = [
     'reshard',
     'pgstatsmon',
     'garbage-collector',
-    'prometheus'
+    'prometheus',
+    'buckets-postgres',
+    'boray',
+    'electric-boray'
 ];
 
 function main()
@@ -67,7 +70,8 @@ function main()
 	 * Test serviceIsSharded().
 	 */
 	sharded = knownServices.filter(services.serviceIsSharded).sort();
-	assertplus.deepEqual([ 'moray', 'postgres' ], sharded);
+	assertplus.deepEqual(
+	    [ 'boray', 'buckets-postgres', 'moray', 'postgres' ], sharded);
 
 	/*
 	 * Test serviceSupportsOneach().

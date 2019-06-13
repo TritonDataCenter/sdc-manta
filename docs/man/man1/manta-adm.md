@@ -64,6 +64,15 @@ Services that are part of the Manta application include:
 **authcache**
   Stores user identity information
 
+**boray**
+  PostgreSQL interface for manta buckets system
+
+**buckets-postgres**
+  PostgreSQL databases used for storing object metadata for the buckets system
+
+**electric-boray**
+  Boray proxy for buckets that handles sharding using consistent hashing
+
 **electric-moray**
   Moray proxy that handles sharding using consistent hashing
 
@@ -695,7 +704,7 @@ See above for information on the `-l`, `-H`, and `-o` options.
 
 `-j, --json`
   Instead of the default text-based output, emit a JSON representation of the
-  summary information reported with the `-s/--summary` command.  This format is 
+  summary information reported with the `-s/--summary` command.  This format is
   suitable for use with `manta-adm update`.  This option cannot be combined with
   `-c/--bycn`, `-a/--all`, `-H/--omit-header`, or `-o/--columns`, and it _must_
   be combined with `-s/--summary`.  (Future versions of this command may support

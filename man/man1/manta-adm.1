@@ -60,6 +60,15 @@ Services that are part of the Manta application include:
 \fBauthcache\fP
 Stores user identity information
 .TP
+\fBboray\fP
+PostgreSQL interface for manta buckets system
+.TP
+\fBbuckets\-postgres\fP
+PostgreSQL databases used for storing object metadata for the buckets system
+.TP
+\fBelectric\-boray\fP
+Boray proxy for buckets that handles sharding using consistent hashing
+.TP
 \fBelectric\-moray\fP
 Moray proxy that handles sharding using consistent hashing
 .TP
@@ -103,7 +112,7 @@ PostgreSQL databases used for storing object and job metadata
 Monitoring system for Postgres
 .TP
 \fBprometheus\fP
-Time-series database that aggregates Manta and Triton metrics
+Time\-series database that aggregates Manta and Triton metrics
 .TP
 \fBreshard\fP
 Automated resharding system for Manta
@@ -739,7 +748,7 @@ logically apply).  The count for each group is also reported.  With
 .TP
 \fB\fC\-j, \-\-json\fR
 Instead of the default text\-based output, emit a JSON representation of the
-summary information reported with the \fB\fC\-s/\-\-summary\fR command.  This format is 
+summary information reported with the \fB\fC\-s/\-\-summary\fR command.  This format is
 suitable for use with \fB\fCmanta\-adm update\fR\&.  This option cannot be combined with
 \fB\fC\-c/\-\-bycn\fR, \fB\fC\-a/\-\-all\fR, \fB\fC\-H/\-\-omit\-header\fR, or \fB\fC\-o/\-\-columns\fR, and it \fImust\fP
 be combined with \fB\fC\-s/\-\-summary\fR\&.  (Future versions of this command may support

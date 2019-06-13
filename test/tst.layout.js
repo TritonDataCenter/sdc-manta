@@ -347,7 +347,10 @@ var images = {
     'ops': 'OPS_IMAGE0',
     'madtom': 'MADTOM_IMAGE0',
     'marlin-dashboard': 'DASHBOARD_IMAGE0',
-    'marlin': 'MARLIN_IMAGE0'
+    'marlin': 'MARLIN_IMAGE0',
+    'buckets-postgres': 'BUCKETS_POSTGRES_IMAGE0',
+    'boray': 'BORAY_IMAGE0',
+    'electric-boray': 'ELECTRIC_BORAY_IMAGE0'
 };
 
 var nrun = 0;
