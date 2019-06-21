@@ -756,7 +756,8 @@ var pipelineFuncs = [
 	 *
 	 * 	Error: image uuid "<origin image uuid>" already exists
 	 *
-	 * Until IMGAPI supports this, some work around options are:
+	 * Until IMGAPI supports this (TRITON-1766), some work around options
+	 * are:
 	 *
 	 * 1. Retry the failed image imports.
 	 * 2. Have a leading stage that determines all the shared origin
@@ -827,35 +828,43 @@ var pipelineFuncs = [
 		log.info({ images: images, remote_url: remote_url },
 			'downloading images');
 
-		async.forEachLimit(images, CONCURRENCY,
-		    function (image, subcb) {
+		// De-dupe images so we don't ask IMGAPI to concurrently
+		// download the same image twice.
+		var image_from_uuid = {};
+		images.forEach(
+			function (img) { image_from_uuid[img.uuid] = img; });
+
+		async.forEachLimit(Object.keys(image_from_uuid), CONCURRENCY,
+		    function (image_uuid, subcb) {
 			var import_opts = {};
 			import_opts.skipOwnerCheck = true;
 
-			log.info('downloading image %s', image.uuid);
+			log.info('downloading image %s', image_uuid);
 
 			function onDone(err, img, res) {
 				if (err && err.name !==
 				    'ImageUuidAlreadyExistsError') {
 					log.error({err: err,
-						image_uuid: image.uuid},
+						image_uuid: image_uuid},
 						'failed to download image');
 					return (subcb(err));
 				} else if (err) {
 					log.info('image %s already downloaded',
-						image.uuid);
+						image_uuid);
 				} else {
 					log.info('downloaded image %s',
-						image.uuid);
+						image_uuid);
 				}
 				return (subcb());
 			}
 
-			if (ARGV.m && image.name === 'manta-marlin')
-				image.uuid = ARGV.m;
+			if (ARGV.m && image_from_uuid[image_uuid].name
+			    === 'manta-marlin') {
+				image_uuid = ARGV.m;
+			}
 
 			imgapi.adminImportRemoteImageAndWait(
-				image.uuid, remote_url, import_opts, onDone);
+				image_uuid, remote_url, import_opts, onDone);
 
 		}, function (err) {
 			return (cb(err));
