@@ -6,7 +6,7 @@
 #
 
 #
-# Copyright (c) 2018, Joyent, Inc.
+# Copyright 2019 Joyent, Inc.
 #
 
 #
@@ -83,11 +83,8 @@ manta-shardadm set -m "1.moray"
 manta-shardadm set -s "1.moray"
 
 set +o errexit
-manta-create-topology.sh -v $mdl_topo_size -p 2020
+manta-adm create-topology -v $mdl_topo_size -p 2020
 case "$?" in
-	3)
-		echo "hash ring already exists"
-		;;
 	0)
 		echo "successfully generated hash ring"
 		;;

@@ -30,6 +30,10 @@
  *
  *     zk		view and manage configured nameserver instances
  *
+ *     accel-gc         configure accelerated garbage-collection
+ *
+ *     create-topology  generate a hash ring for electric-moray
+ *
  * NOTE: this file contains ONLY the CLI wrapper around the real functionality
  * contained in lib/adm.js.  Do NOT add deployment logic here.  It belongs in
  * the library that can eventually be consumed by other tools.
@@ -2329,6 +2333,86 @@ MantaAdmAlarmProbeGroup.prototype.do_list.options = [
     maCommonOptions.configFile
 ];
 
+MantaAdm.prototype.do_create_topology = function (subcmd, opts, args, callback)
+{
+	var self = this;
+
+	if (args.length > 0) {
+		callback(new Error('unexpected arguments'));
+		return;
+	}
+	if (!opts.t) {
+		callback(new VError('argument is required: --t'));
+		return;
+	}
+	if (opts.t !== 'directory' && opts.t !== 'buckets') {
+		callback(new VError('unsupported value for --t: %s. Valid ' +
+		    'values are "directory" and "buckets".', opts.t));
+		return;
+	}
+	if (!opts.v) {
+		callback(new VError('argument is required: --v'));
+		return;
+	}
+	if (!opts.p) {
+		callback(new VError('argument is required: --p'));
+		return;
+	}
+	var force = opts.f === true;
+
+	self.initAdm(opts, function initCb() {
+		var adm = self.madm_adm;
+		adm.createTopology({
+			buckets: opts.t === 'buckets',
+			vnodes: opts.v,
+			port: opts.p,
+			force: force
+		}, function createdTopology(err) {
+			if (err) {
+				fatal(err.message);
+			}
+			self.finiAdm();
+		});
+	});
+};
+
+MantaAdm.prototype.do_create_topology.help =
+    'Creates a consistent hash ring used by electric-moray.\n' +
+    'The ring is created and uploaded to imgapi. The resulting image UUID\n' +
+    'is persisted in SAPI on the Manta application as\n' +
+    'metadata.HASH_RING_IMAGE\n' +
+    '\n' +
+    'WARNING: Run this command with care. Improper use such as generating \n' +
+    'a bad ring or a different ring in production will result in the \n' +
+    'corruption of Manta metadata.\n' +
+    '\n' +
+    'Usage:\n' +
+    '  manta-adm create-topology -t <ring type> -v <vnodes> -p <moray port>\n';
+
+MantaAdm.prototype.do_create_topology.options = [
+    maCommonOptions.logFile,
+{
+    'names': [ 't' ],
+    'type': 'string',
+    'default': 'directory',
+    'helpArg': 'TYPE',
+    'help': 'Type of ring to create. Valid values are "directory" and "buckets"'
+}, {
+    'names': [ 'v' ],
+    'type': 'integer',
+    'helpArg': 'VNODES',
+    'help': 'Number of vnodes to include in the ring'
+}, {
+    'names': [ 'p' ],
+    'type': 'integer',
+    'helpArg': 'PORT',
+    'help': 'Port of moray/boray instances that electric-moray will connect to'
+}, {
+    'names': [ 'f' ],
+    'type': 'bool',
+    'help': 'force generation of new hash ring even if one already exists in ' +
+	'SAPI metadata'
+} ];
 
 /*
  * Named arguments:
