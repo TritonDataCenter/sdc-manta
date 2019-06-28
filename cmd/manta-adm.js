@@ -7,7 +7,7 @@
  */
 
 /*
- * Copyright (c) 2019, Joyent, Inc.
+ * Copyright 2019 Joyent, Inc.
  */
 
 /*
@@ -873,7 +873,11 @@ MantaAdm.prototype.do_update = function (subcmd, opts, args, callback)
 			adm.fetchDeployed(stepcb);
 		},
 		function generatePlan(_, stepcb) {
-			adm.generatePlan(stepcb, service, opts.no_reprovision);
+			adm.generatePlan({
+				service: service,
+				noreprovision: opts.no_reprovision,
+				experimental: opts.experimental
+			}, stepcb);
 		},
 		function dumpPlan(_, stepcb) {
 			adm.execPlan(process.stdout, process.stderr,
@@ -941,6 +945,11 @@ MantaAdm.prototype.do_update.options = [
     'type': 'bool',
     'help': 'When upgrading a zone, always provision and deprovision ' +
 	'rather than reprovision'
+},
+{
+    'names': [ 'experimental', 'X' ],
+    'type':  'bool',
+    'help': 'Allow deployment of experimental services'
 } ];
 
 MantaAdm.prototype.do_zk = MantaAdmZk;
