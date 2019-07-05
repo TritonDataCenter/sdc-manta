@@ -124,7 +124,7 @@ function printShards(metadata, cb) {
 Shardadm.prototype.do_set = function (subcmd, opts, args, cb) {
 	var self = this;
 
-	if (args.length !== 0 || (!opts.i && !opts.m && !opts.s)) {
+	if (args.length !== 0 || (!opts.i && !opts.b && !opts.m && !opts.s)) {
 		this.do_help('help', {}, [subcmd], cb);
 		return;
 	}
@@ -157,16 +157,11 @@ Shardadm.prototype.do_set = function (subcmd, opts, args, cb) {
 		}
 
 		if (opts.i) {
-			var names = opts.i.split(' ');
-			var shards = [];
+			addIndexShards(opts.i, common.INDEX_SHARDS);
+		}
 
-			names.forEach(function (name) {
-				var shard = addSuffix(name, domain_name);
-				shards.push({ host: shard });
-			});
-			shards[shards.length - 1].last = true;
-
-			metadata[common.INDEX_SHARDS] = shards;
+		if (opts.b) {
+			addIndexShards(opts.b, common.BUCKETS_SHARDS);
 		}
 
 		if (Object.keys(metadata).length === 0) {
@@ -182,6 +177,28 @@ Shardadm.prototype.do_set = function (subcmd, opts, args, cb) {
 			console.log('Updated Manta shards successfully');
 			return (cb(null));
 		    });
+
+		/*
+		 * Helper function for adding index shards to metadata object.
+		 * Arguments are:
+		 *
+		 * - nameStr: a string of shard names separated by spaces
+		 *
+		 * - key: the field in the metadata object in which to store
+		 *   the shard array
+		 */
+		function addIndexShards(nameStr, key) {
+			var names = nameStr.split(' ');
+			var shards = [];
+
+			names.forEach(function (name) {
+				var shard = addSuffix(name, domain_name);
+				shards.push({ host: shard });
+			});
+			shards[shards.length - 1].last = true;
+
+			metadata[key] = shards;
+		}
 	});
 };
 Shardadm.prototype.do_set.options = [
@@ -189,6 +206,10 @@ Shardadm.prototype.do_set.options = [
 	    names: [ 'i' ],
 	    type: 'string',
 	    help: 'shards for indexing tier'
+	}, {
+	    names: [ 'b' ],
+	    type: 'string',
+	    help: 'shards for manta buckets subsystem indexing tier'
 	}, {
 	    names: [ 'm' ],
 	    type: 'string',
