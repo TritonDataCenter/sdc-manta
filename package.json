@@ -30,7 +30,7 @@
         "tab": "0.1.0",
         "triton-netconfig": "1.4.0",
         "ufds": "1.6.0",
-        "urclient": "1.0.0",
+        "urclient": "1.2.1",
         "vasync": "1.6.3",
         "verror": "1.10.0",
         "wordwrap": "1.0.0",
