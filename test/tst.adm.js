@@ -38,7 +38,7 @@ function runTestCase(t, callback)
 
 	t['changefunc'](desired);
 	adm.readConfigRaw(JSON.stringify(desired));
-	adm.generatePlan(function () {
+	adm.generatePlan({}, function () {
 		var actual = adm.dumpPlan();
 		var expected = t['expect'];
 

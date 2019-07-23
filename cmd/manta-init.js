@@ -570,6 +570,8 @@ var pipelineFuncs = [
 		    extra.metadata['DOMAIN_NAME']);
 		extra.metadata['ELECTRIC_MORAY'] = sprintf('electric-moray.%s',
 		    extra.metadata['DOMAIN_NAME']);
+		extra.metadata['ELECTRIC_BORAY'] = sprintf('electric-boray.%s',
+		    extra.metadata['DOMAIN_NAME']);
 		extra.metadata['POSEIDON_UUID'] = POSEIDON.uuid;
 		extra.metadata['IMGAPI_SERVICE'] =
 		    url.format(self.IMGAPI.client.url);
