@@ -2199,8 +2199,9 @@ MantaAdmAlarmMetadata.prototype.do_events.help = [
     'List known event names.',
     '',
     'Usage:',
+    '    {{name}} events',
     '',
-    '    manta-adm alarm events'
+    '{{options}}'
 ].join('\n');
 
 MantaAdmAlarmMetadata.prototype.do_events.options = [
@@ -2249,13 +2250,14 @@ MantaAdmAlarmMetadata.prototype.do_ka = function (subcmd, opts, args, callback)
 	});
 };
 
+
 MantaAdmAlarmMetadata.prototype.do_ka.help = [
     'Print information about events.',
     '',
     'Usage:',
+    '    {{name}} ka [EVENT_NAME]',
     '',
-    '    manta-adm alarm ka',
-    '    manta-adm alarm ka EVENT_NAME'
+    '{{options}}'
 ].join('\n');
 
 MantaAdmAlarmMetadata.prototype.do_ka.options = [ maCommonOptions.configFile ];
@@ -2318,12 +2320,10 @@ MantaAdmAlarmProbeGroup.prototype.do_list.help = [
     'List open alarms',
     '',
     'Usage:',
-    '',
-    '    manta-adm alarm config probegroup list OPTIONS',
+    '    {{name}} list OPTIONS',
     '',
     '{{options}}',
-    '',
-    'Available columns for -o:\n',
+    'Available columns for -o:',
     '    ' + madm.probeGroupColumnNames().join(', ')
 ].join('\n');
 
@@ -2342,20 +2342,20 @@ MantaAdm.prototype.do_create_topology = function (subcmd, opts, args, callback)
 		return;
 	}
 	if (!opts.t) {
-		callback(new VError('argument is required: --t'));
+		callback(new VError('argument is required: -t'));
 		return;
 	}
 	if (opts.t !== 'directory' && opts.t !== 'buckets') {
-		callback(new VError('unsupported value for --t: %s. Valid ' +
+		callback(new VError('unsupported value for -t: %s. Valid ' +
 		    'values are "directory" and "buckets".', opts.t));
 		return;
 	}
 	if (!opts.v) {
-		callback(new VError('argument is required: --v'));
+		callback(new VError('argument is required: -v'));
 		return;
 	}
 	if (!opts.p) {
-		callback(new VError('argument is required: --p'));
+		callback(new VError('argument is required: -p'));
 		return;
 	}
 	var force = opts.f === true;
@@ -2376,18 +2376,25 @@ MantaAdm.prototype.do_create_topology = function (subcmd, opts, args, callback)
 	});
 };
 
-MantaAdm.prototype.do_create_topology.help =
-    'Creates a consistent hash ring used by electric-moray.\n' +
-    'The ring is created and uploaded to imgapi. The resulting image UUID\n' +
-    'is persisted in SAPI on the Manta application as\n' +
-    'metadata.HASH_RING_IMAGE\n' +
-    '\n' +
-    'WARNING: Run this command with care. Improper use such as generating \n' +
-    'a bad ring or a different ring in production will result in the \n' +
-    'corruption of Manta metadata.\n' +
-    '\n' +
-    'Usage:\n' +
-    '  manta-adm create-topology -t <ring type> -v <vnodes> -p <moray port>\n';
+MantaAdm.prototype.do_create_topology.helpOpts = {
+    maxHelpCol: 23
+};
+
+MantaAdm.prototype.do_create_topology.help = [
+    'Creates a consistent hash ring used by electric-moray.',
+    '',
+    'Usage:',
+    '  manta-adm create-topology -t RING_TYPE -v VNODES -p PORT',
+    '',
+    '{{options}}',
+    'The ring is created and uploaded to imgapi. The resulting image UUID',
+    'is persisted in SAPI on the Manta application as',
+    'metadata.HASH_RING_IMAGE',
+    '',
+    'WARNING: Run this command with care. Improper use such as generating ',
+    'a bad ring or a different ring in production will result in the ',
+    'corruption of Manta metadata.'
+].join('\n');
 
 MantaAdm.prototype.do_create_topology.options = [
     maCommonOptions.logFile,
@@ -2395,7 +2402,7 @@ MantaAdm.prototype.do_create_topology.options = [
     'names': [ 't' ],
     'type': 'string',
     'default': 'directory',
-    'helpArg': 'TYPE',
+    'helpArg': 'RING_TYPE',
     'help': 'Type of ring to create. Valid values are "directory" and "buckets"'
 }, {
     'names': [ 'v' ],
