@@ -2368,10 +2368,8 @@ MantaAdm.prototype.do_create_topology = function (subcmd, opts, args, callback)
 			port: opts.p,
 			force: force
 		}, function createdTopology(err) {
-			if (err) {
-				fatal(err.message);
-			}
 			self.finiAdm();
+			callback(err);
 		});
 	});
 };

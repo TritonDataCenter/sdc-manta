@@ -41,6 +41,9 @@ function confirm
 	[[ $REPLY =~ ^[Yy]$ ]]
 }
 
+# Must be kept in sync with the value in lib/common.js
+RING_EXISTS_EXIT_STATUS=3
+
 mdl_tmpdir="${TMPDIR:-/var/tmp}"
 mdl_conffile="$mdl_tmpdir/lab-config.json"
 mdl_override="false"		# override confirmation prompts
@@ -85,6 +88,9 @@ manta-shardadm set -s "1.moray"
 set +o errexit
 manta-adm create-topology -v $mdl_topo_size -p 2020
 case "$?" in
+	${RING_EXISTS_EXIT_STATUS})
+		echo "hash ring already exists"
+		;;
 	0)
 		echo "successfully generated hash ring"
 		;;
