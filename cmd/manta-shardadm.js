@@ -100,12 +100,13 @@ Shardadm.prototype.do_list.help = (
 );
 
 function printShards(metadata, cb) {
+	var i;
 	var fmt = '%-12s %s';
 
 	console.log(sprintf(fmt, 'TYPE', 'SHARD NAME'));
 
 	if (metadata[common.INDEX_SHARDS]) {
-		for (var i = 0; i < metadata[common.INDEX_SHARDS].length; i++) {
+		for (i = 0; i < metadata[common.INDEX_SHARDS].length; i++) {
 			console.log(sprintf(fmt,
 			    'Index', metadata[common.INDEX_SHARDS][i].host));
 		}
@@ -117,6 +118,13 @@ function printShards(metadata, cb) {
 	if (metadata[common.STORAGE_SHARD])
 		console.log(sprintf(fmt,
 		    'Storage', metadata[common.STORAGE_SHARD]));
+
+	if (metadata[common.BUCKETS_SHARDS]) {
+		for (i = 0; i < metadata[common.BUCKETS_SHARDS].length; i++) {
+			console.log(sprintf(fmt, 'Buckets',
+			    metadata[common.BUCKETS_SHARDS][i].host));
+		}
+	}
 
 	return (cb(null));
 }
