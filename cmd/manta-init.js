@@ -7,7 +7,7 @@
  */
 
 /*
- * Copyright (c) 2019, Joyent, Inc.
+ * Copyright 2019 Joyent, Inc.
  */
 
 /*
@@ -53,6 +53,16 @@ var CONCURRENCY = 10;
 optimist.usage('Usage:\tmanta-init -e <email>');
 
 var ARGV = optimist.options({
+	'B': {
+		alias: 'branch',
+		describe: 'the branch substring to use when looking for images '
+			+ '(default: no filter)',
+		default: ''
+	},
+	'C': {
+		alias: 'channel',
+		describe: 'the channel to use'
+	},
 	'c': {
 		alias: 'concurrent_downloads',
 		describe: 'number of concurrent image downloads (default: 10)'
@@ -217,17 +227,24 @@ function findLatestImage(service, cb) {
 	var log = self.log;
 
 	var image_name = services.serviceNameToImageName(service);
-	var version_substr = 'master';
+	var version_substr = ARGV.branch;
+	var channel = ARGV.channel;
 
-	log.info('finding image %s (version substr "%s") for service %s',
-	    image_name, version_substr, service);
+	log.info('finding image %s for service %s on channel "%s"',
+	    image_name, service, channel);
 
 	var onSearchFinish = function (err, image) {
 		if (err) {
 			log.error(err);
 			return (cb(err));
 		}
-
+		if (image === undefined) {
+			var msg = sprintf(
+			    'Unable to find image %s for %s on channel "%s"',
+			    image_name, service, channel);
+			log.error(msg);
+			return (cb(new Error(msg)));
+		}
 		log.info({ image: image }, 'found image %s for %s',
 		    image_name, service);
 
@@ -236,7 +253,7 @@ function findLatestImage(service, cb) {
 
 	/*
 	 * If -n is used, find the most recent image which is installed in
-	 * this datacenter's IMGAPI.
+	 * this datacenter's IMGAPI, assuming it matches our version_substr.
 	 */
 	if (ARGV.n) {
 		return (findLatestLocalImage(
@@ -245,7 +262,14 @@ function findLatestImage(service, cb) {
 
 	var filters = {};
 	filters.name = image_name;
-	filters.version = '~' + version_substr;
+	if (version_substr.length > 0) {
+		log.info('search restricted to version substring: %s',
+		    version_substr);
+		filters.version = '~' + version_substr;
+	}
+	if (channel.length > 0) {
+		filters.channel = channel;
+	}
 	log.info({ filters: filters }, 'search for images');
 
 	remote_imgapi.listImages(filters, function (err, images) {
@@ -263,12 +287,15 @@ function findLatestLocalImage(image_name, version_substr, cb) {
 	var imgapi = self.IMGAPI;
 	var log = self.log;
 
-	log.info('search for image %s (version substr "%s") restricted ' +
-	    'to local images', image_name, version_substr);
+	log.info('search for image %s restricted to local images', image_name);
 
 	var filters = {};
 	filters.name = image_name;
-	filters.version = '~' + version_substr;
+	if (version_substr.length > 0) {
+		log.info('search restricted to version substring: %s',
+		    version_substr);
+		filters.version = '~' + version_substr;
+	}
 
 	imgapi.listImages(filters, function (err, images) {
 		if (err) {
@@ -395,6 +422,9 @@ if (typeof (ARGV.c) == 'number' && ARGV.c > 0 && ARGV.c < 128 &&
 	 */
 	usage('unsupported value for "-c" option ' +
 	    '(must be a positive integer less than 128)');
+}
+if (typeof (ARGV.channel) === 'boolean') {
+	ARGV.channel = '';
 }
 
 var pipelineFuncs = [
@@ -695,6 +725,26 @@ var pipelineFuncs = [
 
 			log.info('loaded manifests from %s', dirname);
 			return (cb(null));
+		});
+	},
+
+	function determineDefaultChannel(_, cb) {
+		var log = self.log;
+		// If the user passed a -C argument, then we're done
+		if (ARGV.channel !== undefined) {
+			return (cb(null));
+		}
+
+		log.info('determining update_channel from sapi');
+		common.getSdcChannel.call(self,
+			{}, function (err, channel) {
+			if (!err) {
+				ARGV.channel = channel;
+				return (cb(null));
+			}
+			log.error(
+			    err, 'failed to determine sdc update_channel');
+			return (cb(err));
 		});
 	},
 

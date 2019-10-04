@@ -20,7 +20,7 @@ manta-adm - administer a Manta deployment
 
 `manta-adm show [-l LOG_FILE] [-js] SERVICE`
 
-`manta-adm update [-l LOG_FILE] [-n] [-y] [--no-reprovision] FILE [SERVICE]`
+`manta-adm update [-l LOG_FILE] [-n] [-y] [--no-reprovision] [--skip-verify-channel] FILE [SERVICE]`
 
 `manta-adm zk list [-l LOG_FILE] [-H] [-o FIELD...]`
 
@@ -790,6 +790,12 @@ options described above, plus:
   When upgrading a zone, always provision a new zone and deprovision the
   previous one, rather than reprovisioning the existing one.
 
+`--skip-verify-channel`
+  When upgrading, do not verify that the images being provisioned or
+  reprovisioned are present on the "remote" (usually https://updates.joyent.com)
+  imgapi channel that was set on the headnode using the `sdcadm channel`
+  command.
+
 If `SERVICE` is specified, then only instances of the named service are
 changed.
 
@@ -900,7 +906,7 @@ and `-y/--confirm` options described above.
 
 ## COPYRIGHT
 
-Copyright (c) 2019, Joyent Inc.
+Copyright 2019 Joyent, Inc.
 
 ## SEE ALSO
 

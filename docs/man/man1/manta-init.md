@@ -1,4 +1,4 @@
-# MANTA-INIT 1 "2016" Manta "Manta Operator Commands"
+# MANTA-INIT 1 "2019" Manta "Manta Operator Commands"
 
 ## NAME
 
@@ -23,6 +23,20 @@ run this command except as documented in the Manta Operator's Guide.**
 
 
 ## OPTIONS
+
+`-B, --branch BRANCH`
+  Specifies a substring which must be present in the version string of the
+  images to be downloaded. The default for this value is the empty string,
+  which means that the latest images on the given channel are used, regardless
+  of their branch.
+
+`-C, --channel CHANNEL`
+  Specifies the updates.joyent.com channel from which images should be
+  downloaded unless `-n` is used. By default, this value is set to the current
+  value of `update_channel` in this data-center, obtained from the `sdc`
+  application in SAPI. Use the `sdcadm channel` command to view or change
+  the default value. Using an empty string as the argument will cause
+  manta-init to search for images on any channel.
 
 `-c, --concurrent_downloads N`
   Specifies that no more than `N` zone images should be downloaded
@@ -71,7 +85,7 @@ Non-zero
 
 ## COPYRIGHT
 
-Copyright (c) 2016 Joyent Inc.
+Copyright 2019 Joyent, Inc.
 
 ## SEE ALSO
 

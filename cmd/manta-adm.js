@@ -876,12 +876,24 @@ MantaAdm.prototype.do_update = function (subcmd, opts, args, callback)
 		function fetchDeployed(_, stepcb) {
 			adm.fetchDeployed(stepcb);
 		},
+		function determineDefaultChannel(_, stepcb) {
+			if (opts.skip_verify_channel) {
+				stepcb();
+				return;
+			}
+			adm.determineSdcChannel(stepcb);
+		},
 		function generatePlan(_, stepcb) {
 			adm.generatePlan({
 				service: service,
 				noreprovision: opts.no_reprovision,
 				experimental: opts.experimental
 			}, stepcb);
+		},
+		function verifyPlan(_, stepcb) {
+			adm.verifyPlan(
+			    {skip_verify_channel: opts.skip_verify_channel},
+			    stepcb);
 		},
 		function dumpPlan(_, stepcb) {
 			adm.execPlan(process.stdout, process.stderr,
@@ -954,6 +966,13 @@ MantaAdm.prototype.do_update.options = [
     'names': [ 'experimental', 'X' ],
     'type':  'bool',
     'help': 'Allow deployment of experimental services'
+},
+{
+    'names': [ 'skip-verify-channel' ],
+    'type': 'bool',
+    'help': 'When provisioning an image, avoid verifying that this image ' +
+    'comes from the default update channel for this datacenter',
+    'default': false
 } ];
 
 MantaAdm.prototype.do_zk = MantaAdmZk;
