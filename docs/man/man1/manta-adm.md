@@ -70,6 +70,9 @@ Services that are part of the Manta application include:
 **buckets-postgres**
   PostgreSQL databases used for storing object metadata for the buckets system
 
+**buckets-api**
+  Handles end user buckets API requests
+
 **electric-boray**
   Boray proxy for buckets that handles sharding using consistent hashing
 
@@ -126,6 +129,7 @@ Services that are part of the Manta application include:
 
 **webapi**
   Handles end user API requests
+
 
 These services are described in much more detail in the Manta Operator's Guide.
 

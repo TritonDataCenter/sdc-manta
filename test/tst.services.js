@@ -42,6 +42,7 @@ var knownServices = [
     'pgstatsmon',
     'garbage-collector',
     'prometheus',
+    'buckets-api',
     'buckets-postgres',
     'boray',
     'electric-boray'
