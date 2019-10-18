@@ -1,7 +1,9 @@
+@Library('jenkins-joylib@v1.0.0') _
+
 pipeline {
 
     agent {
-        label '!platform:true && image_ver:15.4.1 && pkgsrc_arch:multiarch && pi:20151126T062538Z && jenkins_agent:2'
+        label joyCommonLabels(image_ver: '15.4.1')
     }
 
     options {
@@ -23,13 +25,14 @@ pipeline {
         }
         stage('build image and upload') {
             steps {
-                sh('''
-set -o errexit
-set -o pipefail
-
-export ENGBLD_BITS_UPLOAD_IMGAPI=true
-make print-BRANCH print-STAMP all release publish buildimage bits-upload''')
+                joyBuildImageAndUpload()
             }
+        }
+    }
+
+    post {
+        always {
+            joyMattermostNotification()
         }
     }
 }
