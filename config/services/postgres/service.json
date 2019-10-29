@@ -5,6 +5,7 @@
 		"max_lwps": 256000
 	},
 	"metadata": {
+		"PG_DEFAULT_VERSION": "9.6",
 		"PG_DIR": "/manatee/pg/data"
 	}
 }
