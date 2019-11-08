@@ -7,7 +7,7 @@
  */
 
 /*
- * Copyright (c) 2019, Joyent, Inc.
+ * Copyright 2019 Joyent, Inc.
  */
 
 /*
@@ -585,6 +585,7 @@ var pipelineFuncs = [
 		extra.metadata['MANTA_REJECT_UNAUTHORIZED'] = false;
 		extra.metadata['MANTA_TLS_INSECURE'] = '1';
 		extra.metadata['MUSKIE_MULTI_DC'] = false;
+		extra.metadata['BUCKETS_API_MULTI_DC'] = false;
 
 		/*
 		 * Because of a series of unfortunate bugs, there was a flag
