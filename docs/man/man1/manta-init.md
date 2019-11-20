@@ -35,8 +35,7 @@ run this command except as documented in the Manta Operator's Guide.**
   downloaded unless `-n` is used. By default, this value is set to the current
   value of `update_channel` in this data-center, obtained from the `sdc`
   application in SAPI. Use the `sdcadm channel` command to view or change
-  the default value. Using an empty string as the argument will cause
-  manta-init to search for images on any channel.
+  the default value.
 
 `-c, --concurrent_downloads N`
   Specifies that no more than `N` zone images should be downloaded

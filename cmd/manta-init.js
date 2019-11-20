@@ -228,10 +228,18 @@ function findLatestImage(service, cb) {
 
 	var image_name = services.serviceNameToImageName(service);
 	var version_substr = ARGV.branch;
+	// This is usually the channel set in SAPI if no -C argument was
+	// passed. If there's no channel in SAPI, we use the server's
+	// default channel.
 	var channel = ARGV.channel;
 
-	log.info('finding image %s for service %s on channel "%s"',
-	    image_name, service, channel);
+	if (channel === null) {
+		log.info('finding image %s for service %s on ' +
+		    'default update channel', image_name, service);
+	} else {
+		log.info('finding image %s for service %s on channel "%s"',
+		    image_name, service, channel);
+	}
 
 	var onSearchFinish = function (err, image) {
 		if (err) {
@@ -267,9 +275,11 @@ function findLatestImage(service, cb) {
 		    version_substr);
 		filters.version = '~' + version_substr;
 	}
-	if (channel.length > 0) {
+
+	if (channel) {
 		filters.channel = channel;
 	}
+
 	log.info({ filters: filters }, 'search for images');
 
 	remote_imgapi.listImages(filters, function (err, images) {
@@ -423,8 +433,10 @@ if (typeof (ARGV.c) == 'number' && ARGV.c > 0 && ARGV.c < 128 &&
 	usage('unsupported value for "-c" option ' +
 	    '(must be a positive integer less than 128)');
 }
-if (typeof (ARGV.channel) === 'boolean') {
-	ARGV.channel = '';
+
+if (typeof (ARGV.channel) === 'boolean' || ARGV.channel === '*') {
+	usage('unsupported value for "-C" option ' +
+	    '(must not be "*" or an empty string)');
 }
 
 var pipelineFuncs = [
@@ -736,8 +748,12 @@ var pipelineFuncs = [
 		}
 
 		log.info('determining update_channel from sapi');
-		common.getSdcChannel.call(self,
-			{}, function (err, channel) {
+		var opts = {
+			sapi: self.SAPI,
+			log: self.log
+		};
+		common.getSdcChannel(opts,
+			function (err, channel) {
 			if (!err) {
 				ARGV.channel = channel;
 				return (cb(null));
