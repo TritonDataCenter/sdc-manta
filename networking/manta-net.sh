@@ -930,16 +930,13 @@ fetch_distribute_svcs || fatal "failed to determine if GZ SMF services" \
     "should be distributed"
 handle_tag 'admin' || fatal "failed to handle tag for admin nic_tag"
 handle_tag 'manta' || fatal "failed to handle manta nic_tag"
-handle_tag 'marlin' || fatal "failed to handle marlin nic_tag"
 
 handle_network 'admin' || fatal "failed to handle admin network"
 handle_network 'manta' || fatal "failed to handle manta network"
-handle_network 'marlin' || fatal "failed to handle marlin network"
 
 update_admin_routes || fatal "failed to fix up admin networks"
 
 add_tags 'manta' 'manta_nodes' || fatal "failed to add manta nic tag to CNs"
-add_tags 'marlin' 'marlin_nodes' || fatal "failed to add marlin nic tag to CNs"
 
 setup_output_dir || fatal "failed to setup output directory"
 allocate_manta_ips || fatal "failed to allocate ips for manta nics for GZs"
