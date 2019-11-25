@@ -20,7 +20,7 @@ manta-adm - administer a Manta deployment
 
 `manta-adm show [-l LOG_FILE] [-js] SERVICE`
 
-`manta-adm update [-l LOG_FILE] [-n] [-y] [--no-reprovision] [--skip-verify-channel] FILE [SERVICE]`
+`manta-adm update [-l LOG_FILE] [-n] [-y] [--no-reprovision] [--skip-verify-remote] [--skip-verify-channel] FILE [SERVICE]`
 
 `manta-adm zk list [-l LOG_FILE] [-H] [-o FIELD...]`
 
@@ -764,7 +764,7 @@ Example: show only postgres zones in the current datacenter
 
 ### "update" subcommand
 
-`manta-adm update [-l LOG_FILE] [-n] [-y] [--no-reprovision] FILE [SERVICE]`
+`manta-adm update [-l LOG_FILE] [-n] [-y] [--no-reprovision] [--skip-verify-remote] [--skip-verify-channel] FILE [SERVICE]`
 
 The `manta-adm update` command updates a Manta deployment to match the JSON
 configuration stored at path `FILE`.  The JSON configuration describes the
@@ -793,6 +793,12 @@ options described above, plus:
 `--no-reprovision`
   When upgrading a zone, always provision a new zone and deprovision the
   previous one, rather than reprovisioning the existing one.
+
+`--skip-verify-channel`
+  When upgrading, do perform any lookups on the "remote" (usually https://updates.joyent.com)
+  imgapi channel that was set on the headnode using the `sdcadm channel`
+  command. Typically, this option would be used when operating a Triton instance
+  that is not connected to the internet.
 
 `--skip-verify-channel`
   When upgrading, do not verify that the images being provisioned or

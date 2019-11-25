@@ -891,9 +891,10 @@ MantaAdm.prototype.do_update = function (subcmd, opts, args, callback)
 			}, stepcb);
 		},
 		function verifyPlan(_, stepcb) {
-			adm.verifyPlan(
-			    {skip_verify_channel: opts.skip_verify_channel},
-			    stepcb);
+			adm.verifyPlan({
+				skip_verify_channel: opts.skip_verify_channel,
+				skip_verify_remote: opts.skip_verify_remote
+			}, stepcb);
 		},
 		function dumpPlan(_, stepcb) {
 			adm.execPlan(process.stdout, process.stderr,
@@ -966,6 +967,13 @@ MantaAdm.prototype.do_update.options = [
     'names': [ 'experimental', 'X' ],
     'type':  'bool',
     'help': 'Allow deployment of experimental services'
+},
+{
+	'names': [ 'skip-verify-remote' ],
+	'type': 'bool',
+	'help': 'When provisioning an image, avoid doing any lookups against ' +
+	'the remote update imgapi instance for this datacenter',
+	'default': false
 },
 {
     'names': [ 'skip-verify-channel' ],
