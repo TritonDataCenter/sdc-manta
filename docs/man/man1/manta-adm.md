@@ -794,8 +794,8 @@ options described above, plus:
   When upgrading a zone, always provision a new zone and deprovision the
   previous one, rather than reprovisioning the existing one.
 
-`--skip-verify-channel`
-  When upgrading, do perform any lookups on the "remote" (usually https://updates.joyent.com)
+`--skip-verify-remote`
+  When upgrading, do not perform any lookups on the "remote" (usually https://updates.joyent.com)
   imgapi channel that was set on the headnode using the `sdcadm channel`
   command. Typically, this option would be used when operating a Triton instance
   that is not connected to the internet.
