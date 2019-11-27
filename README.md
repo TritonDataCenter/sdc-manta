@@ -120,3 +120,4 @@ the sdc-manta repository.  There are several steps involved there:
 For information on how to deploy manta, add a new service, or learn about
 manta's configuration, see the documentation in the
 [manta](http://github.com/joyent/manta) repository.
+Make a change to this file.
