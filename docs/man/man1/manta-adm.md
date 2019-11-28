@@ -20,7 +20,7 @@ manta-adm - administer a Manta deployment
 
 `manta-adm show [-l LOG_FILE] [-js] SERVICE`
 
-`manta-adm update [-l LOG_FILE] [-n] [-y] [--no-reprovision] [--skip-verify-remote] [--skip-verify-channel] FILE [SERVICE]`
+`manta-adm update [-l LOG_FILE] [-n] [-y] [--no-reprovision] [--skip-verify-channel] FILE [SERVICE]`
 
 `manta-adm zk list [-l LOG_FILE] [-H] [-o FIELD...]`
 
