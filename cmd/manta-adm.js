@@ -858,14 +858,6 @@ MantaAdm.prototype.do_update = function (subcmd, opts, args, callback)
 		return;
 	}
 
-	if (opts.skip_verify_remote && !opts.skip_verify_channel) {
-		callback(new Error(
-		    'Channel verification requires remote imgapi lookups. ' +
-		    'Use --skip_verify_channel as well as ' +
-		    '--skip-verify-remote.'));
-		return;
-	}
-
 	filename = args[0];
 	if (args.length == 2)
 		service = args[1];
@@ -900,8 +892,7 @@ MantaAdm.prototype.do_update = function (subcmd, opts, args, callback)
 		},
 		function verifyPlan(_, stepcb) {
 			adm.verifyPlan({
-				skip_verify_channel: opts.skip_verify_channel,
-				skip_verify_remote: opts.skip_verify_remote
+				skip_verify_channel: opts.skip_verify_channel
 			}, stepcb);
 		},
 		function dumpPlan(_, stepcb) {
@@ -975,14 +966,6 @@ MantaAdm.prototype.do_update.options = [
     'names': [ 'experimental', 'X' ],
     'type':  'bool',
     'help': 'Allow deployment of experimental services'
-},
-{
-	'names': [ 'skip-verify-remote' ],
-	'type': 'bool',
-	'help': 'When provisioning an image, avoid doing any lookups against ' +
-	'the remote update imgapi instance for this datacenter. ' +
-	'Requires --skip-verify-channel',
-	'default': false
 },
 {
     'names': [ 'skip-verify-channel' ],
