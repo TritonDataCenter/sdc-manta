@@ -891,9 +891,9 @@ MantaAdm.prototype.do_update = function (subcmd, opts, args, callback)
 			}, stepcb);
 		},
 		function verifyPlan(_, stepcb) {
-			adm.verifyPlan(
-			    {skip_verify_channel: opts.skip_verify_channel},
-			    stepcb);
+			adm.verifyPlan({
+				skip_verify_channel: opts.skip_verify_channel
+			}, stepcb);
 		},
 		function dumpPlan(_, stepcb) {
 			adm.execPlan(process.stdout, process.stderr,

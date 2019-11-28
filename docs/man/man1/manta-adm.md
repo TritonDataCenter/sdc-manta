@@ -764,7 +764,7 @@ Example: show only postgres zones in the current datacenter
 
 ### "update" subcommand
 
-`manta-adm update [-l LOG_FILE] [-n] [-y] [--no-reprovision] FILE [SERVICE]`
+`manta-adm update [-l LOG_FILE] [-n] [-y] [--no-reprovision] [--skip-verify-channel] FILE [SERVICE]`
 
 The `manta-adm update` command updates a Manta deployment to match the JSON
 configuration stored at path `FILE`.  The JSON configuration describes the
