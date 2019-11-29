@@ -555,9 +555,7 @@ MantaAdmAccelGc.prototype.do_enable = function(subcmd, opts, args, callback) {
     account = args[0];
 
     if (account === 'poseidon') {
-        callback(
-            new Error('accelerated gc is not supported for poseidon')
-        );
+        callback(new Error('accelerated gc is not supported for poseidon'));
         return;
     }
 
@@ -604,9 +602,7 @@ MantaAdmAccelGc.prototype.do_disable = function(subcmd, opts, args, callback) {
     account = args[0];
 
     if (account === 'poseidon') {
-        callback(
-            new Error('accelerated gc is not supported for poseidon')
-        );
+        callback(new Error('accelerated gc is not supported for poseidon'));
         return;
     }
 
@@ -1171,9 +1167,7 @@ MantaAdmZk.prototype.do_fixup = function(subcmd, opts, args, callback) {
                     });
 
                     if (opts.dryrun) {
-                        console.error(
-                            'To repair, leave off -n (--dry-run)'
-                        );
+                        console.error('To repair, leave off -n (--dry-run)');
                     }
 
                     stepcb();
@@ -2055,9 +2049,7 @@ MantaAdmAlarmMaint.prototype.do_create = function(
     assertplus.ok(!isNaN(tend));
 
     if (tend <= tstart) {
-        callback(
-            new VError('specified window does not start before it ends')
-        );
+        callback(new VError('specified window does not start before it ends'));
         return;
     }
 

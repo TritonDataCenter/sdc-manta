@@ -358,11 +358,7 @@ async.waterfall(
                 function(uuid, subcb) {
                     sapi.deleteService(uuid, function(err) {
                         if (err) {
-                            log.error(
-                                err,
-                                'failed to delete service %s',
-                                uuid
-                            );
+                            log.error(err, 'failed to delete service %s', uuid);
                         } else {
                             log.info('deleted service %s', uuid);
                         }
@@ -389,11 +385,7 @@ async.waterfall(
 
             sapi.deleteApplication(app.uuid, function(err) {
                 if (err) {
-                    log.error(
-                        err,
-                        'failed to delete application %s',
-                        app.uuid
-                    );
+                    log.error(err, 'failed to delete application %s', app.uuid);
                 } else {
                     log.info('deleted application %s', app.uuid);
                 }
@@ -423,11 +415,7 @@ async.waterfall(
 
                     amon.deleteProbe(POSEIDON.uuid, uuid, function(err) {
                         if (err) {
-                            log.error(
-                                err,
-                                'failed to delete probe %s',
-                                uuid
-                            );
+                            log.error(err, 'failed to delete probe %s', uuid);
                         } else {
                             log.info('deleted probe %s', uuid);
                         }

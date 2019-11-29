@@ -171,10 +171,7 @@ function runTestCase(testcase, callback) {
         for (j = 0; j < warnings.length; j++) {
             if (expected[i].test(warnings[j].message)) {
                 if (verbose) {
-                    console.error(
-                        'found expected warning: %s',
-                        expected[i]
-                    );
+                    console.error('found expected warning: %s', expected[i]);
                 }
                 break;
             }

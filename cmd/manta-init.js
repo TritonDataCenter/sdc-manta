@@ -79,8 +79,7 @@ var ARGV = optimist.options({
     },
     m: {
         alias: 'marlin_image',
-        describe:
-            'Use the specified image_uuid instead of searching for latest'
+        describe: 'Use the specified image_uuid instead of searching for latest'
     },
     n: {
         alias: 'no_download',
@@ -573,10 +572,7 @@ var pipelineFuncs = [
 
             sapi.setMode('full', function(suberr) {
                 if (suberr) {
-                    log.error(
-                        suberr,
-                        'failed to upgrade to SAPI full mode'
-                    );
+                    log.error(suberr, 'failed to upgrade to SAPI full mode');
                     return cb(suberr);
                 }
 
@@ -646,10 +642,7 @@ var pipelineFuncs = [
 
         ufds.modify(operatorsdn, entry, function(err, res) {
             if (err) {
-                log.error(
-                    err,
-                    'failed to add poseidon to operators group'
-                );
+                log.error(err, 'failed to add poseidon to operators group');
             }
 
             return cb(err);
@@ -716,9 +709,7 @@ var pipelineFuncs = [
             self.config.region_name === undefined ||
             self.config.region_name === ''
         ) {
-            return cb(
-                new Error('config file did not contain a region_name.')
-            );
+            return cb(new Error('config file did not contain a region_name.'));
         }
 
         extra.metadata['REGION'] = self.config.region_name;
