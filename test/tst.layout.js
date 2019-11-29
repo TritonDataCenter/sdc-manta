@@ -404,7 +404,7 @@ function main() {
 function mkserver(role, racknum, servernum, aznum) {
     var rack, cnid, server, azname;
 
-    assertplus.ok(['metadata', 'storage'].indexOf(role) != -1);
+    assertplus.ok(['metadata', 'storage'].indexOf(role) !== -1);
     assertplus.number(racknum);
     assertplus.ok(racknum >= 0);
     assertplus.ok(racknum < 100);

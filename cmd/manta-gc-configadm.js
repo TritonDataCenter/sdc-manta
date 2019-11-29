@@ -422,7 +422,7 @@ function validateGcInstanceConfigs(metadata, oldFields, newFields, callback) {
             }
             return !md.hasOwnProperty(field);
         });
-        if (missingOld.length != 0 && missingNew.length != 0) {
+        if (missingOld.length !== 0 && missingNew.length !== 0) {
             errors.push(
                 new VError(
                     'garbage-collector "%s" ' +

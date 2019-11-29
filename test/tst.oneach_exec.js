@@ -424,7 +424,7 @@ MockUrClient.prototype.exec = function(args, callback) {
         args: args
     });
 
-    iszone = args['script'].indexOf('zlogin') != -1;
+    iszone = args['script'].indexOf('zlogin') !== -1;
     setImmediate(callback, null, {
         exit_status: 0,
         stdout: iszone ? 'in zone' : 'global zone',

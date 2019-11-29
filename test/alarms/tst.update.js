@@ -661,7 +661,7 @@ function generateMockAmonObjects(mock, callback) {
                  * probes.
                  */
                 mock.config.groups = mock.config.groups.filter(function(g) {
-                    return g.uuid != groupToRm;
+                    return g.uuid !== groupToRm;
                 });
                 jsprim.forEachKey(mock.config.agentprobes, function(
                     agentuuid,
@@ -677,7 +677,7 @@ function generateMockAmonObjects(mock, callback) {
 
                     mock.config.agentprobes[agentuuid] = agentprobes.filter(
                         function(p) {
-                            return p.group != groupToRm;
+                            return p.group !== groupToRm;
                         }
                     );
                 });
@@ -689,7 +689,7 @@ function generateMockAmonObjects(mock, callback) {
                 mock.config.agentprobes[nsagent] = mock.config.agentprobes[
                     nsagent
                 ].filter(function(p) {
-                    return p.group != 'deployed-group-uuid-1';
+                    return p.group !== 'deployed-group-uuid-1';
                 });
 
                 /*

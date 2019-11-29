@@ -593,7 +593,7 @@ MantaAdmAccelGc.prototype.do_disable = function(subcmd, opts, args, callback) {
     var self;
     var account;
 
-    if (args.length != 1) {
+    if (args.length !== 1) {
         callback(new Error('missing arguments: ACCOUNT-LOGIN'));
         return;
     }
@@ -642,7 +642,7 @@ MantaAdmAccelGc.prototype.do_accounts = function(subcmd, opts, args, callback) {
     self = this;
     options = {};
 
-    if (args.length != 0) {
+    if (args.length !== 0) {
         callback(new Error('unexpected arguments'));
         return;
     }
@@ -692,7 +692,7 @@ MantaAdm.prototype.do_genconfig = function(subcmd, opts, args, callback) {
             callback(new Error('unexpected arguments'));
             return;
         }
-    } else if (args.length != 1 || (args[0] != 'lab' && args[0] != 'coal')) {
+    } else if (args.length !== 1 || (args[0] !== 'lab' && args[0] !== 'coal')) {
         callback(new Error('expected "lab", "coal", or --from-file option'));
         return;
     } else if (opts.directory) {

@@ -387,7 +387,7 @@ var validPipeline = [
         console.error(
             'removing %s old window%s',
             ctx.ctx_found.length,
-            ctx.ctx_found.length != 1 ? 's' : ''
+            ctx.ctx_found.length !== 1 ? 's' : ''
         );
         forkexec.forkExecWait(
             {
