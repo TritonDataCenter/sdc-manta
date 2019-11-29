@@ -30,8 +30,6 @@ PROBECHK	 = node ./tools/probecfgchk.js
 # Options and overrides
 #
 
-JSL_CONF_NODE	 = tools/jsl.node.conf
-JSSTYLE_FLAGS	 = -o doxygen
 # Overrides needed to use v8plus for binary modules
 NPM_ENV		 = MAKE_OVERRIDES="CTFCONVERT=/bin/true CTFMERGE=/bin/true"
 
@@ -45,8 +43,7 @@ BASH_FILES	 = scripts/user-script.sh  \
 		   tools/rsync-to
 DOC_FILES	 = index.md
 JS_FILES	:= $(shell find cmd lib test networking -name '*.js')
-JSL_FILES_NODE	 = $(JS_FILES)
-JSSTYLE_FILES	 = $(JS_FILES)
+ESLINT_FILES	:= $(JS_FILES)
 JSON_FILES	 = package.json \
 		   $(shell find config \
 				manifests \
