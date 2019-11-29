@@ -140,7 +140,7 @@ util.inherits(MantaAdm, cmdln.Cmdln);
 MantaAdm.prototype.initAdm = function(opts, callback) {
     var logstreams;
 
-    if (opts.log_file == 'stdout') {
+    if (opts.log_file === 'stdout') {
         logstreams = [
             {
                 level: 'debug',
@@ -705,10 +705,10 @@ MantaAdm.prototype.do_genconfig = function(subcmd, opts, args, callback) {
         var func;
         var options = {};
 
-        if (args[0] == 'lab') {
+        if (args[0] === 'lab') {
             func = adm.dumpConfigLab;
             options['outstream'] = process.stdout;
-        } else if (args[0] == 'coal') {
+        } else if (args[0] === 'coal') {
             func = adm.dumpConfigCoal;
             options['outstream'] = process.stdout;
         } else {
@@ -900,7 +900,7 @@ MantaAdm.prototype.do_update = function(subcmd, opts, args, callback) {
     }
 
     filename = args[0];
-    if (args.length == 2) {
+    if (args.length === 2) {
         service = args[1];
     }
 
@@ -1213,7 +1213,7 @@ MantaAdmZk.prototype.do_fixup = function(subcmd, opts, args, callback) {
                 console.error(
                     '%d issue%s repaired',
                     nfixed,
-                    nfixed == 1 ? '' : 's'
+                    nfixed === 1 ? '' : 's'
                 );
             }
             self.mn_parent.finiAdm();
@@ -2002,7 +2002,7 @@ MantaAdmAlarmMaint.prototype.do_create = function(
         callback(new VError('argument is required: --start'));
         return;
     }
-    if (opts.start == 'now') {
+    if (opts.start === 'now') {
         params['start'] = new Date(tnow);
     } else {
         var d = Date.parse(opts.start);
@@ -2650,7 +2650,7 @@ function checkColumns(allowed, columns) {
 
     for (i = 0; i < selected.length; i++) {
         c = selected[i];
-        if (allowed.indexOf(c) == -1) {
+        if (allowed.indexOf(c) === -1) {
             return new VError('unknown column: "%s"', c);
         }
     }

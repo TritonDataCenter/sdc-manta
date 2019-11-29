@@ -335,9 +335,9 @@ function main() {
     console.error(
         '%d test case%s executed, %d failure%s',
         nexecuted,
-        nexecuted == 1 ? '' : 's',
+        nexecuted === 1 ? '' : 's',
         nerrors,
-        nerrors == 1 ? '' : 's'
+        nerrors === 1 ? '' : 's'
     );
     process.exit(nerrors === 0 ? 0 : 1);
 }
@@ -388,7 +388,7 @@ function runTestCase(testcase) {
          * the arguments anyway, so just remove it.
          */
         assertplus.ok(actual.hasOwnProperty('streamStatus'));
-        assertplus.ok(actual['streamStatus'] == process.stderr);
+        assertplus.ok(actual['streamStatus'] === process.stderr);
         delete actual['streamStatus'];
 
         if (expected_err !== null) {

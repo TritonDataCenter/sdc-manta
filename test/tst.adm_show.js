@@ -22,35 +22,6 @@ var madm = require('../lib/adm');
 var nrun = 0;
 var separator = '--------------------------------------------------';
 
-function main() {
-    vasync.forEachPipeline(
-        {
-            func: runTestCase,
-            inputs: testCases
-        },
-        function(err) {
-            assertplus.ok(!err);
-            assertplus.equal(nrun, testCases.length);
-            console.error('%d test cases run', nrun);
-        }
-    );
-}
-
-function runTestCase(t, callback) {
-    assertplus.string(t.name);
-    assertplus.ok(typeof t.config === 'object');
-    assertplus.ok(typeof t.func === 'function');
-
-    console.log(separator);
-    console.log('test case "%s"', t.name);
-
-    t.func.call(adm, process.stdout, t.config);
-
-    console.log(separator);
-    nrun++;
-    callback();
-}
-
 var fakeDeployed = {
     cn001: {
         marlin: {img001: 10},
@@ -149,5 +120,34 @@ var testCases = [
         config: {}
     }
 ];
+
+function runTestCase(t, callback) {
+    assertplus.string(t.name);
+    assertplus.ok(typeof t.config === 'object');
+    assertplus.ok(typeof t.func === 'function');
+
+    console.log(separator);
+    console.log('test case "%s"', t.name);
+
+    t.func.call(adm, process.stdout, t.config);
+
+    console.log(separator);
+    nrun++;
+    callback();
+}
+
+function main() {
+    vasync.forEachPipeline(
+        {
+            func: runTestCase,
+            inputs: testCases
+        },
+        function(err) {
+            assertplus.ok(!err);
+            assertplus.equal(nrun, testCases.length);
+            console.error('%d test cases run', nrun);
+        }
+    );
+}
 
 main();

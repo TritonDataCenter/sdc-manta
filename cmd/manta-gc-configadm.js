@@ -71,7 +71,7 @@ util.inherits(MantaGcConfigAdm, cmdln.Cmdln);
 MantaGcConfigAdm.prototype.initAdm = function(opts, callback) {
     var logstreams;
 
-    if (opts.log_file == 'stdout') {
+    if (opts.log_file === 'stdout') {
         logstreams = [
             {
                 level: 'debug',

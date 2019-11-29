@@ -14,12 +14,9 @@
 
 var assertplus = require('assert-plus');
 var bunyan = require('bunyan');
-var jsprim = require('jsprim');
 var vasync = require('vasync');
 var CollectorStream = require('./CollectorStream');
 var VError = require('verror').VError;
-var readable = require('readable-stream');
-var util = require('util');
 var sprintf = require('extsprintf').sprintf;
 
 var madm = require('../lib/adm');
@@ -28,7 +25,14 @@ var outputHeader =
     '# DATACENTER ZONENAME                             IP                PORT';
 var localDc = 'testdc1';
 var remoteDc = 'testdc2';
-var verbose = process.argv[2] == '-v';
+var verbose = process.argv[2] === '-v';
+
+var log = new bunyan({
+    name: 'tst.zk.js',
+    level: process.env['LOG_LEVEL'] || 'warn',
+    serializers: bunyan.stdSerializers
+});
+
 
 /*
  * Helper functions
@@ -154,7 +158,7 @@ function runTestCase(testcase, callback) {
     /*
      * Check for expected output.
      */
-    if (collector.data != testcase.output) {
+    if (collector.data !== testcase.output) {
         console.error('output mismatch! expected:');
         console.error(testcase.output);
         console.error('but found:');
@@ -177,7 +181,7 @@ function runTestCase(testcase, callback) {
             }
         }
 
-        if (j == warnings.length) {
+        if (j === warnings.length) {
             callback(
                 new VError('no match for expected warning: "%s"', expected[i])
             );
@@ -212,12 +216,6 @@ function identVm(n) {
 /*
  * Mainline
  */
-
-var log = new bunyan({
-    name: 'tst.zk.js',
-    level: process.env['LOG_LEVEL'] || 'warn',
-    serializers: bunyan.stdSerializers
-});
 
 vasync.forEachPipeline(
     {

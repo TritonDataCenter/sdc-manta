@@ -515,7 +515,7 @@ if (
     typeof ARGV.c === 'number' &&
     ARGV.c > 0 &&
     ARGV.c < 128 &&
-    Math.floor(ARGV.c) == ARGV.c
+    Math.floor(ARGV.c) === ARGV.c
 ) {
     CONCURRENCY = ARGV.c;
 } else if (ARGV.c !== undefined) {
@@ -1246,7 +1246,7 @@ var pipelineFuncs = [
         assert.func(cb, 'cb');
 
         for (i = 0; i < sapi_services.length; i++) {
-            if (sapi_services[i].name == 'webapi') {
+            if (sapi_services[i].name === 'webapi') {
                 svc = sapi_services[i];
                 break;
             }

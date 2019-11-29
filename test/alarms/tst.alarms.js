@@ -132,7 +132,7 @@ function main() {
                         });
 
                         list.forEach(function(l) {
-                            assertplus.ok(l.alarm == alarmset.alarmForId(l.id));
+                            assertplus.ok(l.alarm === alarmset.alarmForId(l.id));
                         });
 
                         /*

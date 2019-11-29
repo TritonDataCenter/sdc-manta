@@ -172,12 +172,12 @@ function main() {
             inputs: test_cases,
             func: runTestCase
         },
-        function(err) {
+        function(_err) {
             assertplus.equal(nexecuted, test_cases.length);
             console.error(
                 '%d test case%s executed',
                 nexecuted,
-                nexecuted == 1 ? '' : 's'
+                nexecuted === 1 ? '' : 's'
             );
         }
     );

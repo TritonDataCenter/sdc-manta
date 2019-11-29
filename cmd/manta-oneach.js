@@ -94,7 +94,7 @@ function main() {
     });
 
     exec = new oneach.mzCommandExecutor(args);
-    if (args.outputMode == 'text') {
+    if (args.outputMode === 'text') {
         next = new oneach.mzResultToText({
             omitHeader: args.omitHeader,
             outputBatch: args.outputBatch,
