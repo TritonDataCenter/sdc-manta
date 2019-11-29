@@ -110,7 +110,6 @@ var test_cases = [ {
     }
 }, {
     'name': 'bad service name',
-    /* JSSTYLED */
     'error': /unrecognized service: "devnullapi"/,
     'args': {
 	'scopeServices': [ 'devnullapi' ],
@@ -119,7 +118,6 @@ var test_cases = [ {
     }
 }, {
     'name': 'marlin zones explicitly disallowed',
-    /* JSSTYLED */
     'error': /unsupported service: "marlin"/,
     'args': {
 	'scopeServices': [ 'marlin' ],

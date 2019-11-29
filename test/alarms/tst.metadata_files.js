@@ -167,7 +167,6 @@ function main()
 			assertplus.ok(err !== null);
 			assertplus.ok(err instanceof Error);
 			assertplus.ok(!metadata);
-			/* JSSTYLED */
 			assertplus.ok(/readdir "junkDirectory".*ENOENT/.test(
 			    err.message));
 			callback();
@@ -189,7 +188,6 @@ function main()
 			assertplus.ok(err !== null);
 			assertplus.ok(err instanceof Error);
 			assertplus.equal(info.status, 1);
-			/* JSSTYLED */
 			assertplus.ok(/read ".*ENOENT.yaml": ENOENT/.test(
 			    info.stderr));
 			callback();
@@ -203,7 +201,6 @@ function main()
 			assertplus.ok(err instanceof Error);
 			assertplus.equal(info.status, 1);
 			assertplus.ok(
-			    /* JSSTYLED */
 			    /parse ".*file3": unexpected end of the stream/.
 			    test(info.stderr));
 			callback();

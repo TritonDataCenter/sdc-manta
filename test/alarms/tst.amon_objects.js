@@ -331,7 +331,6 @@ function generateTestCases()
 	    'name': 'alarm: bad "id"',
 	    'objtype': 'alarm',
 	    'input': input,
-	    /* JSSTYLED */
 	    'errmsg': /^property "id": string value found.*integer.*required$/
 	});
 
@@ -341,7 +340,6 @@ function generateTestCases()
 	    'name': 'alarm: bad "user"',
 	    'objtype': 'alarm',
 	    'input': input,
-	    /* JSSTYLED */
 	    'errmsg': /property "user":.*number.*found.*string.*required/
 	});
 
@@ -351,7 +349,6 @@ function generateTestCases()
 	    'name': 'alarm: bad "user"',
 	    'objtype': 'alarm',
 	    'input': input,
-	    /* JSSTYLED */
 	    'errmsg': /property "user":.*number.*found.*string.*required/
 	});
 
@@ -361,7 +358,6 @@ function generateTestCases()
 	    'name': 'alarm: bad "probeGroup"',
 	    'objtype': 'alarm',
 	    'input': input,
-	    /* JSSTYLED */
 	    'errmsg': /property "probeGroup":.*object.*found.*string.*required/
 	});
 
@@ -371,7 +367,6 @@ function generateTestCases()
 	    'name': 'alarm: bad "closed"',
 	    'objtype': 'alarm',
 	    'input': input,
-	    /* JSSTYLED */
 	    'errmsg': /property "closed":.*object.*found.*bool.*required/
 	});
 
@@ -381,7 +376,6 @@ function generateTestCases()
 	    'name': 'alarm: bad "suppressed"',
 	    'objtype': 'alarm',
 	    'input': input,
-	    /* JSSTYLED */
 	    'errmsg': /property "suppressed":.*object.*found.*bool.*required/
 	});
 
@@ -391,7 +385,6 @@ function generateTestCases()
 	    'name': 'alarm: bad "timeOpened"',
 	    'objtype': 'alarm',
 	    'input': input,
-	    /* JSSTYLED */
 	    'errmsg': /property "timeOpened":.*string.*found.*number.*required/
 	});
 
@@ -401,7 +394,6 @@ function generateTestCases()
 	    'name': 'alarm: bad "timeClosed"',
 	    'objtype': 'alarm',
 	    'input': input,
-	    /* JSSTYLED */
 	    'errmsg': /property "timeClosed":.*string.*found.*number.*required/
 	});
 
@@ -411,7 +403,6 @@ function generateTestCases()
 	    'name': 'alarm: bad "timeLastEvent"',
 	    'objtype': 'alarm',
 	    'input': input,
-	    /* JSSTYLED */
 	    'errmsg': /"timeLastEvent":.*string.*found.*number.*required/
 	});
 
@@ -421,7 +412,6 @@ function generateTestCases()
 	    'name': 'alarm: bad "numEvents"',
 	    'objtype': 'alarm',
 	    'input': input,
-	    /* JSSTYLED */
 	    'errmsg': /property "numEvents":.*string.*found.*integer.*required/
 	});
 
@@ -431,7 +421,6 @@ function generateTestCases()
 	    'name': 'alarm: bad "faults"',
 	    'objtype': 'alarm',
 	    'input': input,
-	    /* JSSTYLED */
 	    'errmsg': /property "faults":.*string.*found.*array.*required/
 	});
 
@@ -503,7 +492,6 @@ function generateTestCases()
 	    'name': 'fault: unsupported "type"',
 	    'objtype': 'alarm',
 	    'input': input,
-	    /* JSSTYLED */
 	    'errmsg': /property "faults\[0\].type":.*enumeration/
 	});
 
@@ -513,7 +501,6 @@ function generateTestCases()
 	    'name': 'fault: unsupported "type"',
 	    'objtype': 'alarm',
 	    'input': input,
-	    /* JSSTYLED */
 	    'errmsg': /property "faults\[0\].event.type":.*enumeration/
 	});
 
@@ -523,7 +510,6 @@ function generateTestCases()
 	    'name': 'fault: unsupported version"',
 	    'objtype': 'alarm',
 	    'input': input,
-	    /* JSSTYLED */
 	    'errmsg': /property "faults\[0\].event.v":.*enumeration/
 	});
 
@@ -543,7 +529,6 @@ function generateTestCases()
 	    'name': 'alarm: inconsistent close state (1)',
 	    'objtype': 'alarm',
 	    'input': input,
-	    /* JSSTYLED */
 	    'errmsg': /alarm's "closed" is not consistent with "timeClosed"/
 	});
 
@@ -553,7 +538,6 @@ function generateTestCases()
 	    'name': 'alarm: inconsistent close state (2)',
 	    'objtype': 'alarm',
 	    'input': input,
-	    /* JSSTYLED */
 	    'errmsg': /alarm's "closed" is not consistent with "timeClosed"/
 	});
 
