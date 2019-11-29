@@ -308,7 +308,7 @@ function findLatestImage(service, cb) {
 		}
 	}, function finishListRemoteImages(err) {
 		if (err) {
-			log.error('error listing remote images %d', err);
+			log.error(err, 'error listing remote images');
 			onSearchFinish(err);
 		} else {
 			if (images.length === 0) {
@@ -361,7 +361,7 @@ function findLatestLocalImage(image_names, version_substr, cb) {
 			nextImage();
 		});
 		}
-	}, function finishListRemoteImages(err) {
+	}, function finishListLocalImages(err) {
 		if (err) {
 			log.error('error listing local images %d', err);
 			cb(err);
@@ -858,7 +858,6 @@ var pipelineFuncs = [
 				    'uuid': ARGV.m,
 				    'name': imageNames[0]});
 			}
-
 
 			ctx.images = images;
 			return (cb(suberr));
