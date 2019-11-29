@@ -1,0 +1,61 @@
+#!/bin/bash
+#
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+#
+# Copyright 2019 Joyent, Inc.
+#
+
+#
+# Rsync the files in this working copy to the deployed zone on the given HN.
+#
+# Usage:
+#   ./tools/rsync-to HEADNODE
+#
+# Examples:
+#   ./tools/rsync-to root@10.99.99.7
+#   ./tools/rsync-to coal    # if you have a "coal" host entry in ~/.ssh/config
+#
+
+if [[ -n "$TRACE" ]]; then
+    export PS4='[\D{%FT%TZ}] ${BASH_SOURCE}:${LINENO}: ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+    set -o xtrace
+fi
+set -o errexit
+set -o pipefail
+
+
+TOP=$(cd $(dirname $0)/../; pwd)
+NODE="root@$1"
+
+if [[ -z "$ZONE" ]]; then
+    ZONE=$(ssh $NODE "vmadm lookup -1 alias=~^manta[0-9]+" 2>/dev/null)
+fi
+echo "ZONE: $ZONE"
+
+extraOpts=
+if [[ $(uname -s) != "SunOS" ]]; then
+    extraOpts="--exclude *.node --exclude build"
+else
+    # Clean node_modules everytime if we are rsync'ing from SunOS.
+    ssh $NODE rm -rf /zones/$ZONE/root/opt/smartdc/manta-deployment/node_modules
+fi
+
+rsync -av ${TOP}/ \
+    $NODE:/zones/$ZONE/root/opt/smartdc/manta-deployment/ \
+    $extraOpts \
+    --exclude /Jenkinsfile \
+    --exclude /LICENSE \
+    --exclude /Makefile \
+    --exclude /README.md \
+    --exclude /env.sh \
+    --exclude .git/ \
+    --exclude .history/ \
+    --exclude /boot/ \
+    --exclude /deps/ \
+    --exclude /test/
+
+rsync -av ${TOP}/boot/ \
+    $NODE:/zones/$ZONE/root/opt/smartdc/boot/ \
+    $extraOpts
