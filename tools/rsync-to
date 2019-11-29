@@ -1,5 +1,13 @@
 #!/bin/bash
 #
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+#
+# Copyright 2019 Joyent, Inc.
+#
+
+#
 # Rsync the files in this working copy to the deployed zone on the given HN.
 #
 # Usage:
@@ -46,8 +54,6 @@ rsync -av ${TOP}/ \
     --exclude .history/ \
     --exclude /boot/ \
     --exclude /deps/ \
-    --exclude /docs/ \
-    --exclude /tools/ \
     --exclude /test/
 
 rsync -av ${TOP}/boot/ \
