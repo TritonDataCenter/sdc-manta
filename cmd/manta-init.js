@@ -80,7 +80,7 @@ var ARGV = optimist.options({
     m: {
         alias: 'marlin_image',
         describe:
-            'Use the specified image_uuid instead of ' + 'searching for latest'
+            'Use the specified image_uuid instead of searching for latest'
     },
     n: {
         alias: 'no_download',
@@ -543,7 +543,7 @@ var pipelineFuncs = [
         if (ARGV.s && ['coal', 'lab', 'production'].indexOf(ARGV.s) === -1) {
             return cb(
                 new Error(
-                    'size option must be one of,' + ' coal, lab, or production.'
+                    'size option must be one of, coal, lab, or production.'
                 )
             );
         }
@@ -575,7 +575,7 @@ var pipelineFuncs = [
                 if (suberr) {
                     log.error(
                         suberr,
-                        'failed to upgrade ' + 'to SAPI full mode'
+                        'failed to upgrade to SAPI full mode'
                     );
                     return cb(suberr);
                 }
@@ -648,7 +648,7 @@ var pipelineFuncs = [
             if (err) {
                 log.error(
                     err,
-                    'failed to add poseidon to ' + 'operators group'
+                    'failed to add poseidon to operators group'
                 );
             }
 
@@ -717,7 +717,7 @@ var pipelineFuncs = [
             self.config.region_name === ''
         ) {
             return cb(
-                new Error('config file did not contain a ' + 'region_name.')
+                new Error('config file did not contain a region_name.')
             );
         }
 
@@ -882,7 +882,7 @@ var pipelineFuncs = [
 
         addConfig(dirname, updatefunc, function(err) {
             if (err) {
-                log.error(err, 'failed to load manifests ' + 'for %s', uuid);
+                log.error(err, 'failed to load manifests for %s', uuid);
                 return cb(err);
             }
 
@@ -1028,11 +1028,11 @@ var pipelineFuncs = [
                             return;
                         } else if (err) {
                             log.info(
-                                'origin image %s ' + 'already downloaded',
+                                'origin image %s already downloaded',
                                 uuid
                             );
                         } else {
-                            log.info('downloaded origin ' + 'image %s', uuid);
+                            log.info('downloaded origin image %s', uuid);
                         }
                         subcb();
                     }
@@ -1180,7 +1180,7 @@ var pipelineFuncs = [
                     extra.include_master = true;
 
                     log.info(
-                        'getting or creating service %s ' + 'with uuid %s',
+                        'getting or creating service %s with uuid %s',
                         svcname,
                         app_uuid
                     );

@@ -144,7 +144,7 @@ async.waterfall(
                 compute_id
             ) {
                 if (err) {
-                    log.error(err, 'unable to get or ' + 'create compute_id');
+                    log.error(err, 'unable to get or create compute_id');
                     return cb(err);
                 }
 
@@ -193,7 +193,7 @@ async.waterfall(
                 app.metadata['ZK_SERVERS'].length < 1
             ) {
                 message =
-                    'zk servers missing or empty in the ' + 'manta application';
+                    'zk servers missing or empty in the manta application';
                 log.error(
                     {
                         zkServers: app.metadata['ZK_SERVERS']

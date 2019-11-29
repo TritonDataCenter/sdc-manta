@@ -189,7 +189,7 @@ MantaGcConfigAdm.prototype.do_migrate_config = function(
                             err: err,
                             metadata: metadata
                         },
-                        'got deployed garbage-collector ' + 'configs'
+                        'got deployed garbage-collector configs'
                     );
                     next(err, metadata);
                 }
@@ -203,7 +203,7 @@ MantaGcConfigAdm.prototype.do_migrate_config = function(
                     {
                         err: err
                     },
-                    'validated garbage-collector ' + 'configs'
+                    'validated garbage-collector configs'
                 );
                 next(err, metadata);
             });
@@ -215,7 +215,7 @@ MantaGcConfigAdm.prototype.do_migrate_config = function(
                         err: err,
                         metadata: metadata
                     },
-                    'transformed garbage-collector ' + 'configs'
+                    'transformed garbage-collector configs'
                 );
                 next(err, metadata);
             });
@@ -335,7 +335,7 @@ MantaGcConfigAdm.prototype.do_migrate_config = function(
                             add: svcChanges.add,
                             remove: svcChanges.remove
                         },
-                        'updated garbage-collector ' + 'service metadata'
+                        'updated garbage-collector service metadata'
                     );
                     next(updateErr);
                 }
@@ -407,7 +407,7 @@ MantaGcConfigAdm.prototype.do_migrate_config.options = [
 function validateGcInstanceConfigs(metadata, oldFields, newFields, callback) {
     var errors = [];
     Object.keys(metadata).forEach(function(uuid) {
-        assertplus.uuid(uuid, 'expected garbage-collector ' + 'instance uuid');
+        assertplus.uuid(uuid, 'expected garbage-collector instance uuid');
         var md = metadata[uuid];
         var missingOld = oldFields.filter(function(field) {
             return !md.hasOwnProperty(field);
@@ -460,7 +460,7 @@ function validateGcInstanceConfigs(metadata, oldFields, newFields, callback) {
  */
 function translateGcInstanceConfigs(app, metadata, callback) {
     Object.keys(metadata).forEach(function(uuid) {
-        assertplus.uuid(uuid, 'expected garbage-collector ' + 'instance uuid');
+        assertplus.uuid(uuid, 'expected garbage-collector instance uuid');
         var md = metadata[uuid];
         var assignedShards = [];
         var lo = md['GC_SHARD_NUM_LO'] || 0;

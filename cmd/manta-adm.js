@@ -459,7 +459,7 @@ MantaAdmAccelGc.prototype.do_genconfig = function(
     var self;
 
     if (args.length !== 2) {
-        callback(new Error('missing arguments: IMAGE_UUID ' + 'NCOLLECTORS'));
+        callback(new Error('missing arguments: IMAGE_UUID NCOLLECTORS'));
         return;
     }
 
@@ -471,7 +471,7 @@ MantaAdmAccelGc.prototype.do_genconfig = function(
         callback(
             new VError(
                 num_collectors,
-                'unable to generate ' + 'garbage-collector deployment config'
+                'unable to generate garbage-collector deployment config'
             )
         );
         return;
@@ -556,7 +556,7 @@ MantaAdmAccelGc.prototype.do_enable = function(subcmd, opts, args, callback) {
 
     if (account === 'poseidon') {
         callback(
-            new Error('accelerated gc is not supported for ' + 'poseidon')
+            new Error('accelerated gc is not supported for poseidon')
         );
         return;
     }
@@ -605,7 +605,7 @@ MantaAdmAccelGc.prototype.do_disable = function(subcmd, opts, args, callback) {
 
     if (account === 'poseidon') {
         callback(
-            new Error('accelerated gc is not supported for ' + 'poseidon')
+            new Error('accelerated gc is not supported for poseidon')
         );
         return;
     }
@@ -739,7 +739,7 @@ MantaAdm.prototype.do_genconfig = function(subcmd, opts, args, callback) {
 
                 if (nissues !== 0) {
                     console.error(
-                        'error: bailing out ' + 'because of at least one issue'
+                        'error: bailing out because of at least one issue'
                     );
                     process.exit(1);
                 }
@@ -1172,7 +1172,7 @@ MantaAdmZk.prototype.do_fixup = function(subcmd, opts, args, callback) {
 
                     if (opts.dryrun) {
                         console.error(
-                            'To repair, leave off ' + '-n (--dry-run)'
+                            'To repair, leave off -n (--dry-run)'
                         );
                     }
 
@@ -1982,7 +1982,7 @@ MantaAdmAlarmMaint.prototype.do_create = function(
             if (!/^[a-zA-Z0-9_-]+$/.test(targets[i])) {
                 callback(
                     new VError(
-                        'identifier "%s": ' + 'does not look like a valid uuid',
+                        'identifier "%s": does not look like a valid uuid',
                         targets[i]
                     )
                 );
@@ -2056,7 +2056,7 @@ MantaAdmAlarmMaint.prototype.do_create = function(
 
     if (tend <= tstart) {
         callback(
-            new VError('specified window does not start ' + 'before it ends')
+            new VError('specified window does not start before it ends')
         );
         return;
     }
@@ -2079,7 +2079,7 @@ MantaAdmAlarmMaint.prototype.do_create = function(
 
     if (tend - tstart > maMaintWindowLong) {
         console.error(
-            'note: maintenance window exceeds expected ' + 'maximum (%s)',
+            'note: maintenance window exceeds expected maximum (%s)',
             common.fmtDuration(maMaintWindowLong)
         );
     }

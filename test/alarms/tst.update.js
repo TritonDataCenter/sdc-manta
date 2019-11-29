@@ -526,7 +526,7 @@ function generateMockAmonObjects(mock, callback) {
                         agent: 'svc-jobsupervisor-0'
                     }),
                     makeProbe({
-                        group: 'deployed-group-uuid-svc-' + 'jobsupervisor',
+                        group: 'deployed-group-uuid-svc-jobsupervisor',
                         name: 'upset.manta.test.jobsupervisor0',
                         agent: 'svc-jobsupervisor-0'
                     })
@@ -538,7 +538,7 @@ function generateMockAmonObjects(mock, callback) {
                         agent: 'svc-jobsupervisor-1'
                     }),
                     makeProbe({
-                        group: 'deployed-group-uuid-svc-' + 'jobsupervisor',
+                        group: 'deployed-group-uuid-svc-jobsupervisor',
                         name: 'upset.manta.test.jobsupervisor0',
                         agent: 'svc-jobsupervisor-1'
                     })

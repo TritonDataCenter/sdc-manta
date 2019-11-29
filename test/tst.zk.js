@@ -172,7 +172,7 @@ function runTestCase(testcase, callback) {
             if (expected[i].test(warnings[j].message)) {
                 if (verbose) {
                     console.error(
-                        'found expected ' + 'warning: %s',
+                        'found expected warning: %s',
                         expected[i]
                     );
                 }

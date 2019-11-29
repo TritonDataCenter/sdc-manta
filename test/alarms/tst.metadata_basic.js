@@ -299,7 +299,7 @@ function generateTestCases() {
             ),
             input: JSON.stringify([input]),
             errmsg: new RegExp(
-                '^parse "input": property ' + '"0.' + field + '":.*missing'
+                '^parse "input": property "0.' + field + '":.*missing'
             )
         });
     });
@@ -403,7 +403,7 @@ function generateTestCases() {
             }
         ]),
         errmsg: new RegExp(
-            '^parse "input": property "0.something": ' + 'unsupported property'
+            '^parse "input": property "0.something": unsupported property'
         )
     });
 
@@ -487,7 +487,7 @@ function generateTestCases() {
             }
         ]),
         errmsg: new RegExp(
-            '^parse "input": property "0.checks": ' + '.*minimum of 1.*'
+            '^parse "input": property "0.checks": .*minimum of 1.*'
         )
     });
 
@@ -579,7 +579,7 @@ function generateTestCases() {
             }
         ]),
         errmsg: new RegExp(
-            '^input: probe 1: event name contains ' + 'unsupported characters'
+            '^input: probe 1: event name contains unsupported characters'
         )
     });
 
@@ -595,7 +595,7 @@ function generateTestCases() {
             }
         ]),
         errmsg: new RegExp(
-            '^input: probe 1: event name contains ' + 'unsupported characters'
+            '^input: probe 1: event name contains unsupported characters'
         )
     });
 
@@ -803,7 +803,7 @@ function runTestCase(testcase) {
 
         if (!testcase.errmsg.test(errors[0].message)) {
             throw new VError(
-                'error message mismatch: found ' + '"%s", expected "%s"',
+                'error message mismatch: found "%s", expected "%s"',
                 errors[0].message,
                 testcase.errmsg.source
             );

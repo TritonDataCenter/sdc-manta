@@ -323,13 +323,13 @@ function findTestWindows(callback) {
                 var parts = strsplit(l.trim(), /\s+/, 2);
                 if (parts[1] == exampleNote) {
                     console.error(
-                        '    found window %s ' + 'from this test suite',
+                        '    found window %s from this test suite',
                         parts[0]
                     );
                     found.push(parts[0]);
                 } else {
                     console.error(
-                        '    ignoring ' + 'pre-existing window %s',
+                        '    ignoring pre-existing window %s',
                         parts[0]
                     );
                 }
