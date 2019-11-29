@@ -18,21 +18,18 @@ var util = require('util');
 
 module.exports = CollectorStream;
 
-function CollectorStream(options)
-{
-	readable.Transform.call(this, options);
-	this.data = '';
+function CollectorStream(options) {
+    readable.Transform.call(this, options);
+    this.data = '';
 }
 
 util.inherits(CollectorStream, readable.Transform);
 
-CollectorStream.prototype._transform = function (chunk, encoding, done)
-{
-	this.data += chunk;
-	done();
+CollectorStream.prototype._transform = function(chunk, encoding, done) {
+    this.data += chunk;
+    done();
 };
 
-CollectorStream.prototype._flush = function (callback)
-{
-	callback();
+CollectorStream.prototype._flush = function(callback) {
+    callback();
 };

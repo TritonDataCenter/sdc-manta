@@ -58,66 +58,65 @@ var mzUsageMessage = [
     '    --amqp-timeout SECONDS'
 ].join('\n');
 
-function main()
-{
-	var args, exec, next;
+function main() {
+    var args, exec, next;
 
-	cmdutil.exitOnEpipe();
-	cmdutil.configure({
-	    'synopses': mzSynopses,
-	    'usageMessage': mzUsageMessage
-	});
+    cmdutil.exitOnEpipe();
+    cmdutil.configure({
+        synopses: mzSynopses,
+        usageMessage: mzUsageMessage
+    });
 
-	args = oneach_cli.mzParseCommandLine(process.argv.slice(2));
-	if (args instanceof Error) {
-		cmdutil.usage(args);
-	}
+    args = oneach_cli.mzParseCommandLine(process.argv.slice(2));
+    if (args instanceof Error) {
+        cmdutil.usage(args);
+    }
 
-	if (args === null) {
-		/* error message emitted by getopt */
-		cmdutil.usage();
-	}
+    if (args === null) {
+        /* error message emitted by getopt */
+        cmdutil.usage();
+    }
 
-	/*
-	 * By default, we hide virtually all bunyan log messages.  It would be
-	 * better to log these to a local file, but we don't have a great
-	 * solution for this.  ("/var/log" isn't necessarily writable, and
-	 * "/var/tmp", isn't appropriate.  Plus, we want to append to the log
-	 * rather than to replace whatever's there.  We also want to make sure
-	 * it gets flushed on operational errors.)  We don't want to clutter the
-	 * user's terminal, even when things go wrong, since we should be
-	 * reporting actionable operational errors through the usual mechanisms.
-	 * Users can enable logging by setting LOG_LEVEL.
-	 */
-	args.log = new bunyan({
-	    'name': 'manta-oneach',
-	    'level': process.env['LOG_LEVEL'] || 'fatal'
-	});
+    /*
+     * By default, we hide virtually all bunyan log messages.  It would be
+     * better to log these to a local file, but we don't have a great
+     * solution for this.  ("/var/log" isn't necessarily writable, and
+     * "/var/tmp", isn't appropriate.  Plus, we want to append to the log
+     * rather than to replace whatever's there.  We also want to make sure
+     * it gets flushed on operational errors.)  We don't want to clutter the
+     * user's terminal, even when things go wrong, since we should be
+     * reporting actionable operational errors through the usual mechanisms.
+     * Users can enable logging by setting LOG_LEVEL.
+     */
+    args.log = new bunyan({
+        name: 'manta-oneach',
+        level: process.env['LOG_LEVEL'] || 'fatal'
+    });
 
-	exec = new oneach.mzCommandExecutor(args);
-	if (args.outputMode == 'text') {
-		next = new oneach.mzResultToText({
-		    'omitHeader': args.omitHeader,
-		    'outputBatch': args.outputBatch,
-		    'multilineMode': args.multilineMode
-		});
-	} else {
-		assert.equal(args.outputMode, 'jsonstream');
-		next = new oneach.mzResultToJson();
-	}
+    exec = new oneach.mzCommandExecutor(args);
+    if (args.outputMode == 'text') {
+        next = new oneach.mzResultToText({
+            omitHeader: args.omitHeader,
+            outputBatch: args.outputBatch,
+            multilineMode: args.multilineMode
+        });
+    } else {
+        assert.equal(args.outputMode, 'jsonstream');
+        next = new oneach.mzResultToJson();
+    }
 
-	exec.pipe(next);
-	next.pipe(process.stdout);
+    exec.pipe(next);
+    next.pipe(process.stdout);
 
-	exec.on('error', function (err) {
-		cmdutil.fail(err);
-	});
+    exec.on('error', function(err) {
+        cmdutil.fail(err);
+    });
 
-	process.stdout.on('finish', function () {
-		if (exec.nexecerrors() > 0) {
-			process.exit(1);
-		}
-	});
+    process.stdout.on('finish', function() {
+        if (exec.nexecerrors() > 0) {
+            process.exit(1);
+        }
+    });
 }
 
 main();

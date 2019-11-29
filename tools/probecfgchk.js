@@ -20,44 +20,47 @@ var vasync = require('vasync');
 var alarm_metadata = require('../lib/alarms/metadata');
 var nerrors = 0;
 
-function main()
-{
-	cmdutil.configure({
-	    'synopses': [ 'FILENAME...' ],
-	    'usageMessage': 'validates one or more probe template files'
-	});
+function main() {
+    cmdutil.configure({
+        synopses: ['FILENAME...'],
+        usageMessage: 'validates one or more probe template files'
+    });
 
-	if (process.argv.length < 3) {
-		cmdutil.usage();
-	}
+    if (process.argv.length < 3) {
+        cmdutil.usage();
+    }
 
-	vasync.forEachPipeline({
-	    'func': validateOneFile,
-	    'inputs': process.argv.slice(2)
-	}, function () {
-		process.exit(nerrors === 0 ? 0 : 1);
-	});
+    vasync.forEachPipeline(
+        {
+            func: validateOneFile,
+            inputs: process.argv.slice(2)
+        },
+        function() {
+            process.exit(nerrors === 0 ? 0 : 1);
+        }
+    );
 }
 
-function validateOneFile(filename, callback)
-{
-	var pts;
+function validateOneFile(filename, callback) {
+    var pts;
 
-	pts = new alarm_metadata.MetadataLoader();
-	pts.loadFromFile(filename, function onLoaded() {
-		var errors;
+    pts = new alarm_metadata.MetadataLoader();
+    pts.loadFromFile(filename, function onLoaded() {
+        var errors;
 
-		errors = pts.errors();
-		nerrors += errors.length;
+        errors = pts.errors();
+        nerrors += errors.length;
 
-		if (errors.length === 0) {
-			console.error('%s okay', filename);
-		} else {
-			errors.forEach(function (e) { cmdutil.warn(e); });
-		}
+        if (errors.length === 0) {
+            console.error('%s okay', filename);
+        } else {
+            errors.forEach(function(e) {
+                cmdutil.warn(e);
+            });
+        }
 
-		callback();
-	});
+        callback();
+    });
 }
 
 main();

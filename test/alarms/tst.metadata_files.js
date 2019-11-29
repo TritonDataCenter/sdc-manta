@@ -29,22 +29,22 @@ var alarm_metadata = require('../../lib/alarms/metadata');
 var testCases = [];
 var sampleEvent = 'upset.manta.test_event';
 var sampleLegacyName = 'my sample probe';
-var sampleScope = { 'service': 'madtom' };
-var sampleChecks = [ { 'type': 'cmd', 'config': { 'test': 'prop' } } ];
+var sampleScope = {service: 'madtom'};
+var sampleChecks = [{type: 'cmd', config: {test: 'prop'}}];
 var sampleKa = {
-    'title': 'sample title',
-    'description': 'sample description',
-    'severity': 'sample severity',
-    'response': 'sample response',
-    'impact': 'sample impact',
-    'action': 'sample action'
+    title: 'sample title',
+    description: 'sample description',
+    severity: 'sample severity',
+    response: 'sample response',
+    impact: 'sample impact',
+    action: 'sample action'
 };
 var sampleTemplate = {
-    'event': sampleEvent,
-    'legacyName': sampleLegacyName,
-    'scope': sampleScope,
-    'checks': sampleChecks,
-    'ka': sampleKa
+    event: sampleEvent,
+    legacyName: sampleLegacyName,
+    scope: sampleScope,
+    checks: sampleChecks,
+    ka: sampleKa
 };
 var done = false;
 var tounlink = [];
@@ -56,212 +56,239 @@ var tounlink = [];
  */
 var testDirectory = path.join('.', 'testdir-' + path.basename(__filename));
 
-function main()
-{
-	process.on('exit', function (code) {
-		if (code === 0 && !done) {
-			throw (new Error('exited prematurely!'));
-		}
-	});
+function main() {
+    process.on('exit', function(code) {
+        if (code === 0 && !done) {
+            throw new Error('exited prematurely!');
+        }
+    });
 
-	vasync.waterfall([
-	    function setupTestDirectory(callback) {
-		fs.mkdir(testDirectory, function (err) {
-			if (err && err.code == 'EEXIST') {
-				console.error('using existing directory %s',
-				    testDirectory);
-				err = null;
-			} else {
-				console.error('creating %s', testDirectory);
-			}
+    vasync.waterfall(
+        [
+            function setupTestDirectory(callback) {
+                fs.mkdir(testDirectory, function(err) {
+                    if (err && err.code == 'EEXIST') {
+                        console.error(
+                            'using existing directory %s',
+                            testDirectory
+                        );
+                        err = null;
+                    } else {
+                        console.error('creating %s', testDirectory);
+                    }
 
-			callback(err);
-		});
-	    },
+                    callback(err);
+                });
+            },
 
-	    function setupTestFile1(callback) {
-		var file, contents;
-		file = path.join(testDirectory, 'file1.yaml');
-		contents = JSON.stringify([ {
-		    'event': sampleEvent + '.1',
-		    'scope': sampleScope,
-		    'checks': sampleChecks,
-		    'ka': sampleKa
-		}, {
-		    'event': sampleEvent + '.3',
-		    'scope': sampleScope,
-		    'checks': sampleChecks,
-		    'ka': sampleKa
-		} ]);
+            function setupTestFile1(callback) {
+                var file, contents;
+                file = path.join(testDirectory, 'file1.yaml');
+                contents = JSON.stringify([
+                    {
+                        event: sampleEvent + '.1',
+                        scope: sampleScope,
+                        checks: sampleChecks,
+                        ka: sampleKa
+                    },
+                    {
+                        event: sampleEvent + '.3',
+                        scope: sampleScope,
+                        checks: sampleChecks,
+                        ka: sampleKa
+                    }
+                ]);
 
-		tounlink.push(file);
-		writeFile(file, contents, callback);
-	    },
+                tounlink.push(file);
+                writeFile(file, contents, callback);
+            },
 
-	    function setupTestFile2(callback) {
-		var file, contents;
-		file = path.join(testDirectory, 'file2.yaml');
-		contents = JSON.stringify([ {
-		    'event': sampleEvent + '.2',
-		    'scope': sampleScope,
-		    'checks': sampleChecks,
-		    'ka': sampleKa
-		} ]);
+            function setupTestFile2(callback) {
+                var file, contents;
+                file = path.join(testDirectory, 'file2.yaml');
+                contents = JSON.stringify([
+                    {
+                        event: sampleEvent + '.2',
+                        scope: sampleScope,
+                        checks: sampleChecks,
+                        ka: sampleKa
+                    }
+                ]);
 
-		tounlink.push(file);
-		writeFile(file, contents, callback);
-	    },
+                tounlink.push(file);
+                writeFile(file, contents, callback);
+            },
 
-	    function setupTestFileSkip(callback) {
-		var file;
-		file = path.join(testDirectory, 'file3');
-		tounlink.push(file);
-		writeFile(file, '{', callback);
-	    },
+            function setupTestFileSkip(callback) {
+                var file;
+                file = path.join(testDirectory, 'file3');
+                tounlink.push(file);
+                writeFile(file, '{', callback);
+            },
 
-	    function loadDirectory(callback) {
-		console.error('loading data from %s', testDirectory);
-		alarm_metadata.loadMetadata({
-		    'directory': testDirectory
-		}, callback);
-	    },
+            function loadDirectory(callback) {
+                console.error('loading data from %s', testDirectory);
+                alarm_metadata.loadMetadata(
+                    {
+                        directory: testDirectory
+                    },
+                    callback
+                );
+            },
 
-	    function verifyMetadata(metadata, callback) {
-		var pts;
+            function verifyMetadata(metadata, callback) {
+                var pts;
 
-		pts = [];
-		metadata.eachTemplate(function (pt) {
-			pts.push({
-			    'event': pt.pt_event,
-			    'origin': pt.pt_origin_label
-			});
-		});
-		pts.sort(function (p1, p2) {
-			return (p1.event.localeCompare(p2.event));
-		});
+                pts = [];
+                metadata.eachTemplate(function(pt) {
+                    pts.push({
+                        event: pt.pt_event,
+                        origin: pt.pt_origin_label
+                    });
+                });
+                pts.sort(function(p1, p2) {
+                    return p1.event.localeCompare(p2.event);
+                });
 
-		/*
-		 * Importantly, we have all three probes, and it doesn't matter
-		 * where each one came from.  We also skipped the file that
-		 * didn't end in ".yaml".
-		 */
-		assertplus.deepEqual(pts, [ {
-		    'event': sampleEvent + '.1',
-		    'origin': sprintf('%s/file1.yaml: probe 1', testDirectory)
-		}, {
-		    'event': sampleEvent + '.2',
-		    'origin': sprintf('%s/file2.yaml: probe 1', testDirectory)
-		}, {
-		    'event': sampleEvent + '.3',
-		    'origin': sprintf('%s/file1.yaml: probe 2', testDirectory)
-		} ]);
+                /*
+                 * Importantly, we have all three probes, and it doesn't matter
+                 * where each one came from.  We also skipped the file that
+                 * didn't end in ".yaml".
+                 */
+                assertplus.deepEqual(pts, [
+                    {
+                        event: sampleEvent + '.1',
+                        origin: sprintf('%s/file1.yaml: probe 1', testDirectory)
+                    },
+                    {
+                        event: sampleEvent + '.2',
+                        origin: sprintf('%s/file2.yaml: probe 1', testDirectory)
+                    },
+                    {
+                        event: sampleEvent + '.3',
+                        origin: sprintf('%s/file1.yaml: probe 2', testDirectory)
+                    }
+                ]);
 
-		callback();
-	    },
+                callback();
+            },
 
-	    function loadDirectoryFail(callback) {
-		console.error('loading data from non-existent directory');
-		alarm_metadata.loadMetadata({
-		    'directory': 'junkDirectory'
-		}, function (err, metadata) {
-			assertplus.ok(err !== null);
-			assertplus.ok(err instanceof Error);
-			assertplus.ok(!metadata);
-			assertplus.ok(/readdir "junkDirectory".*ENOENT/.test(
-			    err.message));
-			callback();
-		});
-	    },
+            function loadDirectoryFail(callback) {
+                console.error('loading data from non-existent directory');
+                alarm_metadata.loadMetadata(
+                    {
+                        directory: 'junkDirectory'
+                    },
+                    function(err, metadata) {
+                        assertplus.ok(err !== null);
+                        assertplus.ok(err instanceof Error);
+                        assertplus.ok(!metadata);
+                        assertplus.ok(
+                            /readdir "junkDirectory".*ENOENT/.test(err.message)
+                        );
+                        callback();
+                    }
+                );
+            },
 
-	    function checkFileOkay(callback) {
-		var file = path.join(testDirectory, 'file1.yaml');
-		checkFile(file, function (err, info) {
-			assertplus.ok(!err);
-			assertplus.ok(info.status === 0);
-			callback();
-		});
-	    },
+            function checkFileOkay(callback) {
+                var file = path.join(testDirectory, 'file1.yaml');
+                checkFile(file, function(err, info) {
+                    assertplus.ok(!err);
+                    assertplus.ok(info.status === 0);
+                    callback();
+                });
+            },
 
-	    function checkFileNonexistent(callback) {
-		var file = path.join(testDirectory, 'ENOENT.yaml');
-		checkFile(file, function (err, info) {
-			assertplus.ok(err !== null);
-			assertplus.ok(err instanceof Error);
-			assertplus.equal(info.status, 1);
-			assertplus.ok(/read ".*ENOENT.yaml": ENOENT/.test(
-			    info.stderr));
-			callback();
-		});
-	    },
+            function checkFileNonexistent(callback) {
+                var file = path.join(testDirectory, 'ENOENT.yaml');
+                checkFile(file, function(err, info) {
+                    assertplus.ok(err !== null);
+                    assertplus.ok(err instanceof Error);
+                    assertplus.equal(info.status, 1);
+                    assertplus.ok(
+                        /read ".*ENOENT.yaml": ENOENT/.test(info.stderr)
+                    );
+                    callback();
+                });
+            },
 
-	    function checkFileInvalid(callback) {
-		var file = path.join(testDirectory, 'file3');
-		checkFile(file, function (err, info) {
-			assertplus.ok(err !== null);
-			assertplus.ok(err instanceof Error);
-			assertplus.equal(info.status, 1);
-			assertplus.ok(
-			    /parse ".*file3": unexpected end of the stream/.
-			    test(info.stderr));
-			callback();
-		});
-	    },
+            function checkFileInvalid(callback) {
+                var file = path.join(testDirectory, 'file3');
+                checkFile(file, function(err, info) {
+                    assertplus.ok(err !== null);
+                    assertplus.ok(err instanceof Error);
+                    assertplus.equal(info.status, 1);
+                    assertplus.ok(
+                        /parse ".*file3": unexpected end of the stream/.test(
+                            info.stderr
+                        )
+                    );
+                    callback();
+                });
+            },
 
-	    function cleanupFiles(callback) {
-		console.error('removing files: %s', tounlink.join(', '));
-		vasync.forEachPipeline({
-		    'inputs': tounlink,
-		    'func': fs.unlink
-		}, function (err) {
-			callback(err);
-		});
-	    },
+            function cleanupFiles(callback) {
+                console.error('removing files: %s', tounlink.join(', '));
+                vasync.forEachPipeline(
+                    {
+                        inputs: tounlink,
+                        func: fs.unlink
+                    },
+                    function(err) {
+                        callback(err);
+                    }
+                );
+            },
 
-	    function cleanupDirectory(callback) {
-		console.error('removing directory: %s', testDirectory);
-		fs.rmdir(testDirectory, callback);
-	    }
-	], function (err) {
-		if (err) {
-			throw (err);
-		}
+            function cleanupDirectory(callback) {
+                console.error('removing directory: %s', testDirectory);
+                fs.rmdir(testDirectory, callback);
+            }
+        ],
+        function(err) {
+            if (err) {
+                throw err;
+            }
 
-		done = true;
-		console.error('%s okay', __filename);
-	});
+            done = true;
+            console.error('%s okay', __filename);
+        }
+    );
 }
 
 /*
  * Wrapper around fs.writeFile() that provides a more useful Error on failure.
  */
-function writeFile(filename, contents, callback)
-{
-	console.error('writing %s', filename);
-	fs.writeFile(filename, contents, function (err) {
-		if (err) {
-			err = new VError('write "%s"', filename);
-		}
+function writeFile(filename, contents, callback) {
+    console.error('writing %s', filename);
+    fs.writeFile(filename, contents, function(err) {
+        if (err) {
+            err = new VError('write "%s"', filename);
+        }
 
-		callback(err);
-	});
+        callback(err);
+    });
 }
 
 /*
  * Runs the checker tool on the specified file.
  */
-function checkFile(filename, callback)
-{
-	var argv = [
-	    path.join(__dirname, '..', '..', 'tools', 'probecfgchk.js'),
-	    filename
-	];
+function checkFile(filename, callback) {
+    var argv = [
+        path.join(__dirname, '..', '..', 'tools', 'probecfgchk.js'),
+        filename
+    ];
 
-	console.error('checking %s', filename);
-	forkexec.forkExecWait({
-	    'argv': argv
-	}, function (err, info) {
-		callback(err, info);
-	});
+    console.error('checking %s', filename);
+    forkexec.forkExecWait(
+        {
+            argv: argv
+        },
+        function(err, info) {
+            callback(err, info);
+        }
+    );
 }
 
 main();

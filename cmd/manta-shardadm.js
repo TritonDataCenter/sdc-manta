@@ -30,221 +30,222 @@ var Logger = require('bunyan');
 var VERSION = '1.0.0';
 
 function Shardadm() {
-	Cmdln.call(this, {
-	    name: 'manta-shardadm',
-	    desc: 'Manage manta shards',
-	    // Custom options. By default you get -h/--help.
-	    options: [
-		{names: ['help', 'h'], type: 'bool',
-		    help: 'Print help and exit.'},
-		{name: 'version', type: 'bool',
-		    help: 'Print version and exit.'}
-	    ]
-	});
+    Cmdln.call(this, {
+        name: 'manta-shardadm',
+        desc: 'Manage manta shards',
+        // Custom options. By default you get -h/--help.
+        options: [
+            {names: ['help', 'h'], type: 'bool', help: 'Print help and exit.'},
+            {name: 'version', type: 'bool', help: 'Print version and exit.'}
+        ]
+    });
 }
 util.inherits(Shardadm, Cmdln);
 
-Shardadm.prototype.init = function (opts, args, cb) {
-	if (opts.version) {
-		console.log(this.name, VERSION);
-		cb(false);
-		return;
-	}
+Shardadm.prototype.init = function(opts, args, cb) {
+    if (opts.version) {
+        console.log(this.name, VERSION);
+        cb(false);
+        return;
+    }
 
-	this.log = new Logger({
-	    name: __filename,
-	    serializers: Logger.stdSerializers,
-	    streams: [ {
-		level: 'debug',
-		path: '/var/log/manta-shardadm.log'
-	    } ]
-	});
+    this.log = new Logger({
+        name: __filename,
+        serializers: Logger.stdSerializers,
+        streams: [
+            {
+                level: 'debug',
+                path: '/var/log/manta-shardadm.log'
+            }
+        ]
+    });
 
-	var CFG = path.resolve(__dirname, '../etc/config.json');
-	var config = JSON.parse(fs.readFileSync(CFG, 'utf8'));
+    var CFG = path.resolve(__dirname, '../etc/config.json');
+    var config = JSON.parse(fs.readFileSync(CFG, 'utf8'));
 
-	this.client = new sdc.SAPI({
-	    url: config.sapi.url,
-	    log: this.log,
-		agent: false,
-		version: '~2'
-	});
+    this.client = new sdc.SAPI({
+        url: config.sapi.url,
+        log: this.log,
+        agent: false,
+        version: '~2'
+    });
 
-	Cmdln.prototype.init.apply(this, arguments);
+    Cmdln.prototype.init.apply(this, arguments);
 };
 
+Shardadm.prototype.do_list = function(subcmd, opts, args, cb) {
+    var search_opts = {};
+    search_opts.name = 'manta';
 
-Shardadm.prototype.do_list = function (subcmd, opts, args, cb) {
-	var search_opts = {};
-	search_opts.name = 'manta';
+    this.client.listApplications(search_opts, function(err, apps) {
+        if (err) {
+            return cb(err);
+        }
 
-	this.client.listApplications(search_opts, function (err, apps) {
-		if (err)
-			return (cb(err));
+        if (apps.length === 0) {
+            console.log('No manta application configured');
+            return cb(null);
+        }
 
-		if (apps.length === 0) {
-			console.log('No manta application configured');
-			return (cb(null));
-		}
-
-		printShards(apps[0].metadata, cb);
-	});
+        printShards(apps[0].metadata, cb);
+    });
 };
 Shardadm.prototype.do_list.help = 'List shards';
 
-Shardadm.prototype.do_list.help = (
-	'List Manta shards.\n'
-	+ '\n'
-	+ 'Usage:\n'
-	+ '     manta-shardadm list \n'
-);
+Shardadm.prototype.do_list.help =
+    'List Manta shards.\n' + '\n' + 'Usage:\n' + '     manta-shardadm list \n';
 
 function printShards(metadata, cb) {
-	var i;
-	var fmt = '%-12s %s';
+    var i;
+    var fmt = '%-12s %s';
 
-	console.log(sprintf(fmt, 'TYPE', 'SHARD NAME'));
+    console.log(sprintf(fmt, 'TYPE', 'SHARD NAME'));
 
-	if (metadata[common.INDEX_SHARDS]) {
-		for (i = 0; i < metadata[common.INDEX_SHARDS].length; i++) {
-			console.log(sprintf(fmt,
-			    'Index', metadata[common.INDEX_SHARDS][i].host));
-		}
-	}
+    if (metadata[common.INDEX_SHARDS]) {
+        for (i = 0; i < metadata[common.INDEX_SHARDS].length; i++) {
+            console.log(
+                sprintf(fmt, 'Index', metadata[common.INDEX_SHARDS][i].host)
+            );
+        }
+    }
 
-	if (metadata[common.MARLIN_SHARD])
-		console.log(sprintf(fmt,
-		    'Marlin', metadata[common.MARLIN_SHARD]));
-	if (metadata[common.STORAGE_SHARD])
-		console.log(sprintf(fmt,
-		    'Storage', metadata[common.STORAGE_SHARD]));
+    if (metadata[common.MARLIN_SHARD]) {
+        console.log(sprintf(fmt, 'Marlin', metadata[common.MARLIN_SHARD]));
+    }
+    if (metadata[common.STORAGE_SHARD]) {
+        console.log(sprintf(fmt, 'Storage', metadata[common.STORAGE_SHARD]));
+    }
 
-	if (metadata[common.BUCKETS_SHARDS]) {
-		for (i = 0; i < metadata[common.BUCKETS_SHARDS].length; i++) {
-			console.log(sprintf(fmt, 'Buckets',
-			    metadata[common.BUCKETS_SHARDS][i].host));
-		}
-	}
+    if (metadata[common.BUCKETS_SHARDS]) {
+        for (i = 0; i < metadata[common.BUCKETS_SHARDS].length; i++) {
+            console.log(
+                sprintf(fmt, 'Buckets', metadata[common.BUCKETS_SHARDS][i].host)
+            );
+        }
+    }
 
-	return (cb(null));
+    return cb(null);
 }
 
-Shardadm.prototype.do_set = function (subcmd, opts, args, cb) {
-	var self = this;
+Shardadm.prototype.do_set = function(subcmd, opts, args, cb) {
+    var self = this;
 
-	if (args.length !== 0 || (!opts.i && !opts.b && !opts.m && !opts.s)) {
-		this.do_help('help', {}, [subcmd], cb);
-		return;
-	}
+    if (args.length !== 0 || (!opts.i && !opts.b && !opts.m && !opts.s)) {
+        this.do_help('help', {}, [subcmd], cb);
+        return;
+    }
 
-	var search_opts = {};
-	search_opts.name = 'manta';
+    var search_opts = {};
+    search_opts.name = 'manta';
 
-	this.client.listApplications(search_opts, function (err, apps) {
-		if (err)
-			return (cb(err));
+    this.client.listApplications(search_opts, function(err, apps) {
+        if (err) {
+            return cb(err);
+        }
 
-		if (apps.length === 0) {
-			console.log('no manta application configured');
-			return (cb(null));
-		}
+        if (apps.length === 0) {
+            console.log('no manta application configured');
+            return cb(null);
+        }
 
-		var app = apps[0];
-		var domain_name = '.' + app.metadata['DOMAIN_NAME'];
+        var app = apps[0];
+        var domain_name = '.' + app.metadata['DOMAIN_NAME'];
 
-		var metadata = {};
+        var metadata = {};
 
-		if (opts.m) {
-			metadata[common.MARLIN_SHARD] =
-			    addSuffix(opts.m, domain_name);
-		}
+        if (opts.m) {
+            metadata[common.MARLIN_SHARD] = addSuffix(opts.m, domain_name);
+        }
 
-		if (opts.s) {
-			metadata[common.STORAGE_SHARD] =
-			    addSuffix(opts.s, domain_name);
-		}
+        if (opts.s) {
+            metadata[common.STORAGE_SHARD] = addSuffix(opts.s, domain_name);
+        }
 
-		if (opts.i) {
-			addIndexShards(opts.i, common.INDEX_SHARDS);
-		}
+        if (opts.i) {
+            addIndexShards(opts.i, common.INDEX_SHARDS);
+        }
 
-		if (opts.b) {
-			addIndexShards(opts.b, common.BUCKETS_SHARDS);
-		}
+        if (opts.b) {
+            addIndexShards(opts.b, common.BUCKETS_SHARDS);
+        }
 
-		if (Object.keys(metadata).length === 0) {
-			console.log('No shards to update');
-			return (cb(null));
-		}
+        if (Object.keys(metadata).length === 0) {
+            console.log('No shards to update');
+            return cb(null);
+        }
 
-		self.client.updateApplication(app.uuid, { metadata: metadata },
-		    function (suberr) {
-			if (suberr)
-				return (cb(suberr));
+        self.client.updateApplication(app.uuid, {metadata: metadata}, function(
+            suberr
+        ) {
+            if (suberr) {
+                return cb(suberr);
+            }
 
-			console.log('Updated Manta shards successfully');
-			return (cb(null));
-		    });
+            console.log('Updated Manta shards successfully');
+            return cb(null);
+        });
 
-		/*
-		 * Helper function for adding index shards to metadata object.
-		 * Arguments are:
-		 *
-		 * - nameStr: a string of shard names separated by spaces
-		 *
-		 * - key: the field in the metadata object in which to store
-		 *   the shard array
-		 */
-		function addIndexShards(nameStr, key) {
-			var names = nameStr.split(' ');
-			var shards = [];
+        /*
+         * Helper function for adding index shards to metadata object.
+         * Arguments are:
+         *
+         * - nameStr: a string of shard names separated by spaces
+         *
+         * - key: the field in the metadata object in which to store
+         *   the shard array
+         */
+        function addIndexShards(nameStr, key) {
+            var names = nameStr.split(' ');
+            var shards = [];
 
-			names.forEach(function (name) {
-				var shard = addSuffix(name, domain_name);
-				shards.push({ host: shard });
-			});
-			shards[shards.length - 1].last = true;
+            names.forEach(function(name) {
+                var shard = addSuffix(name, domain_name);
+                shards.push({host: shard});
+            });
+            shards[shards.length - 1].last = true;
 
-			metadata[key] = shards;
-		}
-	});
+            metadata[key] = shards;
+        }
+    });
 };
 Shardadm.prototype.do_set.options = [
-	{
-	    names: [ 'i' ],
-	    type: 'string',
-	    help: 'shards for indexing tier'
-	}, {
-	    names: [ 'b' ],
-	    type: 'string',
-	    help: 'shards for manta buckets subsystem indexing tier'
-	}, {
-	    names: [ 'm' ],
-	    type: 'string',
-	    help: 'shard for marlin job records'
-	}, {
-	    names: [ 's' ],
-	    type: 'string',
-	    help: 'shard for minnow (manta_storage) records'
-	}
+    {
+        names: ['i'],
+        type: 'string',
+        help: 'shards for indexing tier'
+    },
+    {
+        names: ['b'],
+        type: 'string',
+        help: 'shards for manta buckets subsystem indexing tier'
+    },
+    {
+        names: ['m'],
+        type: 'string',
+        help: 'shard for marlin job records'
+    },
+    {
+        names: ['s'],
+        type: 'string',
+        help: 'shard for minnow (manta_storage) records'
+    }
 ];
-Shardadm.prototype.do_set.help = (
-	'Set Manta shards.\n'
-	+ '\n'
-	+ 'Usage:\n'
-	+ '     manta-shardadm set [OPTIONS] \n'
-	+ '\n'
-	+ '{{options}}'
-);
+Shardadm.prototype.do_set.help =
+    'Set Manta shards.\n' +
+    '\n' +
+    'Usage:\n' +
+    '     manta-shardadm set [OPTIONS] \n' +
+    '\n' +
+    '{{options}}';
 
 /*
  * If the specified string doesn't already contain the specified suffix, add it.
  */
 function addSuffix(str, suffix) {
-	return (str.indexOf(suffix, str.length - suffix.length) === -1 ?
-	    str + suffix : str);
+    return str.indexOf(suffix, str.length - suffix.length) === -1
+        ? str + suffix
+        : str;
 }
-
 
 var cli = new Shardadm();
 cmdln.main(cli);

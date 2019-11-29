@@ -48,64 +48,81 @@ var knownServices = [
     'electric-boray'
 ];
 
-function main()
-{
-	var sharded;
+function main() {
+    var sharded;
 
-	/*
-	 * Check that the list of known services exactly matches the list that's
-	 * configured inside lib/services.js.
-	 */
-	assertplus.deepEqual(knownServices.slice(0).sort(),
-	    Object.keys(services.mSvcConfigsPrivate).sort());
+    /*
+     * Check that the list of known services exactly matches the list that's
+     * configured inside lib/services.js.
+     */
+    assertplus.deepEqual(
+        knownServices.slice(0).sort(),
+        Object.keys(services.mSvcConfigsPrivate).sort()
+    );
 
-	/*
-	 * Test serviceNameIsValid().
-	 */
-	assertplus.deepEqual(knownServices,
-	    knownServices.filter(services.serviceNameIsValid));
-	assertplus.deepEqual([ 'moray' ],
-	    [ 'milhouse', 'moray', 'mop' ].filter(services.serviceNameIsValid));
+    /*
+     * Test serviceNameIsValid().
+     */
+    assertplus.deepEqual(
+        knownServices,
+        knownServices.filter(services.serviceNameIsValid)
+    );
+    assertplus.deepEqual(
+        ['moray'],
+        ['milhouse', 'moray', 'mop'].filter(services.serviceNameIsValid)
+    );
 
-	/*
-	 * Test serviceIsSharded().
-	 */
-	sharded = knownServices.filter(services.serviceIsSharded).sort();
-	assertplus.deepEqual(
-	    [ 'boray', 'buckets-postgres', 'moray', 'postgres' ], sharded);
+    /*
+     * Test serviceIsSharded().
+     */
+    sharded = knownServices.filter(services.serviceIsSharded).sort();
+    assertplus.deepEqual(
+        ['boray', 'buckets-postgres', 'moray', 'postgres'],
+        sharded
+    );
 
-	/*
-	 * Test serviceSupportsOneach().
-	 */
-	assertplus.deepEqual([ 'marlin' ], knownServices.filter(
-	    function (svcname) {
-		return (!services.serviceSupportsOneach(svcname));
-	    }));
+    /*
+     * Test serviceSupportsOneach().
+     */
+    assertplus.deepEqual(
+        ['marlin'],
+        knownServices.filter(function(svcname) {
+            return !services.serviceSupportsOneach(svcname);
+        })
+    );
 
-	/*
-	 * Test serviceConfigProperties().
-	 */
-	knownServices.forEach(function (svcname) {
-		if (services.serviceIsSharded(svcname)) {
-			assertplus.deepEqual([ 'SH', 'IMAGE' ],
-			    services.serviceConfigProperties(svcname));
-		} else {
-			assertplus.deepEqual([ 'IMAGE' ],
-			    services.serviceConfigProperties(svcname));
-		}
-	});
+    /*
+     * Test serviceConfigProperties().
+     */
+    knownServices.forEach(function(svcname) {
+        if (services.serviceIsSharded(svcname)) {
+            assertplus.deepEqual(
+                ['SH', 'IMAGE'],
+                services.serviceConfigProperties(svcname)
+            );
+        } else {
+            assertplus.deepEqual(
+                ['IMAGE'],
+                services.serviceConfigProperties(svcname)
+            );
+        }
+    });
 
-	/*
-	 * Test serviceSupportsProbes().
-	 */
-	assertplus.deepEqual([ 'marlin' ],
-	    knownServices.filter(function (svcname) {
-		return (!services.serviceSupportsProbes(svcname));
-	    }));
-	assertplus.deepEqual(services.mSvcNamesProbes,
-	    services.mSvcNames.filter(services.serviceSupportsProbes));
+    /*
+     * Test serviceSupportsProbes().
+     */
+    assertplus.deepEqual(
+        ['marlin'],
+        knownServices.filter(function(svcname) {
+            return !services.serviceSupportsProbes(svcname);
+        })
+    );
+    assertplus.deepEqual(
+        services.mSvcNamesProbes,
+        services.mSvcNames.filter(services.serviceSupportsProbes)
+    );
 
-	console.error('%s tests passed', __filename);
+    console.error('%s tests passed', __filename);
 }
 
 main();
