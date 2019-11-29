@@ -226,7 +226,7 @@ function findLatestImage(service, cb) {
 	var remote_imgapi = self.REMOTE_IMGAPI;
 	var log = self.log;
 
-	var image_name = services.serviceNameToImageName(service);
+	var image_names = services.serviceNameToImageNames(service);
 	var version_substr = ARGV.branch;
 	// This is usually the channel set in SAPI if no -C argument was
 	// passed. If there's no channel in SAPI, we use the server's
@@ -234,11 +234,11 @@ function findLatestImage(service, cb) {
 	var channel = ARGV.channel;
 
 	if (channel === null) {
-		log.info('finding image %s for service %s on ' +
-		    'default update channel', image_name, service);
+		log.info('finding an image (matching %s) for service %s on ' +
+		    'default update channel', image_names.join(', '), service);
 	} else {
-		log.info('finding image %s for service %s on channel "%s"',
-		    image_name, service, channel);
+		log.info('finding an image (matching %s) for service %s on ' +
+		    'channel "%s"', image_names.join(', '), service, channel);
 	}
 
 	var onSearchFinish = function (err, image) {
@@ -248,13 +248,14 @@ function findLatestImage(service, cb) {
 		}
 		if (image === undefined) {
 			var msg = sprintf(
-			    'Unable to find image %s for %s on channel "%s"',
-			    image_name, service, channel);
+			    'Unable to find an image (matching %s) for %s ' +
+			    'on channel "%s"',
+			    image_names.join(', '), service, channel);
 			log.error(msg);
 			return (cb(new Error(msg)));
 		}
 		log.info({ image: image }, 'found image %s for %s',
-		    image_name, service);
+		    image.name, service);
 
 		return (cb(null, image));
 	};
@@ -265,62 +266,112 @@ function findLatestImage(service, cb) {
 	 */
 	if (ARGV.n) {
 		return (findLatestLocalImage(
-		    image_name, version_substr, onSearchFinish));
+		    image_names, version_substr, onSearchFinish));
 	}
 
-	var filters = {};
-	filters.name = image_name;
-	if (version_substr.length > 0) {
-		log.info('search restricted to version substring: %s',
-		    version_substr);
-		filters.version = '~' + version_substr;
-	}
+	var images = [];
+	vasync.forEachParallel({
+		inputs: image_names,
+		func: function listOneImage(image_name, nextImage) {
 
-	if (channel) {
-		filters.channel = channel;
-	}
-
-	log.info({ filters: filters }, 'search for images');
-
-	remote_imgapi.listImages(filters, function (err, images) {
-		if (err) {
-			log.error(err, 'failed to search for images with ' +
-				'name like %s', image_name);
-			return (cb(err));
+		var filters = {};
+		filters.name = image_name;
+		if (version_substr.length > 0) {
+			log.info('search restricted to version substring: %s',
+			    version_substr);
+			filters.version = '~' + version_substr;
 		}
 
-		onSearchFinish(null, sortByDate(images));
+		if (channel) {
+			filters.channel = channel;
+		}
+
+		log.info({ filters: filters }, 'search for images');
+		remote_imgapi.listImages(
+		    filters, function (err, remote_images) {
+			if (err) {
+				log.error(err,
+				    'failed to search for images with ' +
+				    'name like %s', image_name);
+				nextImage(err);
+				return;
+			}
+			if (remote_images.length === 0) {
+				// this is not necessarily an error yet, we
+				// might need to search for another image name.
+				nextImage();
+				return;
+			}
+			images = images.concat(remote_images);
+			nextImage();
+		});
+		}
+	}, function finishListRemoteImages(err) {
+		if (err) {
+			log.error(err, 'error listing remote images');
+			onSearchFinish(err);
+		} else {
+			if (images.length === 0) {
+				onSearchFinish(new VError(
+				    'no remote image found for (%s)',
+				    image_names.join(', ')));
+			} else {
+				onSearchFinish(null, sortByDate(images));
+			}
+		}
 	});
 }
 
-function findLatestLocalImage(image_name, version_substr, cb) {
+function findLatestLocalImage(image_names, version_substr, cb) {
 	var imgapi = self.IMGAPI;
 	var log = self.log;
 
-	log.info('search for image %s restricted to local images', image_name);
+	log.info(
+	    'search for an image (%s) restricted to local images',
+	    image_names.join(', '));
 
-	var filters = {};
-	filters.name = image_name;
-	if (version_substr.length > 0) {
-		log.info('search restricted to version substring: %s',
-		    version_substr);
-		filters.version = '~' + version_substr;
-	}
+	var images = [];
+	vasync.forEachParallel({
+		inputs: image_names,
+		func: function listOneImage(image_name, nextImage) {
 
-	imgapi.listImages(filters, function (err, images) {
+		var filters = {};
+		filters.name = image_name;
+		if (version_substr.length > 0) {
+			log.info('search restricted to version substring: %s',
+			    version_substr);
+			filters.version = '~' + version_substr;
+		}
+
+		log.info({ filters: filters }, 'search for images');
+		imgapi.listImages(filters, function (err, local_images) {
+			if (err) {
+				log.error(err, 'failed to list local images');
+				nextImage(err);
+				return;
+			}
+			if (local_images.length === 0) {
+				// this is not necessarily an error yet, we
+				// might need to search for another image name.
+				nextImage();
+				return;
+			}
+
+			images = images.concat(local_images);
+			nextImage();
+		});
+		}
+	}, function finishListLocalImages(err) {
 		if (err) {
-			log.error(err, 'failed to list local images');
-			return (cb(err));
+			log.error('error listing local images %d', err);
+			cb(err);
+		} else if (images.length === 0) {
+			cb(new VError(
+			    'no local image found for (%s) (remove -n?)',
+			    image_names.join(', ')));
+		} else {
+			cb(null, sortByDate(images));
 		}
-
-		if (images.length === 0) {
-			var suberr = new Error(
-			    sprintf('no local image found for %s (remove -n?)',
-			    image_name));
-			return (cb(suberr));
-		}
-
-		return (cb(null, sortByDate(images)));
 	});
 }
 
@@ -797,11 +848,15 @@ var pipelineFuncs = [
 
 			// Adding the marlin image manually.
 			if (ARGV.m) {
+				var imageNames =
+				    services.serviceNameToImageNames('marlin');
+				assert.ok(imageNames.length === 1,
+				    'the marlin service should have ' +
+				    'exactly one valid image name: ' +
+				    imageNames.join(', '));
 				images.push({
-					'uuid': ARGV.m,
-					'name': services.serviceNameToImageName(
-					    'marlin')
-				});
+				    'uuid': ARGV.m,
+				    'name': imageNames[0]});
 			}
 
 			ctx.images = images;
@@ -973,8 +1028,28 @@ var pipelineFuncs = [
 				var extra = {};
 				extra.params = {};
 
-				var imgName =
-				    services.serviceNameToImageName(svcname);
+				/*
+				 * During the manta -> mantav2 transition, we
+				 * support multiple image names for most
+				 * services. At this point, we should have
+				 * exactly one image name per service in imgMap.
+				 * Make sure that's the case.
+				 */
+				var allowedImgNames =
+					services.serviceNameToImageNames(
+					    svcname);
+				var mappedImages = [];
+				allowedImgNames.forEach(
+				    function (found_name) {
+					if (imgMap[found_name] !== undefined) {
+						mappedImages.push(found_name);
+					}
+				});
+				assert.ok(mappedImages.length === 1,
+				    'More than one image name for service ' +
+				    svcname);
+				var imgName = mappedImages[0];
+
 				assert.object(imgMap[imgName],
 				    'imgMap[imgName]');
 				extra.params.image_uuid = imgMap[imgName].uuid;
