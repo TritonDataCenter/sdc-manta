@@ -123,6 +123,15 @@ check:: $(NODE_EXEC)
 check-probe-files:
 	$(PROBECHK) $(PROBE_FILES)
 
+# Just lint check (no style)
+.PHONY: lint
+lint: | $(ESLINT)
+	$(ESLINT) --rule 'prettier/prettier: off' $(JSFILES)
+
+.PHONY: fmt
+fmt: | $(ESLINT)
+	$(ESLINT) --fix $(JSFILES)
+
 prepush: check-probe-files
 
 .PHONY: test
