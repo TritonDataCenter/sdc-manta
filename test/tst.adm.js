@@ -22,6 +22,52 @@ var VError = require('verror').VError;
 var common = require('./common');
 var madm = require('../lib/adm');
 
+var log = new bunyan({
+    name: 'tst.adm.js',
+    level: process.env['LOG_LEVEL'] || 'warn',
+    serializers: bunyan.stdSerializers
+});
+
+/*
+ * This is our fake set of deployed services.  We'll construct a more concrete
+ * version of this below, where we fill in SAPI instances, VMs objects, and CN
+ * objects.
+ */
+var fakeDeployed = {
+    cn001: {
+        marlin: {img001: 10},
+        moray: {
+            '1': {img002: 3},
+            '2': {img002: 3},
+            '3': {img002: 3}
+        },
+        medusa: {img004: 2}
+    },
+    cn002: {
+        marlin: {img001: 10},
+        moray: {
+            '1': {img002: 3},
+            '2': {img002: 3},
+            '3': {img002: 3}
+        }
+    },
+    cn003: {
+        marlin: {img001: 10},
+        postgres: {
+            '1': {img003: 3},
+            '2': {img003: 3},
+            '3': {img003: 3}
+        }
+    },
+    cn004: {
+        marlin: {img001: 2},
+        postgres: {
+            '1': {img003: 1},
+            '2': {img003: 1}
+        }
+    }
+};
+
 function runTestCase(t, callback) {
     var adm, collector, desired;
 
@@ -69,59 +115,13 @@ function runTestCase(t, callback) {
  * Mainline
  */
 
-var log = new bunyan({
-    name: 'tst.adm.js',
-    level: process.env['LOG_LEVEL'] || 'warn',
-    serializers: bunyan.stdSerializers
-});
-
-/*
- * This is our fake set of deployed services.  We'll construct a more concrete
- * version of this below, where we fill in SAPI instances, VMs objects, and CN
- * objects.
- */
-var fakeDeployed = {
-    cn001: {
-        marlin: {img001: 10},
-        moray: {
-            '1': {img002: 3},
-            '2': {img002: 3},
-            '3': {img002: 3}
-        },
-        medusa: {img004: 2}
-    },
-    cn002: {
-        marlin: {img001: 10},
-        moray: {
-            '1': {img002: 3},
-            '2': {img002: 3},
-            '3': {img002: 3}
-        }
-    },
-    cn003: {
-        marlin: {img001: 10},
-        postgres: {
-            '1': {img003: 3},
-            '2': {img003: 3},
-            '3': {img003: 3}
-        }
-    },
-    cn004: {
-        marlin: {img001: 2},
-        postgres: {
-            '1': {img003: 1},
-            '2': {img003: 1}
-        }
-    }
-};
-
 vasync.forEachPipeline(
     {
         func: runTestCase,
         inputs: [
             {
                 name: 'no change',
-                changefunc: function(config) {},
+                changefunc: function(_config) {},
                 expect: []
             },
             {

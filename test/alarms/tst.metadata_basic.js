@@ -65,7 +65,7 @@ function generateTestCases() {
                 );
             });
 
-            md.eachTemplate(function(tpl) {
+            md.eachTemplate(function(_tpl) {
                 throw new VError('empty metadata found a template');
             });
         }

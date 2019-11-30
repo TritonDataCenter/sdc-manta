@@ -23,7 +23,6 @@
 
 var assertplus = require('assert-plus');
 var fs = require('fs');
-var jsprim = require('jsprim');
 var sprintf = require('extsprintf').sprintf;
 var vasync = require('vasync');
 var VError = require('verror');
@@ -589,7 +588,7 @@ function runTestCaseGenerate(tcstate, callback) {
 
         console.log('\ngenerated config:');
         azs = svclayout.azs();
-        azs.forEach(function(azname, i) {
+        azs.forEach(function(azname) {
             rv = svclayout.serialize(azname);
             if (rv !== null) {
                 process.stdout.write(rv);

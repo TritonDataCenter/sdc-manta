@@ -33,7 +33,6 @@ var log = new bunyan({
     serializers: bunyan.stdSerializers
 });
 
-
 /*
  * Helper functions
  */

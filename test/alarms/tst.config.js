@@ -480,7 +480,7 @@ function makeBigTestCase() {
              * Iterate and count the probe groups.
              */
             nfound = 0;
-            config.eachProbeGroup(function(pg) {
+            config.eachProbeGroup(function(_pg) {
                 nfound++;
             });
             assertplus.equal(nfound, ngroups);
@@ -490,7 +490,7 @@ function makeBigTestCase() {
              */
             nfound = 0;
             config.eachProbeGroup(function(pg) {
-                config.eachProbeGroupProbe(pg.pg_name, function(p) {
+                config.eachProbeGroupProbe(pg.pg_name, function(_p) {
                     nfound++;
                 });
             });

@@ -66,39 +66,6 @@ var ndone = 0;
 
 var testsInvalid;
 
-function main() {
-    vasync.forEachPipeline(
-        {
-            func: runTestCase,
-            inputs: testsInvalid
-        },
-        function(err) {
-            if (err) {
-                cmdutil.fail(err);
-            }
-
-            assertplus.equal(ndone, nstarted);
-            assertplus.equal(nstarted, testsInvalid.length);
-
-            var ctx = {};
-            nstarted++;
-            vasync.pipeline(
-                {
-                    arg: ctx,
-                    funcs: validPipeline
-                },
-                function(pipelineErr) {
-                    if (pipelineErr) {
-                        cmdutil.fail(pipelineErr);
-                    }
-
-                    assertplus.equal(ndone, nstarted);
-                }
-            );
-        }
-    );
-}
-
 /*
  * Each of these test cases should cause the command to exit with non-zero
  * status and an error message.  These should have no side effects and do not
@@ -263,7 +230,7 @@ function runTestCase(tc, callback) {
         {
             argv: argv
         },
-        function(err, result) {
+        function(_err, result) {
             var stderr, testresult;
 
             ndone++;
@@ -457,7 +424,7 @@ var validPipeline = [
      * Run through several "create" test cases.
      */
 
-    function createNormalAll(ctx, callback) {
+    function createNormalAll(_ctx, callback) {
         runTestCase(
             {
                 name: 'normal create, scope "all"',
@@ -475,7 +442,7 @@ var validPipeline = [
         );
     },
 
-    function createNormalMachines(ctx, callback) {
+    function createNormalMachines(_ctx, callback) {
         runTestCase(
             {
                 name: 'normal create, scope "machines"',
@@ -493,7 +460,7 @@ var validPipeline = [
         );
     },
 
-    function createNormalProbes(ctx, callback) {
+    function createNormalProbes(_ctx, callback) {
         runTestCase(
             {
                 name: 'normal create, scope "probes"',
@@ -516,7 +483,7 @@ var validPipeline = [
         );
     },
 
-    function createNormalGroups(ctx, callback) {
+    function createNormalGroups(_ctx, callback) {
         runTestCase(
             {
                 name: 'normal create, scope "probegroups"',
@@ -641,7 +608,7 @@ var validPipeline = [
      * window that extends into the past.
      */
 
-    function createLong(ctx, callback) {
+    function createLong(_ctx, callback) {
         runTestCase(
             {
                 name: 'create long window',
@@ -672,7 +639,7 @@ var validPipeline = [
         );
     },
 
-    function createPartwayPast(ctx, callback) {
+    function createPartwayPast(_ctx, callback) {
         runTestCase(
             {
                 name: 'create window extending into past',
@@ -735,7 +702,7 @@ var validPipeline = [
                     .concat(['delete'])
                     .concat(['--', 'bogus', ctx.ctx_new[0], '-1'])
             },
-            function(err, result) {
+            function(_err, result) {
                 var errors;
 
                 errors = result.stderr
@@ -782,7 +749,7 @@ var validPipeline = [
             {
                 argv: baseArgs.concat(['delete']).concat(ctx.ctx_remaining)
             },
-            function(err, result) {
+            function(_err, result) {
                 assertplus.strictEqual(result.status, 0);
                 assertplus.strictEqual(
                     result.stderr,
@@ -854,5 +821,38 @@ var validPipeline = [
         );
     }
 ];
+
+function main() {
+    vasync.forEachPipeline(
+        {
+            func: runTestCase,
+            inputs: testsInvalid
+        },
+        function(err) {
+            if (err) {
+                cmdutil.fail(err);
+            }
+
+            assertplus.equal(ndone, nstarted);
+            assertplus.equal(nstarted, testsInvalid.length);
+
+            var ctx = {};
+            nstarted++;
+            vasync.pipeline(
+                {
+                    arg: ctx,
+                    funcs: validPipeline
+                },
+                function(pipelineErr) {
+                    if (pipelineErr) {
+                        cmdutil.fail(pipelineErr);
+                    }
+
+                    assertplus.equal(ndone, nstarted);
+                }
+            );
+        }
+    );
+}
 
 main();
