@@ -643,7 +643,9 @@ var pipelineFuncs = [
 
 		var extra = {
 			metadata: {
-				MANTAV: 1
+				// This authoritatively indicates that this is a
+				// mantav2 deployment.
+				MANTAV: 2
 			}
 		};
 
