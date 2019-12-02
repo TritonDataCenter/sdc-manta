@@ -641,8 +641,11 @@ var pipelineFuncs = [
 		    '../config/application.json');
 		file = path.resolve(file);
 
-		var extra = {};
-		extra.metadata = {};
+		var extra = {
+			metadata: {
+				MANTAV: 1
+			}
+		};
 
 		if (self.config.region_name === undefined ||
 		    self.config.region_name === '') {

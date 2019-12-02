@@ -1,12 +1,35 @@
+<!--
+    This Source Code Form is subject to the terms of the Mozilla Public
+    License, v. 2.0. If a copy of the MPL was not distributed with this
+    file, You can obtain one at http://mozilla.org/MPL/2.0/.
+-->
+
+<!--
+    Copyright 2019 Joyent, Inc.
+-->
+
 # sdc-manta
 
-This repository is part of the Joyent Triton project. See the [contribution
-guidelines](https://github.com/joyent/triton/blob/master/CONTRIBUTING.md)
-and general documentation at the main [Triton
-project](https://github.com/joyent/triton) page.
+This repository is part of the Joyent Triton and Manta projects.
+For contribution guidelines, issues, and general documentation, visit the main
+[Triton](http://github.com/joyent/triton) and
+[Manta](http://github.com/joyent/manta) project pages.
 
 This repository contains all the deployment tools necessary to manage a Manta
-within an SDC deployment.
+within a Triton deployment.
+
+
+## Active Branches
+
+There are currently two active branches of this repository, for the two
+active major versions of Manta. See the [mantav2 overview
+document](https://github.com/joyent/manta/blob/master/docs/mantav2.md) for
+details on major Manta versions.
+
+- [`master`](../../tree/master/) - For development of mantav2, the latest
+  version of Manta.
+- [`mantav1`](../../tree/mantav1/) - For development of mantav1, the long
+  term support maintenance version of Manta.
 
 
 # Overview
