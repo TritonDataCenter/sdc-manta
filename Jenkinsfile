@@ -3,7 +3,7 @@
 pipeline {
 
     agent {
-        label joyCommonLabels(image_ver: '15.4.1')
+        label joyCommonLabels(image_ver: '18.4.0')
     }
 
     options {
