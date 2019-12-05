@@ -21,7 +21,7 @@ var cp = require('child_process');
 var fs = require('fs');
 var path = require('path');
 var sdc = require('sdc-clients');
-var sprintf = require('sprintf-js').sprintf;
+var sprintf = require('extsprintf').sprintf;
 var util = require('util');
 
 var Cmdln = cmdln.Cmdln;
