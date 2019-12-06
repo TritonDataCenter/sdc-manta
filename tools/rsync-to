@@ -53,8 +53,14 @@ rsync -av ${TOP}/ \
     --exclude .git/ \
     --exclude .history/ \
     --exclude /boot/ \
-    --exclude /deps/ \
-    --exclude /test/
+    --exclude /deps/
+
+# Getting catest and test/ into the manta-deployment zone allows us to
+# run the test suite there.
+ssh $NODE mkdir -p /zones/$ZONE/root/opt/smartdc/manta-deployment/deps/catest
+rsync -av ${TOP}/deps/catest/catest \
+    $NODE:/zones/$ZONE/root/opt/smartdc/manta-deployment/deps/catest/catest \
+    $extraOpts
 
 rsync -av ${TOP}/boot/ \
     $NODE:/zones/$ZONE/root/opt/smartdc/boot/ \
