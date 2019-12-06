@@ -26,7 +26,7 @@ var sdc = require('sdc-clients');
 var services = require('../lib/services');
 var ssh = require('../lib/ssh');
 var url = require('url');
-var node_uuid = require('node-uuid');
+var uuidv4 = require('uuid/v4');
 var vasync = require('vasync');
 var verror = require('verror');
 
@@ -1115,8 +1115,7 @@ var pipelineFuncs = [
 	function addMuskieAes(ctx, cb) {
 		var log = self.log;
 		var sapi = self.SAPI;
-		var cmd = 'openssl enc -aes-128-cbc -k ' + node_uuid.v4() +
-			' -P';
+		var cmd = 'openssl enc -aes-128-cbc -k ' + uuidv4() + ' -P';
 		var pfx = 'MUSKIE_JOB_TOKEN_AES_';
 		var svc, i, m;
 		var sapi_services = ctx.sapi_services;
