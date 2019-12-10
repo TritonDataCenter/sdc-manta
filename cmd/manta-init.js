@@ -53,7 +53,6 @@ var CONCURRENCY = 10;
 // A context object on which to store state.
 var state = {};
 
-
 // -- Arg parsing
 
 optimist.usage('Usage:\tmanta-init -e <email>');
@@ -106,7 +105,6 @@ function usage(message) {
     optimist.showHelp();
     process.exit(2);
 }
-
 
 // -- User management
 

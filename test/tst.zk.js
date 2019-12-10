@@ -27,6 +27,12 @@ var localDc = 'testdc1';
 var remoteDc = 'testdc2';
 var verbose = process.argv[2] === '-v';
 
+var log = new bunyan({
+    name: 'tst.zk.js',
+    level: process.env['LOG_LEVEL'] || 'warn',
+    serializers: bunyan.stdSerializers
+});
+
 /*
  * Helper functions
  */
@@ -209,12 +215,6 @@ function identVm(n) {
 /*
  * Mainline
  */
-
-var log = new bunyan({
-    name: 'tst.zk.js',
-    level: process.env['LOG_LEVEL'] || 'warn',
-    serializers: bunyan.stdSerializers
-});
 
 vasync.forEachPipeline(
     {

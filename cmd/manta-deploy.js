@@ -50,7 +50,7 @@ if (ARGV._.length !== 1) {
     process.exit(2);
 }
 
-if (ARGV.s && !/^\w{8}\-\w{4}\-\w{4}\-\w{4}\-\w{12}$/.test(ARGV.s)) {
+if (ARGV.s && !/^\w{8}-\w{4}-\w{4}-\w{4}-\w{12}$/.test(ARGV.s)) {
     console.error('not a valid server uuid: "%s"', ARGV.s);
     process.exit(1);
 }

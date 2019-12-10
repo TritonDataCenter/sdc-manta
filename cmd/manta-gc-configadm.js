@@ -222,21 +222,18 @@ MantaGcConfigAdm.prototype.do_migrate_config = function(
         function(metadata, next) {
             var remove = {};
             if (opts.cleanup) {
-                function markFieldForRemove(uuid, field) {
-                    if (!remove.hasOwnProperty(uuid)) {
-                        remove[uuid] = {};
-                    }
-                    if (
-                        !metadata[uuid] ||
-                        !metadata[uuid].hasOwnProperty(field)
-                    ) {
-                        return;
-                    }
-                    remove[uuid][field] = metadata[uuid][field];
-                }
                 Object.keys(metadata).forEach(function(uuid) {
                     oldFields.forEach(function(field) {
-                        markFieldForRemove(uuid, field);
+                        if (!remove.hasOwnProperty(uuid)) {
+                            remove[uuid] = {};
+                        }
+                        if (
+                            !metadata[uuid] ||
+                            !metadata[uuid].hasOwnProperty(field)
+                        ) {
+                            return;
+                        }
+                        remove[uuid][field] = metadata[uuid][field];
                     });
                 });
             }
@@ -266,15 +263,17 @@ MantaGcConfigAdm.prototype.do_migrate_config = function(
         function(metadata, next) {
             var removeMetadata = {};
             if (opts.cleanup) {
-                function markFieldForRemove(field) {
-                    if (!metadata.hasOwnProperty(field)) {
-                        return;
-                    }
-                    removeMetadata[field] = metadata[field];
-                }
                 Object.keys(metadata).forEach(function() {
-                    oldFields.forEach(markFieldForRemove);
-                    oldServiceFields.forEach(markFieldForRemove);
+                    oldFields.forEach(function (field) {
+                        if (metadata.hasOwnProperty(field)) {
+                            removeMetadata[field] = metadata[field];
+                        }
+                    });
+                    oldServiceFields.forEach(function (field) {
+                        if (metadata.hasOwnProperty(field)) {
+                            removeMetadata[field] = metadata[field];
+                        }
+                    });
                 });
             }
             changes.service = {

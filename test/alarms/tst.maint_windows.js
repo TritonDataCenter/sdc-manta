@@ -64,47 +64,12 @@ var baseArgs = [process.execPath, execname, 'alarm', 'maint'];
 var nstarted = 0;
 var ndone = 0;
 
-var testsInvalid;
-
-function main() {
-    vasync.forEachPipeline(
-        {
-            func: runTestCase,
-            inputs: testsInvalid
-        },
-        function(err) {
-            if (err) {
-                cmdutil.fail(err);
-            }
-
-            assertplus.equal(ndone, nstarted);
-            assertplus.equal(nstarted, testsInvalid.length);
-
-            var ctx = {};
-            nstarted++;
-            vasync.pipeline(
-                {
-                    arg: ctx,
-                    funcs: validPipeline
-                },
-                function(pipelineErr) {
-                    if (pipelineErr) {
-                        cmdutil.fail(pipelineErr);
-                    }
-
-                    assertplus.equal(ndone, nstarted);
-                }
-            );
-        }
-    );
-}
-
 /*
  * Each of these test cases should cause the command to exit with non-zero
  * status and an error message.  These should have no side effects and do not
  * require that any Triton services be configured or online.
  */
-testsInvalid = [
+var testsInvalid = [
     {
         name: 'missing command',
         argv: [],
@@ -855,4 +820,39 @@ var validPipeline = [
     }
 ];
 
+// ---- mainline
+
 main();
+
+function main() {
+    vasync.forEachPipeline(
+        {
+            func: runTestCase,
+            inputs: testsInvalid
+        },
+        function(err) {
+            if (err) {
+                cmdutil.fail(err);
+            }
+
+            assertplus.equal(ndone, nstarted);
+            assertplus.equal(nstarted, testsInvalid.length);
+
+            var ctx = {};
+            nstarted++;
+            vasync.pipeline(
+                {
+                    arg: ctx,
+                    funcs: validPipeline
+                },
+                function(pipelineErr) {
+                    if (pipelineErr) {
+                        cmdutil.fail(pipelineErr);
+                    }
+
+                    assertplus.equal(ndone, nstarted);
+                }
+            );
+        }
+    );
+}
