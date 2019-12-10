@@ -6,7 +6,7 @@
  */
 
 /*
- * Copyright (c) 2016, Joyent, Inc.
+ * Copyright 2019 Joyent, Inc.
  */
 
 /*

@@ -6,7 +6,7 @@
  */
 
 /*
- * Copyright (c) 2019, Joyent, Inc.
+ * Copyright 2019 Joyent, Inc.
  */
 
 /*
@@ -264,12 +264,12 @@ MantaGcConfigAdm.prototype.do_migrate_config = function(
             var removeMetadata = {};
             if (opts.cleanup) {
                 Object.keys(metadata).forEach(function() {
-                    oldFields.forEach(function (field) {
+                    oldFields.forEach(function(field) {
                         if (metadata.hasOwnProperty(field)) {
                             removeMetadata[field] = metadata[field];
                         }
                     });
-                    oldServiceFields.forEach(function (field) {
+                    oldServiceFields.forEach(function(field) {
                         if (metadata.hasOwnProperty(field)) {
                             removeMetadata[field] = metadata[field];
                         }
