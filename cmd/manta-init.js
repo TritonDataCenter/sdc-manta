@@ -50,6 +50,12 @@ var MANTAV = 2;
  */
 var CONCURRENCY = 10;
 
+// A context object on which to store state.
+var state = {};
+
+
+// -- Arg parsing
+
 optimist.usage('Usage:\tmanta-init -e <email>');
 
 var ARGV = optimist.options({
@@ -101,11 +107,12 @@ function usage(message) {
     process.exit(2);
 }
 
+
 // -- User management
 
 function addUser(user, cb) {
-    var ufds = self.UFDS;
-    var log = self.log;
+    var ufds = state.UFDS;
+    var log = state.log;
 
     assert.object(user, 'user');
     assert.string(user.login, 'user.login');
@@ -126,8 +133,8 @@ function addUser(user, cb) {
 }
 
 function getOrCreateUser(user, cb) {
-    var ufds = self.UFDS;
-    var log = self.log;
+    var ufds = state.UFDS;
+    var log = state.log;
 
     assert.object(user, 'user');
     assert.string(user.login, 'user.login');
@@ -149,8 +156,8 @@ function getOrCreateUser(user, cb) {
 }
 
 function updateEmail(user, email, cb) {
-    var ufds = self.UFDS;
-    var log = self.log;
+    var ufds = state.UFDS;
+    var log = state.log;
 
     assert.object(user, 'user');
     assert.string(user.login, 'user.login');
@@ -227,8 +234,8 @@ function sortByDate(images) {
 }
 
 function findLatestImage(service, cb) {
-    var remote_imgapi = self.REMOTE_IMGAPI;
-    var log = self.log;
+    var remote_imgapi = state.REMOTE_IMGAPI;
+    var log = state.log;
 
     var image_names = services.serviceNameToImageNames(service);
     var version_substr = ARGV.branch;
@@ -349,8 +356,8 @@ function findLatestImage(service, cb) {
 }
 
 function findLatestLocalImage(image_names, version_substr, cb) {
-    var imgapi = self.IMGAPI;
-    var log = self.log;
+    var imgapi = state.IMGAPI;
+    var log = state.log;
 
     log.info(
         'search for an image (%s) restricted to local images',
@@ -410,8 +417,8 @@ function findLatestLocalImage(image_names, version_substr, cb) {
 }
 
 function updateServiceImage(svc, image_uuid, cb) {
-    var sapi = self.SAPI;
-    var log = self.log;
+    var sapi = state.SAPI;
+    var log = state.log;
 
     assert.object(svc, 'svc');
     assert.object(svc.params, 'svc.params');
@@ -450,7 +457,7 @@ function updateServiceImage(svc, image_uuid, cb) {
 // -- SAPI methods
 
 function addConfig(dirname, updatefunc, cb) {
-    var sapi = self.SAPI;
+    var sapi = state.SAPI;
 
     assert.string(dirname, 'dirname');
     assert.func(updatefunc, 'updatefunc');
@@ -472,8 +479,6 @@ function addConfig(dirname, updatefunc, cb) {
 
 // -- Mainline
 
-var self = this;
-
 var bstreams = [
     {
         level: 'debug',
@@ -490,7 +495,7 @@ if (ARGV.l === 'stdout') {
 } else {
     console.error('logs at ' + ARGV.l);
 }
-self.log = new Logger({
+state.log = new Logger({
     name: 'manta-init',
     serializers: Logger.stdSerializers,
     streams: bstreams
@@ -553,12 +558,12 @@ var pipelineFuncs = [
     },
 
     function initClients(_, cb) {
-        common.initSdcClients.call(self, cb);
+        common.initSdcClients.call(state, cb);
     },
 
     function ensureFullMode(_, cb) {
-        var sapi = self.SAPI;
-        var log = self.log;
+        var sapi = state.SAPI;
+        var log = state.log;
 
         sapi.getMode(function(err, mode) {
             if (err) {
@@ -626,8 +631,8 @@ var pipelineFuncs = [
     },
 
     function addPoseidonToOperators(_, cb) {
-        var ufds = self.UFDS;
-        var log = self.log;
+        var ufds = state.UFDS;
+        var log = state.log;
 
         assert.object(POSEIDON, 'POSEIDON');
         assert.string(POSEIDON.dn, 'POSEIDON.dn');
@@ -665,8 +670,8 @@ var pipelineFuncs = [
                         {
                             name: network,
                             owner_uuid: POSEIDON.uuid,
-                            napi: self.NAPI,
-                            log: self.log,
+                            napi: state.NAPI,
+                            log: state.log,
                             action: 'add',
                             update_func: addUserToNetwork
                         },
@@ -682,15 +687,15 @@ var pipelineFuncs = [
     },
 
     function getMantaApplication(_, cb) {
-        var log = self.log;
+        var log = state.log;
         log.info('fetching manta application from sapi');
 
-        common.getMantaApplication.call(self, POSEIDON.uuid, function(
+        common.getMantaApplication.call(state, POSEIDON.uuid, function(
             err,
             app
         ) {
             if (app) {
-                self.manta_app = app;
+                state.manta_app = app;
             }
             cb(err);
         });
@@ -711,8 +716,8 @@ var pipelineFuncs = [
 	},
 
     function createMantaApplication(_, cb) {
-        var log = self.log;
-        var sapi = self.SAPI;
+        var log = state.log;
+        var sapi = state.SAPI;
 
         log.info('building up manta application description');
 
@@ -731,17 +736,17 @@ var pipelineFuncs = [
         };
 
         if (
-            self.config.region_name === undefined ||
-            self.config.region_name === ''
+            state.config.region_name === undefined ||
+            state.config.region_name === ''
         ) {
             cb(new Error('config file did not contain a region_name.'));
             return;
         }
 
-        extra.metadata['REGION'] = self.config.region_name;
+        extra.metadata['REGION'] = state.config.region_name;
         extra.metadata['SIZE'] = ARGV.s || 'lab';
 
-        extra.metadata['DNS_DOMAIN'] = self.config.dns_domain;
+        extra.metadata['DNS_DOMAIN'] = state.config.dns_domain;
         extra.metadata['DOMAIN_NAME'] = sprintf(
             '%s.%s',
             extra.metadata['REGION'],
@@ -765,7 +770,7 @@ var pipelineFuncs = [
             extra.metadata['DOMAIN_NAME']
         );
         extra.metadata['POSEIDON_UUID'] = POSEIDON.uuid;
-        extra.metadata['IMGAPI_SERVICE'] = url.format(self.IMGAPI.client.url);
+        extra.metadata['IMGAPI_SERVICE'] = url.format(state.IMGAPI.client.url);
         extra.metadata['WORKFLOW_SERVICE'] = sprintf(
             'workflow.%s',
             extra.metadata['DOMAIN_NAME']
@@ -811,7 +816,7 @@ var pipelineFuncs = [
                 return;
             }
 
-            self.sapi_application = app;
+            state.sapi_application = app;
             cb(null);
         }
 
@@ -825,9 +830,9 @@ var pipelineFuncs = [
     },
 
     function addAdminKey(_, cb) {
-        var log = self.log;
-        var sapi = self.SAPI;
-        var app = self.sapi_application;
+        var log = state.log;
+        var sapi = state.SAPI;
+        var app = state.sapi_application;
 
         log.info("adding poseidon's key");
 
@@ -846,10 +851,10 @@ var pipelineFuncs = [
         async.waterfall(
             [
                 function(subcb) {
-                    ssh.generateKey.call(self, keyfile, subcb);
+                    ssh.generateKey.call(state, keyfile, subcb);
                 },
                 function(key, subcb) {
-                    ssh.addPublicKey.call(self, POSEIDON, pubfile, function(
+                    ssh.addPublicKey.call(state, POSEIDON, pubfile, function(
                         err
                     ) {
                         subcb(err, key);
@@ -890,10 +895,10 @@ var pipelineFuncs = [
     },
 
     function addApplicationConfigs(_, cb) {
-        var log = self.log;
-        var sapi = self.SAPI;
+        var log = state.log;
+        var sapi = state.SAPI;
 
-        var uuid = self.sapi_application.uuid;
+        var uuid = state.sapi_application.uuid;
         var dirname = path.join(
             path.dirname(__filename),
             '../manifests/applications/manta'
@@ -913,7 +918,7 @@ var pipelineFuncs = [
     },
 
     function determineDefaultChannel(_, cb) {
-        var log = self.log;
+        var log = state.log;
         // If the user passed a -C argument, then we're done
         if (ARGV.channel !== undefined) {
             cb(null);
@@ -922,8 +927,8 @@ var pipelineFuncs = [
 
         log.info('determining update_channel from sapi');
         var opts = {
-            sapi: self.SAPI,
-            log: self.log
+            sapi: state.SAPI,
+            log: state.log
         };
         common.getSdcChannel(opts, function(err, channel) {
             if (!err) {
@@ -937,7 +942,7 @@ var pipelineFuncs = [
     },
 
     function findLatestImages(ctx, cb) {
-        var log = self.log;
+        var log = state.log;
 
         log.info({services: services.mSvcNames}, 'finding images for services');
 
@@ -1014,10 +1019,10 @@ var pipelineFuncs = [
      * This step does #2.
      */
     function importImageOrigins(ctx, cb) {
-        var imgapi = self.IMGAPI;
-        var log = self.log;
+        var imgapi = state.IMGAPI;
+        var log = state.log;
         var origin_images;
-        var remote_url = self.config.remote_imgapi.url;
+        var remote_url = state.config.remote_imgapi.url;
         var images = ctx.images;
 
         assert.arrayOfObject(images, 'images');
@@ -1074,9 +1079,9 @@ var pipelineFuncs = [
     },
 
     function importImages(ctx, cb) {
-        var imgapi = self.IMGAPI;
-        var log = self.log;
-        var remote_url = self.config.remote_imgapi.url;
+        var imgapi = state.IMGAPI;
+        var log = state.log;
+        var remote_url = state.config.remote_imgapi.url;
         var images = ctx.images;
 
         assert.arrayOfObject(images, 'images');
@@ -1139,9 +1144,9 @@ var pipelineFuncs = [
     },
 
     function createMantaServices(ctx, cb) {
-        var sapi = self.SAPI;
-        var log = self.log;
-        var app_uuid = self.sapi_application.uuid;
+        var sapi = state.SAPI;
+        var log = state.log;
+        var app_uuid = state.sapi_application.uuid;
         var images = ctx.images;
 
         assert.arrayOfObject(images, 'images');
@@ -1243,7 +1248,7 @@ var pipelineFuncs = [
     },
 
     function updateServiceImages(ctx, cb) {
-        var log = self.log;
+        var log = state.log;
         var sapi_services = ctx.sapi_services;
 
         assert.arrayOfObject(sapi_services);
@@ -1252,7 +1257,7 @@ var pipelineFuncs = [
         vasync.forEachParallel(
             {
                 func: function(svc, subcb) {
-                    updateServiceImage.call(self, svc, svc.image.uuid, subcb);
+                    updateServiceImage.call(state, svc, svc.image.uuid, subcb);
                 },
                 inputs: sapi_services
             },
@@ -1267,8 +1272,8 @@ var pipelineFuncs = [
     },
 
     function addMuskieAes(ctx, cb) {
-        var log = self.log;
-        var sapi = self.SAPI;
+        var log = state.log;
+        var sapi = state.SAPI;
         var cmd = 'openssl enc -aes-128-cbc -k ' + uuidv4() + ' -P';
         var pfx = 'MUSKIE_JOB_TOKEN_AES_';
         var svc, i, m;
@@ -1358,7 +1363,7 @@ var pipelineFuncs = [
     },
 
     function finiClients(_, cb) {
-        common.finiSdcClients.call(self, cb);
+        common.finiSdcClients.call(state, cb);
     }
 ];
 
