@@ -16,13 +16,10 @@
 var assert = require('assert-plus');
 var async = require('async');
 var common = require('../lib/common');
-var exec = require('child_process').exec;
 var Logger = require('bunyan');
 var optimist = require('optimist');
 var once = require('once');
-var sdc = require('sdc-clients');
 var sprintf = require('util').format;
-var stdin = process.openStdin();
 var vasync = require('vasync');
 var verror = require('verror');
 
@@ -43,10 +40,6 @@ var ARGV = optimist.options({
         describe: 'skip the warning/confirmation'
     }
 }).argv;
-
-function usage() {
-    optimist.showHelp();
-}
 
 // -- Helpers
 
@@ -403,7 +396,7 @@ async.waterfall(
             }
 
             var uuids = [];
-            self.probes.forEach(function(elem, idx, ary) {
+            self.probes.forEach(function(elem) {
                 uuids = uuids.concat(elem.uuid);
             });
 
@@ -438,7 +431,7 @@ async.waterfall(
             }
 
             var uuids = [];
-            self.probeGroups.forEach(function(elem, idx, ary) {
+            self.probeGroups.forEach(function(elem) {
                 uuids = uuids.concat(elem.uuid);
             });
 
@@ -492,7 +485,7 @@ async.waterfall(
                     },
                     inputs: networks
                 },
-                function(err, results) {
+                function(err) {
                     cb(err);
                 }
             );
@@ -523,7 +516,7 @@ async.waterfall(
                 'removing poseidon from operators group'
             );
 
-            ufds.modify(operatorsdn, entry, function(err, res) {
+            ufds.modify(operatorsdn, entry, function(err) {
                 if (err) {
                     log.error(
                         err,

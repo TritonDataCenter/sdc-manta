@@ -14,12 +14,9 @@
 
 var assertplus = require('assert-plus');
 var bunyan = require('bunyan');
-var jsprim = require('jsprim');
 var vasync = require('vasync');
 var CollectorStream = require('./CollectorStream');
 var VError = require('verror').VError;
-var readable = require('readable-stream');
-var util = require('util');
 var sprintf = require('extsprintf').sprintf;
 
 var madm = require('../lib/adm');

@@ -31,7 +31,6 @@ var util = require('util');
 var vasync = require('vasync');
 
 var common = require('../lib/common');
-var deploy = require('../lib/deploy');
 var madm = require('../lib/adm');
 
 var VError = require('verror').VError;
@@ -71,7 +70,7 @@ util.inherits(MantaGcConfigAdm, cmdln.Cmdln);
 MantaGcConfigAdm.prototype.initAdm = function(opts, callback) {
     var logstreams;
 
-    if (opts.log_file == 'stdout') {
+    if (opts.log_file === 'stdout') {
         logstreams = [
             {
                 level: 'debug',
@@ -148,9 +147,9 @@ MantaGcConfigAdm.prototype.finiAdm = function() {
  * option may be passed to get rid of the deprecated variables.
  */
 MantaGcConfigAdm.prototype.do_migrate_config = function(
-    subcmd,
+    _subcmd,
     opts,
-    args,
+    _args,
     callback
 ) {
     var self = this;
@@ -273,7 +272,7 @@ MantaGcConfigAdm.prototype.do_migrate_config = function(
                     }
                     removeMetadata[field] = metadata[field];
                 }
-                Object.keys(metadata).forEach(function(uuid) {
+                Object.keys(metadata).forEach(function() {
                     oldFields.forEach(markFieldForRemove);
                     oldServiceFields.forEach(markFieldForRemove);
                 });
@@ -422,7 +421,7 @@ function validateGcInstanceConfigs(metadata, oldFields, newFields, callback) {
             }
             return !md.hasOwnProperty(field);
         });
-        if (missingOld.length != 0 && missingNew.length != 0) {
+        if (missingOld.length !== 0 && missingNew.length !== 0) {
             errors.push(
                 new VError(
                     'garbage-collector "%s" ' +

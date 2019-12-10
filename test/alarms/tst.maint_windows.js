@@ -263,7 +263,7 @@ function runTestCase(tc, callback) {
         {
             argv: argv
         },
-        function(err, result) {
+        function(_err, result) {
             var stderr, testresult;
 
             ndone++;
@@ -457,7 +457,7 @@ var validPipeline = [
      * Run through several "create" test cases.
      */
 
-    function createNormalAll(ctx, callback) {
+    function createNormalAll(_, callback) {
         runTestCase(
             {
                 name: 'normal create, scope "all"',
@@ -475,7 +475,7 @@ var validPipeline = [
         );
     },
 
-    function createNormalMachines(ctx, callback) {
+    function createNormalMachines(_, callback) {
         runTestCase(
             {
                 name: 'normal create, scope "machines"',
@@ -493,7 +493,7 @@ var validPipeline = [
         );
     },
 
-    function createNormalProbes(ctx, callback) {
+    function createNormalProbes(_, callback) {
         runTestCase(
             {
                 name: 'normal create, scope "probes"',
@@ -516,7 +516,7 @@ var validPipeline = [
         );
     },
 
-    function createNormalGroups(ctx, callback) {
+    function createNormalGroups(_, callback) {
         runTestCase(
             {
                 name: 'normal create, scope "probegroups"',
@@ -641,7 +641,7 @@ var validPipeline = [
      * window that extends into the past.
      */
 
-    function createLong(ctx, callback) {
+    function createLong(_, callback) {
         runTestCase(
             {
                 name: 'create long window',
@@ -672,7 +672,7 @@ var validPipeline = [
         );
     },
 
-    function createPartwayPast(ctx, callback) {
+    function createPartwayPast(_, callback) {
         runTestCase(
             {
                 name: 'create window extending into past',
@@ -735,7 +735,7 @@ var validPipeline = [
                     .concat(['delete'])
                     .concat(['--', 'bogus', ctx.ctx_new[0], '-1'])
             },
-            function(err, result) {
+            function(_err, result) {
                 var errors;
 
                 errors = result.stderr
@@ -782,7 +782,7 @@ var validPipeline = [
             {
                 argv: baseArgs.concat(['delete']).concat(ctx.ctx_remaining)
             },
-            function(err, result) {
+            function(_err, result) {
                 assertplus.strictEqual(result.status, 0);
                 assertplus.strictEqual(
                     result.stderr,

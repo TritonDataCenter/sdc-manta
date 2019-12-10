@@ -16,11 +16,9 @@
 var assert = require('assert-plus');
 var async = require('async');
 var optimist = require('optimist');
-var vasync = require('vasync');
 
 var Logger = require('bunyan');
 
-var exec = require('child_process').exec;
 var sprintf = require('util').format;
 
 var common = require('../lib/common');
@@ -108,7 +106,7 @@ async.waterfall(
             var log = self.log;
 
             if (ARGV.s) {
-                cnapi.getServer(ARGV.s, function(err, s) {
+                cnapi.getServer(ARGV.s, function(err) {
                     if (err) {
                         log.error(
                             {

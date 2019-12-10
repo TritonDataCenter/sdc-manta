@@ -121,7 +121,7 @@ vasync.forEachPipeline(
         inputs: [
             {
                 name: 'no change',
-                changefunc: function(config) {},
+                changefunc: function(_config) {},
                 expect: []
             },
             {

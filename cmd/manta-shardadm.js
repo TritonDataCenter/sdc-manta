@@ -13,11 +13,8 @@
  * manta-shardadm.js: CLI tool for SAPI
  */
 
-var assert = require('assert-plus');
-var async = require('async');
 var cmdln = require('cmdln');
 var common = require('../lib/common');
-var cp = require('child_process');
 var fs = require('fs');
 var path = require('path');
 var sdc = require('sdc-clients');
@@ -42,7 +39,7 @@ function Shardadm() {
 }
 util.inherits(Shardadm, Cmdln);
 
-Shardadm.prototype.init = function(opts, args, cb) {
+Shardadm.prototype.init = function(opts, _args, cb) {
     if (opts.version) {
         console.log(this.name, VERSION);
         cb(false);
@@ -73,7 +70,7 @@ Shardadm.prototype.init = function(opts, args, cb) {
     Cmdln.prototype.init.apply(this, arguments);
 };
 
-Shardadm.prototype.do_list = function(subcmd, opts, args, cb) {
+Shardadm.prototype.do_list = function(_subcmd, _opts, _args, cb) {
     var search_opts = {};
     search_opts.name = 'manta';
 

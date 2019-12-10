@@ -24,14 +24,8 @@ function usage() {
     optimist.showHelp();
 }
 
-function fatal(err) {
-    console.error('Error: ' + err.message);
-    process.exit(1);
-}
-
 var ARGV;
 var bstreams;
-var options;
 var log;
 
 var use = [

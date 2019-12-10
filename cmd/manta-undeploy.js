@@ -27,7 +27,7 @@ function fatal(err) {
     process.exit(1);
 }
 
-var ARGV, bstreams, options, log, deployer;
+var ARGV, bstreams, log, deployer;
 
 optimist.usage('Usage:\tmanta-undeploy <instance>');
 ARGV = optimist.options({

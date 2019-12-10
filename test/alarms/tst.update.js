@@ -255,7 +255,7 @@ function generateTestDatacenters() {
     /*
      * The empty DC is easy: just set up the data structure.
      */
-    jsprim.forEachKey(nInstancesBySvc, function(svcname, n) {
+    jsprim.forEachKey(nInstancesBySvc, function(svcname) {
         dcconfigs.cfg_empty.ctp_instances_by_svcname[svcname] = [];
     });
 
@@ -428,7 +428,7 @@ function generateMockAmonObjects(mock, callback) {
                  * "each" probe template.
                  */
                 mock.config.groups = jsprim.deepCopy(deployedGroups);
-                services.mSvcNamesProbes.forEach(function(svcname, i) {
+                services.mSvcNamesProbes.forEach(function(svcname) {
                     svcname = svcname.replace(/-/g, '_');
                     mock.config.groups.push({
                         uuid: 'deployed-group-uuid-svc-' + svcname,

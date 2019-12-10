@@ -43,16 +43,13 @@ var assertplus = require('assert-plus');
 var bunyan = require('bunyan');
 var cmdln = require('cmdln');
 var cmdutil = require('cmdutil');
-var fs = require('fs');
 var jsprim = require('jsprim');
 var path = require('path');
 var restifyClients = require('restify-clients');
 var util = require('util');
 var vasync = require('vasync');
 var VError = require('verror').VError;
-var MultiError = require('verror').MultiError;
 var common = require('../lib/common');
-var deploy = require('../lib/deploy');
 var madm = require('../lib/adm');
 
 var maArg0 = path.basename(process.argv[1]);
@@ -140,7 +137,7 @@ util.inherits(MantaAdm, cmdln.Cmdln);
 MantaAdm.prototype.initAdm = function(opts, callback) {
     var logstreams;
 
-    if (opts.log_file == 'stdout') {
+    if (opts.log_file === 'stdout') {
         logstreams = [
             {
                 level: 'debug',
@@ -185,7 +182,7 @@ MantaAdm.prototype.finiAdm = function() {
 
 MantaAdm.prototype.do_alarm = MantaAdmAlarm;
 
-MantaAdm.prototype.do_cn = function(subcmd, opts, args, callback) {
+MantaAdm.prototype.do_cn = function(_subcmd, opts, args, callback) {
     var self = this;
     var options = {};
     var selected;
@@ -282,7 +279,7 @@ util.inherits(MantaAdmAccelGc, cmdln.Cmdln);
 
 MantaAdm.prototype.do_accel_gc = MantaAdmAccelGc;
 
-MantaAdmAccelGc.prototype.do_show = function(subcmd, opts, args, callback) {
+MantaAdmAccelGc.prototype.do_show = function(_subcmd, opts, args, callback) {
     var self = this;
 
     if (args.length > 1) {
@@ -346,7 +343,7 @@ MantaAdmAccelGc.prototype.do_show.options = [
     }
 ];
 
-MantaAdmAccelGc.prototype.do_update = function(subcmd, opts, args, callback) {
+MantaAdmAccelGc.prototype.do_update = function(_subcmd, opts, args, callback) {
     var self, adm;
     var filename;
 
@@ -409,9 +406,9 @@ MantaAdmAccelGc.prototype.do_update.help =
 MantaAdmAccelGc.prototype.do_update.options = [];
 
 MantaAdmAccelGc.prototype.do_gen_shard_assignment = function(
-    subcmd,
+    _subcmd,
     opts,
-    args,
+    _args,
     callback
 ) {
     var self = this;
@@ -448,7 +445,7 @@ MantaAdmAccelGc.prototype.do_gen_shard_assignment.help =
 MantaAdmAccelGc.prototype.do_gen_shard_assignment.options = [];
 
 MantaAdmAccelGc.prototype.do_genconfig = function(
-    subcmd,
+    _subcmd,
     opts,
     args,
     callback
@@ -542,7 +539,7 @@ MantaAdmAccelGc.prototype.do_genconfig.options = [
     }
 ];
 
-MantaAdmAccelGc.prototype.do_enable = function(subcmd, opts, args, callback) {
+MantaAdmAccelGc.prototype.do_enable = function(_subcmd, opts, args, callback) {
     var self;
     var account;
 
@@ -589,11 +586,11 @@ MantaAdmAccelGc.prototype.do_enable.help =
 
 MantaAdmAccelGc.prototype.do_enable.options = [];
 
-MantaAdmAccelGc.prototype.do_disable = function(subcmd, opts, args, callback) {
+MantaAdmAccelGc.prototype.do_disable = function(_subcmd, opts, args, callback) {
     var self;
     var account;
 
-    if (args.length != 1) {
+    if (args.length !== 1) {
         callback(new Error('missing arguments: ACCOUNT-LOGIN'));
         return;
     }
@@ -636,13 +633,18 @@ MantaAdmAccelGc.prototype.do_disable.help =
 
 MantaAdmAccelGc.prototype.do_disable.options = [];
 
-MantaAdmAccelGc.prototype.do_accounts = function(subcmd, opts, args, callback) {
+MantaAdmAccelGc.prototype.do_accounts = function(
+    _subcmd,
+    opts,
+    args,
+    callback
+) {
     var self, options;
 
     self = this;
     options = {};
 
-    if (args.length != 0) {
+    if (args.length !== 0) {
         callback(new Error('unexpected arguments'));
         return;
     }
@@ -683,7 +685,7 @@ MantaAdmAccelGc.prototype.do_accounts.options = [
     maCommonOptions.columns
 ];
 
-MantaAdm.prototype.do_genconfig = function(subcmd, opts, args, callback) {
+MantaAdm.prototype.do_genconfig = function(_subcmd, opts, args, callback) {
     var self = this;
     var fromfile = opts.from_file;
 
@@ -692,7 +694,7 @@ MantaAdm.prototype.do_genconfig = function(subcmd, opts, args, callback) {
             callback(new Error('unexpected arguments'));
             return;
         }
-    } else if (args.length != 1 || (args[0] != 'lab' && args[0] != 'coal')) {
+    } else if (args.length !== 1 || (args[0] !== 'lab' && args[0] !== 'coal')) {
         callback(new Error('expected "lab", "coal", or --from-file option'));
         return;
     } else if (opts.directory) {
@@ -705,10 +707,10 @@ MantaAdm.prototype.do_genconfig = function(subcmd, opts, args, callback) {
         var func;
         var options = {};
 
-        if (args[0] == 'lab') {
+        if (args[0] === 'lab') {
             func = adm.dumpConfigLab;
             options['outstream'] = process.stdout;
-        } else if (args[0] == 'coal') {
+        } else if (args[0] === 'coal') {
             func = adm.dumpConfigCoal;
             options['outstream'] = process.stdout;
         } else {
@@ -773,7 +775,7 @@ MantaAdm.prototype.do_genconfig.options = [
 /*
  * manta-adm show: shows information about deployed services
  */
-MantaAdm.prototype.do_show = function(subcmd, opts, args, callback) {
+MantaAdm.prototype.do_show = function(_subcmd, opts, args, callback) {
     var self = this;
     var selected, filter;
 
@@ -885,7 +887,7 @@ MantaAdm.prototype.do_show.options = [
  * manta-adm update: deploys, undeploys, and redeploys to match a desired
  * deployment specification
  */
-MantaAdm.prototype.do_update = function(subcmd, opts, args, callback) {
+MantaAdm.prototype.do_update = function(_subcmd, opts, args, callback) {
     var filename, service, nchanges, adm;
     var self = this;
 
@@ -900,7 +902,7 @@ MantaAdm.prototype.do_update = function(subcmd, opts, args, callback) {
     }
 
     filename = args[0];
-    if (args.length == 2) {
+    if (args.length === 2) {
         service = args[1];
     }
 
@@ -1047,7 +1049,7 @@ function MantaAdmZk(parent) {
 
 util.inherits(MantaAdmZk, cmdln.Cmdln);
 
-MantaAdmZk.prototype.do_list = function(subcmd, opts, args, callback) {
+MantaAdmZk.prototype.do_list = function(_subcmd, opts, args, callback) {
     var self = this;
     var options = {};
     var selected;
@@ -1120,7 +1122,7 @@ MantaAdmZk.prototype.do_list.options = [
     maCommonOptions.columns
 ];
 
-MantaAdmZk.prototype.do_fixup = function(subcmd, opts, args, callback) {
+MantaAdmZk.prototype.do_fixup = function(_subcmd, opts, args, callback) {
     var self = this;
     var adm, nissues, nfixed;
 
@@ -1213,7 +1215,7 @@ MantaAdmZk.prototype.do_fixup = function(subcmd, opts, args, callback) {
                 console.error(
                     '%d issue%s repaired',
                     nfixed,
-                    nfixed == 1 ? '' : 's'
+                    nfixed === 1 ? '' : 's'
                 );
             }
             self.mn_parent.finiAdm();
@@ -1338,7 +1340,7 @@ MantaAdmAlarm.prototype.initAdmAndFetchAlarms = function(args, callback) {
     );
 };
 
-MantaAdmAlarm.prototype.do_close = function(subcmd, opts, args, callback) {
+MantaAdmAlarm.prototype.do_close = function(_subcmd, opts, args, callback) {
     var parent;
 
     if (args.length < 1) {
@@ -1393,7 +1395,7 @@ MantaAdmAlarm.prototype.do_close.options = [
 
 MantaAdmAlarm.prototype.do_config = MantaAdmAlarmConfig;
 
-MantaAdmAlarm.prototype.do_details = function(subcmd, opts, args, callback) {
+MantaAdmAlarm.prototype.do_details = function(_subcmd, opts, args, callback) {
     this.doAlarmPrintSubcommand(opts, 1, args, callback);
 };
 
@@ -1409,7 +1411,7 @@ MantaAdmAlarm.prototype.do_details.help = [
 
 MantaAdmAlarm.prototype.do_details.options = [maCommonOptions.configFile];
 
-MantaAdmAlarm.prototype.do_faults = function(subcmd, opts, args, callback) {
+MantaAdmAlarm.prototype.do_faults = function(_subcmd, opts, args, callback) {
     this.doAlarmPrintSubcommand(opts, undefined, args, callback);
 };
 
@@ -1480,7 +1482,7 @@ MantaAdmAlarm.prototype.doAlarmPrintSubcommand = function doAlarmPrintSubcommand
     );
 };
 
-MantaAdmAlarm.prototype.do_list = function(subcmd, opts, args, callback) {
+MantaAdmAlarm.prototype.do_list = function(_subcmd, opts, args, callback) {
     var self = this;
     var options = {};
     var sources = {};
@@ -1557,7 +1559,7 @@ MantaAdmAlarm.prototype.do_maint = MantaAdmAlarmMaint;
 
 MantaAdmAlarm.prototype.do_metadata = MantaAdmAlarmMetadata;
 
-MantaAdmAlarm.prototype.do_notify = function(subcmd, opts, args, callback) {
+MantaAdmAlarm.prototype.do_notify = function(_subcmd, opts, args, callback) {
     var parent;
     var allowedArg0 = {
         enabled: true,
@@ -1629,7 +1631,7 @@ MantaAdmAlarm.prototype.do_notify.options = [
     maCommonOptions.configFile
 ];
 
-MantaAdmAlarm.prototype.do_show = function(subcmd, opts, args, callback) {
+MantaAdmAlarm.prototype.do_show = function(_subcmd, opts, args, callback) {
     var parent, sources;
 
     if (args.length > 0) {
@@ -1685,7 +1687,12 @@ util.inherits(MantaAdmAlarmConfig, cmdln.Cmdln);
 
 MantaAdmAlarmConfig.prototype.do_probegroup = MantaAdmAlarmProbeGroup;
 
-MantaAdmAlarmConfig.prototype.do_show = function(subcmd, opts, args, callback) {
+MantaAdmAlarmConfig.prototype.do_show = function(
+    _subcmd,
+    opts,
+    args,
+    callback
+) {
     var root, parent, adm, sources;
 
     if (args.length > 0) {
@@ -1732,7 +1739,7 @@ MantaAdmAlarmConfig.prototype.do_show.options = [
 ];
 
 MantaAdmAlarmConfig.prototype.do_update = function(
-    subcmd,
+    _subcmd,
     opts,
     args,
     callback
@@ -1765,7 +1772,7 @@ MantaAdmAlarmConfig.prototype.do_update.options = [
 ];
 
 MantaAdmAlarmConfig.prototype.do_verify = function(
-    subcmd,
+    _subcmd,
     opts,
     args,
     callback
@@ -1916,7 +1923,7 @@ function MantaAdmAlarmMaint(parent) {
 util.inherits(MantaAdmAlarmMaint, cmdln.Cmdln);
 
 MantaAdmAlarmMaint.prototype.do_create = function(
-    subcmd,
+    _subcmd,
     opts,
     args,
     callback
@@ -2002,7 +2009,7 @@ MantaAdmAlarmMaint.prototype.do_create = function(
         callback(new VError('argument is required: --start'));
         return;
     }
-    if (opts.start == 'now') {
+    if (opts.start === 'now') {
         params['start'] = new Date(tnow);
     } else {
         var d = Date.parse(opts.start);
@@ -2160,7 +2167,7 @@ MantaAdmAlarmMaint.prototype.do_create.options = [
 ];
 
 MantaAdmAlarmMaint.prototype.do_delete = function(
-    subcmd,
+    _subcmd,
     opts,
     args,
     callback
@@ -2219,7 +2226,7 @@ MantaAdmAlarmMaint.prototype.do_delete.options = [
 ];
 
 MantaAdmAlarmMaint.prototype.do_list = function cmdMaintList(
-    subcmd,
+    _subcmd,
     opts,
     args,
     callback
@@ -2274,7 +2281,7 @@ MantaAdmAlarmMaint.prototype.do_list.options = [
 ];
 
 MantaAdmAlarmMaint.prototype.do_show = function cmdMaintShow(
-    subcmd,
+    _subcmd,
     opts,
     args,
     callback
@@ -2335,7 +2342,7 @@ function MantaAdmAlarmMetadata(parent) {
 util.inherits(MantaAdmAlarmMetadata, cmdln.Cmdln);
 
 MantaAdmAlarmMetadata.prototype.do_events = function cmdEvents(
-    subcmd,
+    _subcmd,
     opts,
     args,
     callback
@@ -2377,7 +2384,12 @@ MantaAdmAlarmMetadata.prototype.do_events.options = [
     maCommonOptions.configFile
 ];
 
-MantaAdmAlarmMetadata.prototype.do_ka = function(subcmd, opts, args, callback) {
+MantaAdmAlarmMetadata.prototype.do_ka = function(
+    _subcmd,
+    opts,
+    args,
+    callback
+) {
     var self = this;
 
     this.maam_parent.initAdmAndFetchAlarms(
@@ -2445,7 +2457,7 @@ function MantaAdmAlarmProbeGroup(parent) {
 util.inherits(MantaAdmAlarmProbeGroup, cmdln.Cmdln);
 
 MantaAdmAlarmProbeGroup.prototype.do_list = function(
-    subcmd,
+    _subcmd,
     opts,
     args,
     callback
@@ -2507,7 +2519,12 @@ MantaAdmAlarmProbeGroup.prototype.do_list.options = [
     maCommonOptions.configFile
 ];
 
-MantaAdm.prototype.do_create_topology = function(subcmd, opts, args, callback) {
+MantaAdm.prototype.do_create_topology = function(
+    _subcmd,
+    opts,
+    args,
+    callback
+) {
     var self = this;
 
     if (args.length > 0) {
@@ -2650,7 +2667,7 @@ function checkColumns(allowed, columns) {
 
     for (i = 0; i < selected.length; i++) {
         c = selected[i];
-        if (allowed.indexOf(c) == -1) {
+        if (allowed.indexOf(c) === -1) {
             return new VError('unknown column: "%s"', c);
         }
     }

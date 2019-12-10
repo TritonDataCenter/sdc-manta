@@ -26,9 +26,7 @@ var sprintf = extsprintf.sprintf;
 
 var alarm_metadata = require('../../lib/alarms/metadata');
 
-var testCases = [];
 var sampleEvent = 'upset.manta.test_event';
-var sampleLegacyName = 'my sample probe';
 var sampleScope = {service: 'madtom'};
 var sampleChecks = [{type: 'cmd', config: {test: 'prop'}}];
 var sampleKa = {
@@ -38,13 +36,6 @@ var sampleKa = {
     response: 'sample response',
     impact: 'sample impact',
     action: 'sample action'
-};
-var sampleTemplate = {
-    event: sampleEvent,
-    legacyName: sampleLegacyName,
-    scope: sampleScope,
-    checks: sampleChecks,
-    ka: sampleKa
 };
 var done = false;
 var tounlink = [];

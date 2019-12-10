@@ -18,11 +18,9 @@ var assert = require('assert-plus');
 var async = require('async');
 var child_process = require('child_process');
 var common = require('../lib/common');
-var https = require('https');
 var fs = require('fs');
 var optimist = require('optimist');
 var path = require('path');
-var sdc = require('sdc-clients');
 var services = require('../lib/services');
 var ssh = require('../lib/ssh');
 var url = require('url');
@@ -32,7 +30,6 @@ var verror = require('verror');
 
 var Logger = require('bunyan');
 
-var exec = require('child_process').exec;
 var sprintf = require('util').format;
 
 var VError = verror.VError;
@@ -519,7 +516,7 @@ if (
     typeof ARGV.c === 'number' &&
     ARGV.c > 0 &&
     ARGV.c < 128 &&
-    Math.floor(ARGV.c) == ARGV.c
+    Math.floor(ARGV.c) === ARGV.c
 ) {
     CONCURRENCY = ARGV.c;
 } else if (ARGV.c !== undefined) {
@@ -644,7 +641,7 @@ var pipelineFuncs = [
             'adding poseidon to operators group'
         );
 
-        ufds.modify(operatorsdn, entry, function(err, res) {
+        ufds.modify(operatorsdn, entry, function(err) {
             if (err) {
                 log.error(err, 'failed to add poseidon to operators group');
             }
@@ -673,7 +670,7 @@ var pipelineFuncs = [
                 },
                 inputs: networks
             },
-            function(err, results) {
+            function(err) {
                 cb(err);
             }
         );
@@ -1094,7 +1091,7 @@ var pipelineFuncs = [
 
                 log.info('downloading image %s', image_uuid);
 
-                function onDone(err, img, res) {
+                function onDone(err) {
                     if (err && err.name !== 'ImageUuidAlreadyExistsError') {
                         log.error(
                             {err: err, image_uuid: image_uuid},
@@ -1269,7 +1266,7 @@ var pipelineFuncs = [
         assert.func(cb, 'cb');
 
         for (i = 0; i < sapi_services.length; i++) {
-            if (sapi_services[i].name == 'webapi') {
+            if (sapi_services[i].name === 'webapi') {
                 svc = sapi_services[i];
                 break;
             }

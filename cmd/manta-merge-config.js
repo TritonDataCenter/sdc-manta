@@ -14,7 +14,6 @@
  * manta-merge-config.js: shows what a merged config would look like.
  */
 
-var assert = require('assert-plus');
 var optimist = require('optimist');
 var path = require('path');
 var sprintf = require('util').format;
@@ -50,7 +49,6 @@ if (['coal', 'lab', 'production'].indexOf(ARGV.s) === -1) {
 
 // -- Mainline
 
-var self = this;
 var file = sprintf(
     '%s/../config/services/%s/service.json',
     path.dirname(__filename),

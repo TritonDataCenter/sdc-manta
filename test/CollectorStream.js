@@ -25,7 +25,7 @@ function CollectorStream(options) {
 
 util.inherits(CollectorStream, readable.Transform);
 
-CollectorStream.prototype._transform = function(chunk, encoding, done) {
+CollectorStream.prototype._transform = function(chunk, _encoding, done) {
     this.data += chunk;
     done();
 };
