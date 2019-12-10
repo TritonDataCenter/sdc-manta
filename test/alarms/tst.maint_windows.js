@@ -321,7 +321,7 @@ function findTestWindows(callback) {
             windows = result.stdout.trim().split('\n');
             windows.forEach(function(l) {
                 var parts = strsplit(l.trim(), /\s+/, 2);
-                if (parts[1] == exampleNote) {
+                if (parts[1] === exampleNote) {
                     console.error(
                         '    found window %s from this test suite',
                         parts[0]
@@ -387,7 +387,7 @@ var validPipeline = [
         console.error(
             'removing %s old window%s',
             ctx.ctx_found.length,
-            ctx.ctx_found.length != 1 ? 's' : ''
+            ctx.ctx_found.length !== 1 ? 's' : ''
         );
         forkexec.forkExecWait(
             {

@@ -227,7 +227,7 @@ function generateTestCases() {
                 );
 
                 fault = result.a_faults[0];
-                assertplus.ok(fault.aflt_alarm == result);
+                assertplus.ok(fault.aflt_alarm === result);
                 assertplus.strictEqual(fault.aflt_probeid, 'probe-uuid-1');
                 assertplus.strictEqual(fault.aflt_clear, false);
                 assertplus.strictEqual(fault.aflt_uuid, 'event-uuid-1');
@@ -269,7 +269,7 @@ function generateTestCases() {
                 );
 
                 fault = result.a_faults[1];
-                assertplus.ok(fault.aflt_alarm == result);
+                assertplus.ok(fault.aflt_alarm === result);
                 assertplus.strictEqual(fault.aflt_ismaint, false);
                 assertplus.strictEqual(fault.aflt_probeid, 'probe-uuid-2');
                 assertplus.strictEqual(fault.aflt_clear, true);
@@ -287,7 +287,7 @@ function generateTestCases() {
                 );
 
                 fault = result.a_faults[2];
-                assertplus.ok(fault.aflt_alarm == result);
+                assertplus.ok(fault.aflt_alarm === result);
                 assertplus.strictEqual(fault.aflt_ismaint, true);
                 assertplus.strictEqual(fault.aflt_probeid, 'probe-uuid-3');
                 assertplus.strictEqual(fault.aflt_clear, true);

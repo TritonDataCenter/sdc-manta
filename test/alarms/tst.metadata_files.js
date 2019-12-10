@@ -67,7 +67,7 @@ function main() {
         [
             function setupTestDirectory(callback) {
                 fs.mkdir(testDirectory, function(err) {
-                    if (err && err.code == 'EEXIST') {
+                    if (err && err.code === 'EEXIST') {
                         console.error(
                             'using existing directory %s',
                             testDirectory

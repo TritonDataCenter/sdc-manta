@@ -177,7 +177,7 @@ function main() {
             console.error(
                 '%d test case%s executed',
                 nexecuted,
-                nexecuted == 1 ? '' : 's'
+                nexecuted === 1 ? '' : 's'
             );
         }
     );

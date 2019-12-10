@@ -28,7 +28,7 @@ var outputHeader =
     '# DATACENTER ZONENAME                             IP                PORT';
 var localDc = 'testdc1';
 var remoteDc = 'testdc2';
-var verbose = process.argv[2] == '-v';
+var verbose = process.argv[2] === '-v';
 
 /*
  * Helper functions
@@ -154,7 +154,7 @@ function runTestCase(testcase, callback) {
     /*
      * Check for expected output.
      */
-    if (collector.data != testcase.output) {
+    if (collector.data !== testcase.output) {
         console.error('output mismatch! expected:');
         console.error(testcase.output);
         console.error('but found:');
@@ -177,7 +177,7 @@ function runTestCase(testcase, callback) {
             }
         }
 
-        if (j == warnings.length) {
+        if (j === warnings.length) {
             callback(
                 new VError('no match for expected warning: "%s"', expected[i])
             );

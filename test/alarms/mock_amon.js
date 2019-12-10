@@ -120,19 +120,19 @@ function mockAmonHandleRequest(log, config, request, response) {
     parsedurl = url.parse(request.url);
     urlparts = parsedurl.pathname.split('/');
     if (
-        request.method == 'GET' &&
-        urlparts.length == 4 &&
+        request.method === 'GET' &&
+        urlparts.length === 4 &&
         urlparts[0] === '' &&
-        urlparts[1] == 'pub' &&
-        urlparts[2] == account &&
-        urlparts[3] == 'probegroups'
+        urlparts[1] === 'pub' &&
+        urlparts[2] === account &&
+        urlparts[3] === 'probegroups'
     ) {
         value = config.groups;
     } else if (
-        request.method == 'GET' &&
-        urlparts.length == 2 &&
+        request.method === 'GET' &&
+        urlparts.length === 2 &&
         urlparts[0] === '' &&
-        urlparts[1] == 'agentprobes'
+        urlparts[1] === 'agentprobes'
     ) {
         assertplus.object(config.agentprobes);
         params = querystring.parse(parsedurl.query);
@@ -145,12 +145,12 @@ function mockAmonHandleRequest(log, config, request, response) {
             value = [];
         }
     } else if (
-        request.method == 'GET' &&
-        urlparts.length == 4 &&
+        request.method === 'GET' &&
+        urlparts.length === 4 &&
         urlparts[0] === '' &&
-        urlparts[1] == 'pub' &&
-        urlparts[2] == account &&
-        urlparts[3] == 'alarms'
+        urlparts[1] === 'pub' &&
+        urlparts[2] === account &&
+        urlparts[3] === 'alarms'
     ) {
         assertplus.object(config.alarms);
         params = querystring.parse(parsedurl.query);
@@ -164,12 +164,12 @@ function mockAmonHandleRequest(log, config, request, response) {
         );
         value = config.alarms[params.state];
     } else if (
-        (request.method == 'GET' || request.method == 'POST') &&
-        urlparts.length == 5 &&
+        (request.method === 'GET' || request.method === 'POST') &&
+        urlparts.length === 5 &&
         urlparts[0] === '' &&
-        urlparts[1] == 'pub' &&
-        urlparts[2] == account &&
-        urlparts[3] == 'alarms'
+        urlparts[1] === 'pub' &&
+        urlparts[2] === account &&
+        urlparts[3] === 'alarms'
     ) {
         assertplus.object(config.alarms);
         assertplus.object(config.alarms.by_id);
@@ -177,8 +177,8 @@ function mockAmonHandleRequest(log, config, request, response) {
         if (!config.alarms.by_id[urlparts[4]]) {
             code = 404;
         } else if (
-            request.method == 'GET' ||
-            config.alarms.by_id[urlparts[4]] == 'error'
+            request.method === 'GET' ||
+            config.alarms.by_id[urlparts[4]] === 'error'
         ) {
             value = config.alarms.by_id[urlparts[4]];
         } else {
@@ -196,7 +196,7 @@ function mockAmonHandleRequest(log, config, request, response) {
         );
     }
 
-    if (code == 404) {
+    if (code === 404) {
         response.writeHead(404, {
             'content-type': 'application/json'
         });
@@ -206,10 +206,10 @@ function mockAmonHandleRequest(log, config, request, response) {
                 message: 'alarm not found'
             })
         );
-    } else if (code == 204) {
+    } else if (code === 204) {
         response.writeHead(204);
         response.end();
-    } else if (value == 'error') {
+    } else if (value === 'error') {
         response.writeHead(500, {
             'content-type': 'application/json'
         });

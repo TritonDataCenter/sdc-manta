@@ -338,7 +338,7 @@ function finishTest(testcase, exec, error, results, callback) {
             if (expected['zone']) {
                 assertplus.ok(r['zonename']);
                 assertplus.ok(
-                    r['service'] == 'webapi' || r['service'] == 'postgres'
+                    r['service'] === 'webapi' || r['service'] === 'postgres'
                 );
                 assertplus.equal(r['result']['stdout'], 'in zone');
             } else {
@@ -364,7 +364,7 @@ function finishTest(testcase, exec, error, results, callback) {
     mock.muc_calls.forEach(function(c) {
         assertplus.equal(
             c.method,
-            testcase['args']['execMode'] == oneach.MZ_EM_RECEIVEFROMREMOTE
+            testcase['args']['execMode'] === oneach.MZ_EM_RECEIVEFROMREMOTE
                 ? 'recv_file'
                 : 'send_file'
         );
@@ -424,7 +424,7 @@ MockUrClient.prototype.exec = function(args, callback) {
         args: args
     });
 
-    iszone = args['script'].indexOf('zlogin') != -1;
+    iszone = args['script'].indexOf('zlogin') !== -1;
     setImmediate(callback, null, {
         exit_status: 0,
         stdout: iszone ? 'in zone' : 'global zone',
@@ -470,9 +470,9 @@ function setupMockManta(_, callback) {
          * "svc001".
          */
         svcid =
-            zoneid == 'zone5'
+            zoneid === 'zone5'
                 ? 'svc002'
-                : zoneid == 'zone8'
+                : zoneid === 'zone8'
                 ? 'svc003'
                 : 'svc001';
         fakeDeployedTopology.instances[svcid].push({

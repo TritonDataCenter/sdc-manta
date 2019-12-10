@@ -141,7 +141,7 @@ function generateFakeBase(fakeDeployed, azCount) {
             }
             cnHostname = cnUuid.toUpperCase();
             cnIp = cnUuid + '.example.com';
-            if (azNum == 1) {
+            if (azNum === 1) {
                 fakeBase['cns'][cnUuid] = {
                     datacenter: azName,
                     hostname: cnHostname,
@@ -178,7 +178,7 @@ function generateFakeBase(fakeDeployed, azCount) {
                 fakeBase['services'][svcid] = {
                     name: svcname
                 };
-                if (svcname == 'postgres' || svcname == 'moray') {
+                if (svcname === 'postgres' || svcname === 'moray') {
                     for (shardid in svc) {
                         for (imgid in svc[shardid]) {
                             vmsCount = svc[shardid][imgid];
@@ -191,7 +191,7 @@ function generateFakeBase(fakeDeployed, azCount) {
                                     count: vmsCount,
                                     az: azName
                                 },
-                                azNum == 1
+                                azNum === 1
                             );
                         }
                     }
@@ -206,7 +206,7 @@ function generateFakeBase(fakeDeployed, azCount) {
                                 count: svc[imgid],
                                 az: azName
                             },
-                            azNum == 1
+                            azNum === 1
                         );
                     }
                 }

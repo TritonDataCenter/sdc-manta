@@ -416,7 +416,7 @@ testCases.push({
         });
 
         assertplus.equal(found.length, 2);
-        assertplus.ok(pg == found[0]);
+        assertplus.ok(pg === found[0]);
         assertplus.equal(found[1].pg_uuid, 'probe-group-2');
 
         /*

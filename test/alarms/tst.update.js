@@ -661,7 +661,7 @@ function generateMockAmonObjects(mock, callback) {
                  * probes.
                  */
                 mock.config.groups = mock.config.groups.filter(function(g) {
-                    return g.uuid != groupToRm;
+                    return g.uuid !== groupToRm;
                 });
                 jsprim.forEachKey(mock.config.agentprobes, function(
                     agentuuid,
@@ -670,14 +670,14 @@ function generateMockAmonObjects(mock, callback) {
                     if (
                         dc.ctp_instances_by_svcname['nameservice'].indexOf(
                             agentuuid
-                        ) == -1
+                        ) === -1
                     ) {
                         return;
                     }
 
                     mock.config.agentprobes[agentuuid] = agentprobes.filter(
                         function(p) {
-                            return p.group != groupToRm;
+                            return p.group !== groupToRm;
                         }
                     );
                 });
@@ -689,7 +689,7 @@ function generateMockAmonObjects(mock, callback) {
                 mock.config.agentprobes[nsagent] = mock.config.agentprobes[
                     nsagent
                 ].filter(function(p) {
-                    return p.group != 'deployed-group-uuid-1';
+                    return p.group !== 'deployed-group-uuid-1';
                 });
 
                 /*
@@ -1076,10 +1076,10 @@ function runTestCase(tc) {
 
     dc = tc.dcConfig;
     assertplus.ok(
-        tc.deployed == 'none' ||
-            tc.deployed == 'full' ||
-            tc.deployed == 'extra' ||
-            tc.deployed == 'partial'
+        tc.deployed === 'none' ||
+            tc.deployed === 'full' ||
+            tc.deployed === 'extra' ||
+            tc.deployed === 'partial'
     );
     plan = alarms.amonUpdatePlanCreate({
         account: account,
@@ -1087,11 +1087,11 @@ function runTestCase(tc) {
         instances: dc.ctp_instances,
         instancesBySvc: dc.ctp_instances_by_svcname,
         deployed:
-            tc.deployed == 'none'
+            tc.deployed === 'none'
                 ? dc.ctp_deployed_none
-                : tc.deployed == 'extra'
+                : tc.deployed === 'extra'
                 ? dc.ctp_deployed_extra
-                : tc.deployed == 'partial'
+                : tc.deployed === 'partial'
                 ? dc.ctp_deployed_partial
                 : dc.ctp_deployed_full,
         metadata: tc.metadata,
