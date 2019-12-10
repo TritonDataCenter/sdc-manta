@@ -112,7 +112,8 @@ async.waterfall(
     [
         function issueWarning(cb) {
             if (ARGV.y === true) {
-                return cb();
+                cb();
+                return;
             }
 
             common.confirm(warning, function(proceed) {
@@ -128,10 +129,11 @@ async.waterfall(
         function initClients(cb) {
             common.initSdcClients.call(self, function(err) {
                 if (err) {
-                    return cb(err);
+                    cb(err);
+                    return;
                 }
 
-                return cb(null);
+                cb(null);
             });
         },
 
@@ -144,11 +146,12 @@ async.waterfall(
                     process.exit(1);
                 } else if (err) {
                     log.error(err, 'failed to get poseidon user');
-                    return cb(err);
+                    cb(err);
+                    return;
                 }
 
                 POSEIDON = user;
-                return cb(null);
+                cb(null);
             });
         },
 
@@ -172,7 +175,8 @@ async.waterfall(
             log.info('checking stage');
 
             if (!self.application) {
-                return cb(null);
+                cb(null);
+                return;
             }
 
             var app = self.application;
@@ -182,14 +186,16 @@ async.waterfall(
                     'Attempting to factory reset in a ' +
                     'production stage.  Failing...';
                 log.fatal(m);
-                return cb(new Error(m));
+                cb(new Error(m));
+                return;
             }
-            return cb(null);
+            cb(null);
         },
 
         function getServices(cb) {
             if (!self.application) {
-                return cb(null);
+                cb(null);
+                return;
             }
 
             var sapi = self.SAPI;
@@ -199,7 +205,8 @@ async.waterfall(
             sapi.getApplicationObjects(app.uuid, function(err, ret) {
                 if (err) {
                     log.error(err, 'failed to list application objects');
-                    return cb(err);
+                    cb(err);
+                    return;
                 }
 
                 self.services = ret.services;
@@ -226,11 +233,12 @@ async.waterfall(
             cnapi.listServers({}, function(err, res) {
                 if (err) {
                     log.error(err, 'failed to list servers');
-                    return cb(err);
+                    cb(err);
+                    return;
                 }
 
                 self.servers = res;
-                return cb(null);
+                cb(null);
             });
         },
 
@@ -243,11 +251,12 @@ async.waterfall(
             amon.listProbeGroups(POSEIDON.uuid, function(err, res) {
                 if (err) {
                     log.error(err, 'failed to get amon probe groups');
-                    return cb(err);
+                    cb(err);
+                    return;
                 }
 
                 self.probeGroups = res;
-                return cb(null);
+                cb(null);
             });
         },
 
@@ -260,17 +269,19 @@ async.waterfall(
             amon.listProbes(POSEIDON.uuid, function(err, res) {
                 if (err) {
                     log.error(err, 'failed to get amon probes');
-                    return cb(err);
+                    cb(err);
+                    return;
                 }
 
                 self.probes = res;
-                return cb(null);
+                cb(null);
             });
         },
 
         function _undeployMarlinAgents(cb) {
             if (!self.application) {
-                return cb(null);
+                cb(null);
+                return;
             }
 
             var log = self.log;
@@ -295,7 +306,8 @@ async.waterfall(
             var log = self.log;
 
             if (!self.instances) {
-                return cb(null);
+                cb(null);
+                return;
             }
 
             var uuids = [];
@@ -341,7 +353,8 @@ async.waterfall(
             var log = self.log;
 
             if (!self.services) {
-                return cb(null);
+                cb(null);
+                return;
             }
 
             var uuids = Object.keys(self.services);
@@ -367,7 +380,8 @@ async.waterfall(
 
         function _deleteApplications(cb) {
             if (!self.application) {
-                return cb(null);
+                cb(null);
+                return;
             }
 
             var sapi = self.SAPI;
@@ -392,7 +406,8 @@ async.waterfall(
             var log = self.log;
 
             if (!self.probes) {
-                return cb(null);
+                cb(null);
+                return;
             }
 
             var uuids = [];
@@ -427,7 +442,8 @@ async.waterfall(
             var log = self.log;
 
             if (!self.probeGroups) {
-                return cb(null);
+                cb(null);
+                return;
             }
 
             var uuids = [];
@@ -463,7 +479,8 @@ async.waterfall(
 
         function _removePoseidonFromNetworks(cb) {
             if (!POSEIDON) {
-                return cb();
+                cb();
+                return;
             }
 
             var networks = ['manta', 'mantanat', 'admin'];
@@ -493,7 +510,8 @@ async.waterfall(
 
         function _removePoseidonFromOperators(cb) {
             if (!POSEIDON) {
-                return cb();
+                cb();
+                return;
             }
 
             var ufds = self.UFDS;
@@ -524,13 +542,14 @@ async.waterfall(
                     );
                 }
 
-                return cb(err);
+                cb(err);
             });
         },
 
         function _deletePoseidonKeys(cb) {
             if (!POSEIDON) {
-                return cb();
+                cb();
+                return;
             }
 
             var ufds = self.UFDS;
@@ -542,11 +561,13 @@ async.waterfall(
 
             POSEIDON.listKeys(function(err, keys) {
                 if (err) {
-                    return cb(err);
+                    cb(err);
+                    return;
                 }
                 if (keys.length === 0) {
                     log.info('no keys for poseidon.');
-                    return cb();
+                    cb();
+                    return;
                 }
                 log.info(
                     sprintf('removing %s key(s) for poseidon', keys.length)
@@ -557,7 +578,7 @@ async.waterfall(
                         func: deleteKey
                     },
                     function(err2) {
-                        return cb(err2);
+                        cb(err2);
                     }
                 );
             });
@@ -565,7 +586,8 @@ async.waterfall(
 
         function _deletePoseidon(cb) {
             if (!POSEIDON) {
-                return cb();
+                cb();
+                return;
             }
 
             var ufds = self.UFDS;
@@ -575,7 +597,8 @@ async.waterfall(
             ufds.deleteUser(POSEIDON, function(err) {
                 if (err) {
                     log.error(err, 'Error deleting poseidon');
-                    return cb(err);
+                    cb(err);
+                    return;
                 }
                 log.info('poseidon deleted');
                 cb();
@@ -586,8 +609,9 @@ async.waterfall(
             var imgapi = self.IMGAPI;
             vasync.pipeline(
                 {
+                    arg: {},
                     funcs: [
-                        function _listImages(_, _cb) {
+                        function _listImages(ctx, next) {
                             var filter = {
                                 name: 'manta-hash-ring'
                             };
@@ -596,35 +620,36 @@ async.waterfall(
                                 err,
                                 images
                             ) {
-                                _.images = images;
-                                return _cb(err);
+                                ctx.images = images;
+                                next(err);
                             });
                         },
-                        function _deleteImages(_, _cb) {
-                            _cb = once(_cb);
-                            if (!_.images || _.images.length === 0) {
-                                return _cb();
+                        function _deleteImages(ctx, next) {
+                            next = once(next);
+                            if (!ctx.images || ctx.images.length === 0) {
+                                next();
+                                return;
                             }
                             var barrier = vasync.barrier();
                             barrier.on('drain', cb);
-                            _.images.forEach(function(image) {
+                            ctx.images.forEach(function(image) {
                                 barrier.start(image.uuid);
                                 imgapi.deleteImage(image.uuid, {}, function(
                                     err
                                 ) {
                                     if (err) {
-                                        return _cb(err);
+                                        next(err);
+                                        return;
                                     }
                                     barrier.done(image.uuid);
                                 });
                             });
                         }
-                    ],
-                    arg: {}
+                    ]
                 },
                 function(err, results) {
-                    process.exit();
-                    return cb(err, results);
+                    process.exit(); // Dev Note: Why this exit here!? -- Trent
+                    cb(err, results);
                 }
             );
         }

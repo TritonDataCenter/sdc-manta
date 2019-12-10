@@ -175,7 +175,8 @@ async.waterfall(
                 );
                 e = new Error(message);
                 e.message = message;
-                return cb(e);
+                cb(e);
+                return;
             }
 
             var cmd = sprintf('%s/tools/mragentconf', common.MARLIN_DIR);
@@ -200,7 +201,8 @@ async.waterfall(
                 );
                 e = new Error(message);
                 e.message = message;
-                return cb(e);
+                cb(e);
+                return;
             }
 
             var zk_servers = app.metadata['ZK_SERVERS'].map(function(s) {

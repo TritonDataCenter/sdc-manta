@@ -76,12 +76,14 @@ Shardadm.prototype.do_list = function(_subcmd, _opts, _args, cb) {
 
     this.client.listApplications(search_opts, function(err, apps) {
         if (err) {
-            return cb(err);
+            cb(err);
+            return;
         }
 
         if (apps.length === 0) {
             console.log('No manta application configured');
-            return cb(null);
+            cb(null);
+            return;
         }
 
         printShards(apps[0].metadata, cb);
@@ -125,7 +127,7 @@ function printShards(metadata, cb) {
         }
     }
 
-    return cb(null);
+    cb(null);
 }
 
 Shardadm.prototype.do_set = function(subcmd, opts, args, cb) {
@@ -141,12 +143,14 @@ Shardadm.prototype.do_set = function(subcmd, opts, args, cb) {
 
     this.client.listApplications(search_opts, function(err, apps) {
         if (err) {
-            return cb(err);
+            cb(err);
+            return;
         }
 
         if (apps.length === 0) {
             console.log('no manta application configured');
-            return cb(null);
+            cb(null);
+            return;
         }
 
         var app = apps[0];
@@ -172,18 +176,20 @@ Shardadm.prototype.do_set = function(subcmd, opts, args, cb) {
 
         if (Object.keys(metadata).length === 0) {
             console.log('No shards to update');
-            return cb(null);
+            cb(null);
+            return;
         }
 
         self.client.updateApplication(app.uuid, {metadata: metadata}, function(
             suberr
         ) {
             if (suberr) {
-                return cb(suberr);
+                cb(suberr);
+                return;
             }
 
             console.log('Updated Manta shards successfully');
-            return cb(null);
+            cb(null);
         });
 
         /*

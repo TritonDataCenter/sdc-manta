@@ -257,7 +257,8 @@ function findLatestImage(service, cb) {
     var onSearchFinish = function(err, image) {
         if (err) {
             log.error(err);
-            return cb(err);
+            cb(err);
+            return;
         }
         if (image === undefined) {
             var msg = sprintf(
@@ -268,11 +269,12 @@ function findLatestImage(service, cb) {
                 channel
             );
             log.error(msg);
-            return cb(new Error(msg));
+            cb(new Error(msg));
+            return;
         }
         log.info({image: image}, 'found image %s for %s', image.name, service);
 
-        return cb(null, image);
+        cb(null, image);
     };
 
     /*
@@ -280,11 +282,8 @@ function findLatestImage(service, cb) {
      * this datacenter's IMGAPI, assuming it matches our version_substr.
      */
     if (ARGV.n) {
-        return findLatestLocalImage(
-            image_names,
-            version_substr,
-            onSearchFinish
-        );
+        findLatestLocalImage(image_names, version_substr, onSearchFinish);
+        return;
     }
 
     var images = [];
@@ -421,7 +420,8 @@ function updateServiceImage(svc, image_uuid, cb) {
 
     if (svc.params.image_uuid === image_uuid) {
         log.info('service %s already has image %s', svc.uuid, image_uuid);
-        return cb(null);
+        cb(null);
+        return;
     }
 
     var changes = {};
@@ -438,11 +438,12 @@ function updateServiceImage(svc, image_uuid, cb) {
     sapi.updateService(svc.uuid, changes, function(err) {
         if (err) {
             log.error(err, 'failed to update service %s', svc.uuid);
-            return cb(err);
+            cb(err);
+            return;
         }
 
         log.info('updated service %s to image %s', svc.uuid, image_uuid);
-        return cb(null);
+        cb(null);
     });
 }
 
@@ -456,7 +457,8 @@ function addConfig(dirname, updatefunc, cb) {
 
     sapi.loadManifests(dirname, function(err, manifests) {
         if (err) {
-            return cb(err);
+            cb(err);
+            return;
         }
 
         assert.object(manifests, 'manifests');
@@ -561,12 +563,14 @@ var pipelineFuncs = [
         sapi.getMode(function(err, mode) {
             if (err) {
                 log.error(err, 'failed to get SAPI mode');
-                return cb(err);
+                cb(err);
+                return;
             }
 
             if (mode === 'full') {
                 log.info('SAPI in full mode');
-                return cb(null);
+                cb(null);
+                return;
             }
 
             log.info('upgrading SAPI to full mode');
@@ -574,12 +578,13 @@ var pipelineFuncs = [
             sapi.setMode('full', function(suberr) {
                 if (suberr) {
                     log.error(suberr, 'failed to upgrade to SAPI full mode');
-                    return cb(suberr);
+                    cb(suberr);
+                    return;
                 }
 
                 log.info('upgraded SAPI to full mode');
 
-                return cb(null);
+                cb(null);
             });
         });
     },
@@ -729,7 +734,8 @@ var pipelineFuncs = [
             self.config.region_name === undefined ||
             self.config.region_name === ''
         ) {
-            return cb(new Error('config file did not contain a region_name.'));
+            cb(new Error('config file did not contain a region_name.'));
+            return;
         }
 
         extra.metadata['REGION'] = self.config.region_name;
@@ -801,11 +807,12 @@ var pipelineFuncs = [
 
         function onResponse(err, app) {
             if (err) {
-                return cb(err);
+                cb(err);
+                return;
             }
 
             self.sapi_application = app;
-            return cb(null);
+            cb(null);
         }
 
         sapi.getOrCreateApplication(
@@ -829,7 +836,8 @@ var pipelineFuncs = [
 
         if (app.metadata['ADMIN_PRIVATE_KEY']) {
             log.info('SSH key already present, not generating');
-            return cb(null);
+            cb(null);
+            return;
         }
 
         var keyfile = sprintf('/tmp/key.%d.rsa', process.pid);
@@ -860,7 +868,8 @@ var pipelineFuncs = [
                         function(err) {
                             if (err) {
                                 log.error(err, 'failed to push SSH keys');
-                                return subcb(err);
+                                subcb(err);
+                                return;
                             }
 
                             subcb();
@@ -894,11 +903,12 @@ var pipelineFuncs = [
         addConfig(dirname, updatefunc, function(err) {
             if (err) {
                 log.error(err, 'failed to load manifests for %s', uuid);
-                return cb(err);
+                cb(err);
+                return;
             }
 
             log.info('loaded manifests from %s', dirname);
-            return cb(null);
+            cb(null);
         });
     },
 
@@ -906,7 +916,8 @@ var pipelineFuncs = [
         var log = self.log;
         // If the user passed a -C argument, then we're done
         if (ARGV.channel !== undefined) {
-            return cb(null);
+            cb(null);
+            return;
         }
 
         log.info('determining update_channel from sapi');
@@ -917,10 +928,11 @@ var pipelineFuncs = [
         common.getSdcChannel(opts, function(err, channel) {
             if (!err) {
                 ARGV.channel = channel;
-                return cb(null);
+                cb(null);
+                return;
             }
             log.error(err, 'failed to determine sdc update_channel');
-            return cb(err);
+            cb(err);
         });
     },
 
