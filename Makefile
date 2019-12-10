@@ -107,7 +107,7 @@ INSTDIR		:= $(PROTO)/root/opt/smartdc/$(NAME)
 # Repo-specific targets
 #
 .PHONY: all
-all: $(SMF_MANIFESTS) deps sdc-scripts
+all: $(SMF_MANIFESTS) manpages deps sdc-scripts
 
 .PHONY: manpages
 manpages: $(MAN_OUTPUTS)

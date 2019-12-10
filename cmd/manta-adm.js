@@ -30,7 +30,7 @@
  *
  *     zk		view and manage configured nameserver instances
  *
- *     accel-gc         configure accelerated garbage-collection
+ *     gc  configure garbage collection
  *
  *     create-topology  generate a hash ring for electric-moray
  *
@@ -268,18 +268,18 @@ MantaAdm.prototype.do_cn.options = [
     }
 ];
 
-function MantaAdmAccelGc(parent) {
+function MantaAdmGc(parent) {
     this.magc_parent = parent;
     cmdln.Cmdln.call(this, {
         name: parent.name + ' gc',
-        desc: 'Configure accelerated garbage-collection.'
+        desc: 'Configure garbage collection.'
     });
 }
-util.inherits(MantaAdmAccelGc, cmdln.Cmdln);
+util.inherits(MantaAdmGc, cmdln.Cmdln);
 
-MantaAdm.prototype.do_accel_gc = MantaAdmAccelGc;
+MantaAdm.prototype.do_gc = MantaAdmGc;
 
-MantaAdmAccelGc.prototype.do_show = function(_subcmd, opts, args, callback) {
+MantaAdmGc.prototype.do_show = function do_show(_subcmd, opts, args, callback) {
     var self = this;
 
     if (args.length > 1) {
@@ -319,14 +319,14 @@ MantaAdmAccelGc.prototype.do_show = function(_subcmd, opts, args, callback) {
     });
 };
 
-MantaAdmAccelGc.prototype.do_show.help =
+MantaAdmGc.prototype.do_show.help =
     'Output a JSON object mapping of metadata shards to ' +
     'garbage-collectors.\n\n' +
     'Usage:\n\n' +
-    '    manta-adm accel-gc show\n\n' +
+    '    manta-adm gc show\n\n' +
     '{{options}}';
 
-MantaAdmAccelGc.prototype.do_show.options = [
+MantaAdmGc.prototype.do_show.options = [
     {
         names: ['all', 'a'],
         type: 'bool',
@@ -339,11 +339,11 @@ MantaAdmAccelGc.prototype.do_show.options = [
         type: 'bool',
         help:
             'Show results in JSON form suitable for passing to ' +
-            '"manta-adm accel-gc update".'
+            '"manta-adm gc update".'
     }
 ];
 
-MantaAdmAccelGc.prototype.do_update = function(_subcmd, opts, args, callback) {
+MantaAdmGc.prototype.do_update = function do_update(_subcmd, opts, args, callback) {
     var self, adm;
     var filename;
 
@@ -397,20 +397,16 @@ MantaAdmAccelGc.prototype.do_update = function(_subcmd, opts, args, callback) {
     );
 };
 
-MantaAdmAccelGc.prototype.do_update.help =
+MantaAdmGc.prototype.do_update.help =
     'Update the mapping of index shards to garbage-collectors.\n\n' +
     'Usage:\n\n' +
-    '    manta-adm accel-gc update [OPTIONS] CONFIG-FILE\n\n' +
+    '    manta-adm gc update [OPTIONS] CONFIG-FILE\n\n' +
     '{{options}}';
 
-MantaAdmAccelGc.prototype.do_update.options = [];
+MantaAdmGc.prototype.do_update.options = [];
 
-MantaAdmAccelGc.prototype.do_gen_shard_assignment = function(
-    _subcmd,
-    opts,
-    _args,
-    callback
-) {
+MantaAdmGc.prototype.do_gen_shard_assignment =
+function do_gen_shard_assignment(_subcmd, opts, _args, callback) {
     var self = this;
 
     self.magc_parent.initAdm(opts, function() {
@@ -436,20 +432,16 @@ MantaAdmAccelGc.prototype.do_gen_shard_assignment = function(
     });
 };
 
-MantaAdmAccelGc.prototype.do_gen_shard_assignment.help =
+MantaAdmGc.prototype.do_gen_shard_assignment.help =
     'Generate an assignment of index shards to deployed ' +
     'garbage-collector instances.\n\n' +
-    '    manta-adm accel-gc gen-shard-assignment\n\n' +
+    '    manta-adm gc gen-shard-assignment\n\n' +
     '{{options}}';
 
-MantaAdmAccelGc.prototype.do_gen_shard_assignment.options = [];
+MantaAdmGc.prototype.do_gen_shard_assignment.options = [];
 
-MantaAdmAccelGc.prototype.do_genconfig = function(
-    _subcmd,
-    opts,
-    args,
-    callback
-) {
+MantaAdmGc.prototype.do_genconfig =
+function do_genconfig(_subcmd, opts, args, callback) {
     var num_collectors, max_cns;
     var avoid_svcs;
     var imageuuid;
@@ -504,13 +496,13 @@ MantaAdmAccelGc.prototype.do_genconfig = function(
     });
 };
 
-MantaAdmAccelGc.prototype.do_genconfig.help =
+MantaAdmGc.prototype.do_genconfig.help =
     'Layer a number of garbage-collector instances on top of an existing ' +
     'Manta deployment.\n\n' +
-    '    manta-adm accel-gc genconfig [OPTIONS] IMAGE_UUID NCOLLECTORS\n\n' +
+    '    manta-adm gc genconfig [OPTIONS] IMAGE_UUID NCOLLECTORS\n\n' +
     '{{options}}';
 
-MantaAdmAccelGc.prototype.do_genconfig.options = [
+MantaAdmGc.prototype.do_genconfig.options = [
     {
         names: ['max-cns', 'm'],
         type: 'integer',
@@ -538,215 +530,6 @@ MantaAdmAccelGc.prototype.do_genconfig.options = [
             'satisfiable in all deployments.'
     }
 ];
-
-MantaAdmAccelGc.prototype.do_enable = function(_subcmd, opts, args, callback) {
-    var self;
-    var account;
-
-    if (args.length !== 1) {
-        callback(new Error('missing arguments: ACCOUNT-LOGIN'));
-        return;
-    }
-
-    self = this;
-    account = args[0];
-
-    if (account === 'poseidon') {
-        callback(new Error('accelerated gc is not supported for poseidon'));
-        return;
-    }
-
-    self.magc_parent.initAdm(opts, function() {
-        var adm = self.magc_parent.madm_adm;
-
-        adm.fetchDeployed(function(err) {
-            if (err) {
-                callback(err);
-                return;
-            }
-            var options = {
-                account: account
-            };
-            adm.disableSnaplinks(options, function(disableErr) {
-                if (disableErr) {
-                    fatal(disableErr.message);
-                }
-                self.magc_parent.finiAdm();
-                callback(disableErr);
-            });
-        });
-    });
-};
-
-MantaAdmAccelGc.prototype.do_enable.help =
-    'Enable accelerated garbage-collection for an account.\n' +
-    'This also disables snaplinks for the account.\n\n' +
-    '    manta-adm accel-gc enable [ACCOUNT-LOGIN]\n\n' +
-    '{{options}}';
-
-MantaAdmAccelGc.prototype.do_enable.options = [];
-
-MantaAdmAccelGc.prototype.do_disable = function(_subcmd, opts, args, callback) {
-    var self;
-    var account;
-
-    if (args.length !== 1) {
-        callback(new Error('missing arguments: ACCOUNT-LOGIN'));
-        return;
-    }
-
-    self = this;
-    account = args[0];
-
-    if (account === 'poseidon') {
-        callback(new Error('accelerated gc is not supported for poseidon'));
-        return;
-    }
-
-    self.magc_parent.initAdm(opts, function() {
-        var adm = self.magc_parent.madm_adm;
-
-        adm.fetchDeployed(function(err) {
-            if (err) {
-                callback(err);
-                return;
-            }
-            var options = {
-                account: account
-            };
-            adm.enableSnaplinks(options, function(enableErr) {
-                if (enableErr) {
-                    fatal(enableErr.message);
-                }
-                self.magc_parent.finiAdm();
-                callback(enableErr);
-            });
-        });
-    });
-};
-
-MantaAdmAccelGc.prototype.do_disable.help =
-    'Disable accelerated garbage-collection for an account.\n' +
-    'This enables snaplinks for the account.\n\n' +
-    '    manta-adm accel-gc disable [ACCOUNT-LOGIN]\n\n' +
-    '{{options}}';
-
-MantaAdmAccelGc.prototype.do_disable.options = [];
-
-MantaAdmAccelGc.prototype.do_accounts = function(
-    _subcmd,
-    opts,
-    args,
-    callback
-) {
-    var self, options;
-
-    self = this;
-    options = {};
-
-    if (args.length !== 0) {
-        callback(new Error('unexpected arguments'));
-        return;
-    }
-
-    options = listPrepareArgs(opts, madm.gcColumnNames());
-    if (options instanceof Error) {
-        callback(options);
-        return;
-    }
-    options.stream = process.stdout;
-
-    self.magc_parent.initAdm(opts, function() {
-        var adm = self.magc_parent.madm_adm;
-
-        adm.fetchDeployed(function(err) {
-            if (err) {
-                fatal(err.message);
-            }
-
-            adm.dumpSnaplinkDisabledAccounts(options, function(outputErr) {
-                if (err) {
-                    fatal(outputErr.message);
-                }
-                self.magc_parent.finiAdm();
-                callback(outputErr);
-            });
-        });
-    });
-};
-
-MantaAdmAccelGc.prototype.do_accounts.help =
-    'List accounts using accelerated garbage-collection.\n\n' +
-    '    manta-adm accel-gc accounts [OPTIONS]\n' +
-    '{{options}}';
-
-MantaAdmAccelGc.prototype.do_accounts.options = [
-    maCommonOptions.omitHeader,
-    maCommonOptions.columns
-];
-
-MantaAdm.prototype.do_genconfig = function(_subcmd, opts, args, callback) {
-    var self = this;
-    var fromfile = opts.from_file;
-
-    if (fromfile) {
-        if (args.length !== 0) {
-            callback(new Error('unexpected arguments'));
-            return;
-        }
-    } else if (args.length !== 1 || (args[0] !== 'lab' && args[0] !== 'coal')) {
-        callback(new Error('expected "lab", "coal", or --from-file option'));
-        return;
-    } else if (opts.directory) {
-        callback(new Error('--directory can only be used with --from-file'));
-        return;
-    }
-
-    this.initAdm(opts, function() {
-        var adm = self.madm_adm;
-        var func;
-        var options = {};
-
-        if (args[0] === 'lab') {
-            func = adm.dumpConfigLab;
-            options['outstream'] = process.stdout;
-        } else if (args[0] === 'coal') {
-            func = adm.dumpConfigCoal;
-            options['outstream'] = process.stdout;
-        } else {
-            assertplus.string(fromfile);
-            func = adm.genconfigFromFile;
-            options['filename'] = fromfile;
-            if (opts.directory) {
-                options['outDirectory'] = opts.directory;
-            } else {
-                options['outstream'] = process.stdout;
-            }
-            options['errstream'] = process.stderr;
-        }
-
-        adm.fetchDeployed(function(err) {
-            if (err) {
-                fatal(err.message);
-            }
-
-            func.call(adm, options, function(serr, nissues) {
-                if (serr) {
-                    fatal(serr.message);
-                }
-
-                if (nissues !== 0) {
-                    console.error(
-                        'error: bailing out because of at least one issue'
-                    );
-                    process.exit(1);
-                }
-
-                self.finiAdm();
-            });
-        });
-    });
-};
 
 MantaAdm.prototype.do_genconfig.help =
     'Generate a config for COAL, lab, or a larger deployment.\n' +
