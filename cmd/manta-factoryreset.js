@@ -278,29 +278,6 @@ async.waterfall(
             });
         },
 
-        function _undeployMarlinAgents(cb) {
-            if (!self.application) {
-                cb(null);
-                return;
-            }
-
-            var log = self.log;
-            var script = sprintf(
-                '[[ -d %s ]] || exit 0; %s/tools/mragentdestroy -f',
-                common.MARLIN_DIR,
-                common.MARLIN_DIR
-            );
-            common.runOnEachMarlinNode.call(self, script, function(err) {
-                if (err) {
-                    log.error(err, 'failed to undeploy marlin agents');
-                    cb(err);
-                    return;
-                }
-                log.info('done undeploying marlin agents');
-                cb();
-            });
-        },
-
         function _deleteInstances(cb) {
             var sapi = self.SAPI;
             var log = self.log;
@@ -483,7 +460,7 @@ async.waterfall(
                 return;
             }
 
-            var networks = ['manta', 'mantanat', 'admin'];
+            var networks = ['manta', 'admin'];
 
             vasync.forEachParallel(
                 {

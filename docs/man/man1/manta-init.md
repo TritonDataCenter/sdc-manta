@@ -50,10 +50,6 @@ run this command except as documented in the Manta Operator's Guide.**
   is /var/log/manta-init.log.  The special string "stdout" is used to dump to
   stdout.
 
-`-m, --marlin_image IMAGE_UUID`
-  Use image `IMAGE_UUID` for Marlin ("compute") zones.  This is not supported
-  and should only be used by Manta developers.
-
 `-n, --no_download`
   Do not download any new zone images.
 

@@ -227,11 +227,6 @@ Shardadm.prototype.do_set.options = [
         help: 'shards for manta buckets subsystem indexing tier'
     },
     {
-        names: ['m'],
-        type: 'string',
-        help: 'shard for marlin job records'
-    },
-    {
         names: ['s'],
         type: 'string',
         help: 'shard for minnow (manta_storage) records'

@@ -31,13 +31,7 @@ var knownServices = [
     'authcache',
     'webapi',
     'loadbalancer',
-    'jobsupervisor',
-    'jobpuller',
-    'medusa',
     'ops',
-    'madtom',
-    'marlin-dashboard',
-    'marlin',
     'reshard',
     'pgstatsmon',
     'garbage-collector',
@@ -82,16 +76,6 @@ function main() {
     );
 
     /*
-     * Test serviceSupportsOneach().
-     */
-    assertplus.deepEqual(
-        ['marlin'],
-        knownServices.filter(function(svcname) {
-            return !services.serviceSupportsOneach(svcname);
-        })
-    );
-
-    /*
      * Test serviceConfigProperties().
      */
     knownServices.forEach(function(svcname) {
@@ -107,20 +91,6 @@ function main() {
             );
         }
     });
-
-    /*
-     * Test serviceSupportsProbes().
-     */
-    assertplus.deepEqual(
-        ['marlin'],
-        knownServices.filter(function(svcname) {
-            return !services.serviceSupportsProbes(svcname);
-        })
-    );
-    assertplus.deepEqual(
-        services.mSvcNamesProbes,
-        services.mSvcNames.filter(services.serviceSupportsProbes)
-    );
 
     console.error('%s tests passed', __filename);
 }

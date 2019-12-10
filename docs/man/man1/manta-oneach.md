@@ -1,4 +1,4 @@
-# MANTA-ONEACH 1 "2016" Manta "Manta Operator Commands"
+# MANTA-ONEACH 1 "2019" Manta "Manta Operator Commands"
 
 ## NAME
 
@@ -18,8 +18,8 @@ The `manta-oneach` command is used to execute commands and file transfers on an
 arbitrary set of Manta components.  Manta components include:
 
 * **non-global zones**, which make up most Manta components.  Each zone is
-  associated with a service like "webapi", "jobsupervisor", "loadbalancer",
-  and the like.  See manta-adm(1).
+  associated with a service like "webapi", "loadbalancer", and the like.
+  See manta-adm(1).
 * **global zones**, which represent the operating system context on each compute
   node.  Manta has agent components that run in global zones.  Operating on
   global zones can also be useful for fetching system-wide metrics or
@@ -305,7 +305,7 @@ the `-J/--jsonstream` output format.
 
 ## COPYRIGHT
 
-Copyright (c) 2016 Joyent Inc.
+Copyright 2019 Joyent, Inc.
 
 ## SEE ALSO
 

@@ -5,7 +5,7 @@
 #
 
 #
-# Copyright (c) 2017, Joyent, Inc.
+# Copyright 2019 Joyent, Inc.
 #
 
 #
@@ -36,8 +36,7 @@
         response: No automated response will be taken.
         impact: >-
             If the problem was transient, there may be no impact.  Otherwise,
-            some end user requests may be experiencing errors or some jobs may
-            be experiencing errors or additional latency.
+            some end user requests may be experiencing errors.
         action: >-
             Determine the scope of the problem based on the log message and
             resolve the underlying issue.

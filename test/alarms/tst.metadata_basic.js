@@ -692,10 +692,8 @@ function generateTestCases() {
              * See the other valid test case above for the structure of this
              * verifier.
              *
-             * We should see events for each service that supports probes.
-             * This excludes "marlin".
              */
-            expectedServices = services.mSvcNamesProbes.slice(0).sort();
+            expectedServices = services.mSvcNames.slice(0).sort();
             expectedEvents = expectedServices.map(function(svcname) {
                 return sampleEvent + '.' + svcname.replace(/-/g, '_');
             });

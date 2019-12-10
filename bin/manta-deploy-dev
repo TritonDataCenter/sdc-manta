@@ -112,5 +112,4 @@ confirm "Are you ready to proceed? (y/N) " || fail "aborted by user"
 
 set -o xtrace
 manta-adm update --skip-verify-channel -y $mdl_conffile
-manta-marlin -s $(manta-adm cn -H -o server_uuid storage)
 set +o xtrace

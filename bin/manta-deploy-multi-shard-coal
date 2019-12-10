@@ -6,7 +6,7 @@
 #
 
 #
-# Copyright (c) 2014, Joyent, Inc.
+# Copyright 2019 Joyent, Inc.
 #
 
 #
@@ -48,16 +48,4 @@ manta-deploy webapi
 
 manta-deploy loadbalancer
 
-manta-deploy jobsupervisor
-
-manta-deploy jobpuller
-
-manta-deploy medusa
-
 manta-deploy ops
-
-for i in $(seq 1 2); do
-	manta-deploy marlin
-done
-
-manta-marlin

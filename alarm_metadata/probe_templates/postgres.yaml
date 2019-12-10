@@ -5,7 +5,7 @@
 #
 
 #
-# Copyright (c) 2017, Joyent, Inc.
+# Copyright 2019 Joyent, Inc.
 #
 
 #
@@ -175,13 +175,12 @@
         severity: critical
         response: No automated response will be taken.
         impact: >-
-            If the shard is completely offline, then end-user requests or job
-            tasks operating on objects whose metadata is on the affected shard
-            will fail.  If the shard is read-only, then new writes to
-            directories on this shard will fail, but read operations and job
-            tasks using objects on this shard will be unaffected.  If the shard
-            is online for reads and writes, then only its fault tolerance is
-            currently affected.
+            If the shard is completely offline, then end-user requests for
+            objects whose metadata is on the affected shard will fail.  If the
+            shard is read-only, then new writes to directories on this shard
+            will fail, but read operations using objects on this shard will be
+            unaffected.  If the shard is online for reads and writes, then only
+            its fault tolerance is currently affected.
         action: >-
             Determine the scope of the problem and resolve the underying issue.
             See the "manatee-adm" command inside the PostgreSQL zones for
@@ -215,10 +214,8 @@
         severity: minor
         response: No automated response will be taken.
         impact: >-
-            During the transition, some end user requests may have failed.  Some
-            job tasks may have experienced higher dispatch latency or (in rarer
-            cases) failures.  The transition has completed, and there should be
-            no ongoing impact.
+            During the transition, some end user requests may have failed.  The
+            transition has completed, and there should be no ongoing impact.
 
             If the primary peer has been deposed, then fault tolerance may be
             compromised until that peer has been rebuilt.

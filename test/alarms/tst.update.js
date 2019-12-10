@@ -101,8 +101,7 @@ var dcconfigs = {
  * test out those.
  */
 var nInstancesBySvc = {
-    nameservice: 3,
-    jobsupervisor: 2
+    nameservice: 3
 };
 
 /*
@@ -428,7 +427,7 @@ function generateMockAmonObjects(mock, callback) {
                  * "each" probe template.
                  */
                 mock.config.groups = jsprim.deepCopy(deployedGroups);
-                services.mSvcNamesProbes.forEach(function(svcname) {
+                services.mSvcNames.forEach(function(svcname) {
                     svcname = svcname.replace(/-/g, '_');
                     mock.config.groups.push({
                         uuid: 'deployed-group-uuid-svc-' + svcname,
@@ -518,32 +517,6 @@ function generateMockAmonObjects(mock, callback) {
                         agent: 'svc-nameservice-2'
                     })
                 ];
-
-                mock.config.agentprobes['svc-jobsupervisor-0'] = [
-                    makeProbe({
-                        group: 'deployed-group-uuid-3',
-                        name: 'upset.manta.test.all0',
-                        agent: 'svc-jobsupervisor-0'
-                    }),
-                    makeProbe({
-                        group: 'deployed-group-uuid-svc-jobsupervisor',
-                        name: 'upset.manta.test.jobsupervisor0',
-                        agent: 'svc-jobsupervisor-0'
-                    })
-                ];
-                mock.config.agentprobes['svc-jobsupervisor-1'] = [
-                    makeProbe({
-                        group: 'deployed-group-uuid-3',
-                        name: 'upset.manta.test.all0',
-                        agent: 'svc-jobsupervisor-1'
-                    }),
-                    makeProbe({
-                        group: 'deployed-group-uuid-svc-jobsupervisor',
-                        name: 'upset.manta.test.jobsupervisor0',
-                        agent: 'svc-jobsupervisor-1'
-                    })
-                ];
-
                 mock.config.agentprobes['server-uuid-0'] = [
                     makeProbe({
                         group: 'deployed-group-uuid-2',
@@ -789,7 +762,7 @@ function generateTestCases() {
      * There are three non-"each" templates, plus an "each" template
      * that generates a group for each service that supports probes.
      */
-    ngroupsfull = deployedGroups.length + services.mSvcNamesProbes.length;
+    ngroupsfull = deployedGroups.length + services.mSvcNames.length;
 
     /*
      * For the single-DC case, we've got:
@@ -797,12 +770,11 @@ function generateTestCases() {
      *   - 3 "nameservice" probes for the "nameservice" template
      *   - 2 "global" probes for the "global" template
      *   - 3 "nameservice" probes for the "each" template
-     *   - 2 "jobsupervisor" probes for the "each" template
      *   - 5 probes for the "all" template
      *
-     * totalling 15 probes.
+     * totalling 13 probes.
      */
-    nprobesfull = 15;
+    nprobesfull = 13;
 
     /*
      * For the multi-DC case, we've got:
@@ -812,10 +784,9 @@ function generateTestCases() {
      *   - 1 "global" probe for the "global" template
      *     (again, because other nameservice instances are in other DCs)
      *   - 1 "nameservice" probe for the "each" template
-     *   - 1 "jobsupevisor" probe for the "each" template
      *   - 2 probes for the "all" template
      */
-    nprobesmulti = 6;
+    nprobesmulti = 5;
 
     testCases.push({
         name: 'empty DC, undeployed, configure with no metadata',

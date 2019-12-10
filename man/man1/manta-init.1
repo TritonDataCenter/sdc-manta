@@ -1,4 +1,4 @@
-.TH MANTA\-INIT 1 "2016" Manta "Manta Operator Commands"
+.TH MANTA\-INIT 1 "2019" Manta "Manta Operator Commands"
 .SH NAME
 .PP
 manta\-init \- initialize or update a Manta deployment
@@ -17,6 +17,19 @@ Both of these use cases are described in the Manta Operator's Guide.  \fBDo not
 run this command except as documented in the Manta Operator's Guide.\fP
 .SH OPTIONS
 .TP
+\fB\fC\-B, \-\-branch BRANCH\fR
+Specifies a substring which must be present in the version string of the
+images to be downloaded. The default for this value is the empty string,
+which means that the latest images on the given channel are used, regardless
+of their branch.
+.TP
+\fB\fC\-C, \-\-channel CHANNEL\fR
+Specifies the updates.joyent.com channel from which images should be
+downloaded unless \fB\fC\-n\fR is used. By default, this value is set to the current
+value of \fB\fCupdate_channel\fR in this data\-center, obtained from the \fB\fCsdc\fR
+application in SAPI. Use the \fB\fCsdcadm channel\fR command to view or change
+the default value.
+.TP
 \fB\fC\-c, \-\-concurrent_downloads N\fR
 Specifies that no more than \fB\fCN\fR zone images should be downloaded
 concurrently.
@@ -29,10 +42,6 @@ This option is required, even after the initial setup.
 Specifies where the verbose activity log should be written.  The default path
 is /var/log/manta\-init.log.  The special string "stdout" is used to dump to
 stdout.
-.TP
-\fB\fC\-m, \-\-marlin_image IMAGE_UUID\fR
-Use image \fB\fCIMAGE_UUID\fR for Marlin ("compute") zones.  This is not supported
-and should only be used by Manta developers.
 .TP
 \fB\fC\-n, \-\-no_download\fR
 Do not download any new zone images.
@@ -58,7 +67,7 @@ Non\-zero
 Generic failure.
 .SH COPYRIGHT
 .PP
-Copyright (c) 2016 Joyent Inc.
+Copyright 2019 Joyent, Inc.
 .SH SEE ALSO
 .PP
 Manta Operator's Guide

@@ -35,16 +35,14 @@ var log = new bunyan({
  */
 var fakeDeployed = {
     cn001: {
-        marlin: {img001: 10},
         moray: {
             '1': {img002: 3},
             '2': {img002: 3},
             '3': {img002: 3}
         },
-        medusa: {img004: 2}
+        webapi: {img004: 2}
     },
     cn002: {
-        marlin: {img001: 10},
         moray: {
             '1': {img002: 3},
             '2': {img002: 3},
@@ -52,7 +50,6 @@ var fakeDeployed = {
         }
     },
     cn003: {
-        marlin: {img001: 10},
         postgres: {
             '1': {img003: 3},
             '2': {img003: 3},
@@ -60,7 +57,6 @@ var fakeDeployed = {
         }
     },
     cn004: {
-        marlin: {img001: 2},
         postgres: {
             '1': {img003: 1},
             '2': {img003: 1}
@@ -127,12 +123,12 @@ vasync.forEachPipeline(
             {
                 name: 'remove one instance',
                 changefunc: function(config) {
-                    config['cn001']['medusa']['img004'] = 1;
+                    config['cn001']['webapi']['img004'] = 1;
                 },
                 expect: [
                     {
                         cnid: 'cn001',
-                        service: 'medusa',
+                        service: 'webapi',
                         action: 'deprovision',
                         image: 'img004'
                     }
@@ -141,18 +137,18 @@ vasync.forEachPipeline(
             {
                 name: 'deploy two instances',
                 changefunc: function(config) {
-                    config['cn001']['medusa']['img004'] = 4;
+                    config['cn001']['webapi']['img004'] = 4;
                 },
                 expect: [
                     {
                         cnid: 'cn001',
-                        service: 'medusa',
+                        service: 'webapi',
                         action: 'provision',
                         image: 'img004'
                     },
                     {
                         cnid: 'cn001',
-                        service: 'medusa',
+                        service: 'webapi',
                         action: 'provision',
                         image: 'img004'
                     }
@@ -161,18 +157,18 @@ vasync.forEachPipeline(
             {
                 name: 'remove a service',
                 changefunc: function(config) {
-                    delete config['cn001']['medusa'];
+                    delete config['cn001']['webapi'];
                 },
                 expect: [
                     {
                         cnid: 'cn001',
-                        service: 'medusa',
+                        service: 'webapi',
                         action: 'deprovision',
                         image: 'img004'
                     },
                     {
                         cnid: 'cn001',
-                        service: 'medusa',
+                        service: 'webapi',
                         action: 'deprovision',
                         image: 'img004'
                     }
@@ -197,36 +193,24 @@ vasync.forEachPipeline(
                         action: 'deprovision',
                         image: 'img003',
                         shard: '2'
-                    },
-                    {
-                        cnid: 'cn004',
-                        service: 'marlin',
-                        action: 'deprovision',
-                        image: 'img001'
-                    },
-                    {
-                        cnid: 'cn004',
-                        service: 'marlin',
-                        action: 'deprovision',
-                        image: 'img001'
                     }
                 ]
             },
             {
                 name: 'add a service',
                 changefunc: function(config) {
-                    config['cn004']['medusa'] = {img004: 2};
+                    config['cn004']['webapi'] = {img004: 2};
                 },
                 expect: [
                     {
                         cnid: 'cn004',
-                        service: 'medusa',
+                        service: 'webapi',
                         action: 'provision',
                         image: 'img004'
                     },
                     {
                         cnid: 'cn004',
-                        service: 'medusa',
+                        service: 'webapi',
                         action: 'provision',
                         image: 'img004'
                     }
@@ -235,68 +219,35 @@ vasync.forEachPipeline(
             {
                 name: 'add a CN',
                 changefunc: function(config) {
-                    config['cn005'] = {medusa: {img004: 1}};
+                    config['cn005'] = {webapi: {img004: 1}};
                 },
                 expect: [
                     {
                         cnid: 'cn005',
-                        service: 'medusa',
+                        service: 'webapi',
                         action: 'provision',
                         image: 'img004'
                     }
                 ]
             },
             {
-                name: 'upgrade a service (non-marlin)',
+                name: 'upgrade a service',
                 changefunc: function(config) {
-                    config['cn001']['medusa']['img004'] = 1;
-                    config['cn001']['medusa']['img005'] = 2;
+                    config['cn001']['webapi']['img004'] = 1;
+                    config['cn001']['webapi']['img005'] = 2;
                 },
                 expect: [
                     {
                         cnid: 'cn001',
-                        service: 'medusa',
+                        service: 'webapi',
                         action: 'reprovision',
                         image: 'img005'
                     },
                     {
                         cnid: 'cn001',
-                        service: 'medusa',
+                        service: 'webapi',
                         action: 'provision',
                         image: 'img005'
-                    }
-                ]
-            },
-            {
-                name: 'upgrade a service (marlin)',
-                changefunc: function(config) {
-                    config['cn001']['marlin']['img001'] = 8;
-                    config['cn001']['marlin']['img002'] = 2;
-                },
-                expect: [
-                    {
-                        cnid: 'cn001',
-                        service: 'marlin',
-                        action: 'provision',
-                        image: 'img002'
-                    },
-                    {
-                        cnid: 'cn001',
-                        service: 'marlin',
-                        action: 'deprovision',
-                        image: 'img001'
-                    },
-                    {
-                        cnid: 'cn001',
-                        service: 'marlin',
-                        action: 'provision',
-                        image: 'img002'
-                    },
-                    {
-                        cnid: 'cn001',
-                        service: 'marlin',
-                        action: 'deprovision',
-                        image: 'img001'
                     }
                 ]
             },

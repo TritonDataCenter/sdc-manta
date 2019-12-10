@@ -82,26 +82,8 @@ Services that are part of the Manta application include:
 **garbage-collector**
   Processes delete records in specialized Postgres tables
 
-**jobpuller**
-  Manages the archival of completed user compute jobs
-
-**jobsupervisor**
-  Manages the execution of user compute jobs
-
 **loadbalancer**
   Handles SSL termination and loadbalancing for "webapi"
-
-**madtom**
-  Operational dashboard for component health
-
-**marlin-dashboard**
-  Operational dashboard for job activity
-
-**marlin**
-  Zones used to execute end user compute tasks
-
-**medusa**
-  Manages end user interactive shell sessions
 
 **moray**
   Key-value store used to access PostgreSQL
@@ -113,7 +95,7 @@ Services that are part of the Manta application include:
   Manages asynchronous operations like garbage collection, metering, and auditing
 
 **postgres**
-  PostgreSQL databases used for storing object and job metadata
+  PostgreSQL databases used for storing object metadata
 
 **pgstatsmon**
   Monitoring system for Postgres
@@ -597,7 +579,7 @@ Example: list hostnames in form suitable for "sdc-oneachnode -n":
     # manta-adm cn -n
 
 Example: list storage CNs with their associated storage id (used in object
-metadata) and compute ids (used by the compute jobs subsystem):
+metadata) and compute ids (vestigial):
 
     # manta-adm cn -o host,admin_ip,compute_id,storage_ids storage
 
@@ -640,10 +622,7 @@ servers in `FILE` span more than one availability zone.
 The input JSON file `FILE` should contain a single object with properties:
 
 `nshards` (positive integer)
-  the number of database shards to create, which is usually one more than the
-  number of shards that are intended to store object metadata (in order to
-  accommodate jobs and low-volume system metadata that's typically stored in
-  shard 1)
+  the number of database shards to create.
 
 `servers` (array of objects)
   the list of servers available for deployment

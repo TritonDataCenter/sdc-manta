@@ -1,4 +1,4 @@
-.TH MANTA\-ONEACH 1 "2016" Manta "Manta Operator Commands"
+.TH MANTA\-ONEACH 1 "2019" Manta "Manta Operator Commands"
 .SH NAME
 .PP
 manta\-oneach \- execute commands and file transfers on Manta components
@@ -16,8 +16,8 @@ arbitrary set of Manta components.  Manta components include:
 .RS
 .IP \(bu 2
 \fBnon\-global zones\fP, which make up most Manta components.  Each zone is
-associated with a service like "webapi", "jobsupervisor", "loadbalancer",
-and the like.  See 
+associated with a service like "webapi", "loadbalancer", and the like.
+See 
 .BR manta-adm (1).
 .IP \(bu 2
 \fBglobal zones\fP, which represent the operating system context on each compute
@@ -46,6 +46,7 @@ system global zones).
 Select zones for the specified services.  You can specify this option multiple
 times or specify a comma\-separated list of service names.  See 
 .BR manta-adm (1)
+
 for a list of service names.
 .TP
 \fB\fC\-S, \-\-compute\-node HOSTNAME | UUID[,HOSTNAME | UUID...]\fR
@@ -210,9 +211,11 @@ $ manta\-oneach \-\-service storage 'svcs minnow'
 === Output from 3211f5ed\-f70d\-481d\-93ae\-755e4c84837d on headnode (storage):
 STATE          STIME    FMRI
 online         Jan_20   svc:/manta/application/minnow:default
+
 === Output from 4ecda097\-2556\-49ca\-908a\-b8fea6a923c4 on headnode (storage):
 STATE          STIME    FMRI
 online         Jan_20   svc:/manta/application/minnow:default
+
 === Output from b150f995\-a91b\-4fa5\-8fe4\-7cb84621e553 on headnode (storage):
 STATE          STIME    FMRI
 online         Jan_20   svc:/manta/application/minnow:default
@@ -271,12 +274,15 @@ in "moray" and "webapi" zones on compute node RA14872:
 === Output from 69790d4a\-d500\-4e56\-99ac\-967024765805 on RA14872 (moray):
 STATE          STIME    FMRI
 online         Jan_15   svc:/manta/haproxy:default
+
 === Output from b3c6c144\-7500\-4904\-a0b5\-91997a71f75d on RA14872 (moray):
 STATE          STIME    FMRI
 online         Jan_15   svc:/manta/haproxy:default
+
 === Output from b68396db\-d49f\-487a\-8379\-a36234ac9993 on RA14872 (moray):
 STATE          STIME    FMRI
 online         Jan_15   svc:/manta/haproxy:default
+
 === Output from 380920d9\-ed44\-4bcd\-b61c\-4b99f49c1329 on RA14872 (webapi):
 STATE          STIME    FMRI
 online         Jan_15   svc:/manta/haproxy:default
@@ -330,7 +336,7 @@ The internal logger will use this log level and emit output to \fB\fCstderr\fR\&
 option is subject to change at any time.
 .SH COPYRIGHT
 .PP
-Copyright (c) 2016 Joyent Inc.
+Copyright 2019 Joyent, Inc.
 .SH SEE ALSO
 .PP
 .BR bash (1), 

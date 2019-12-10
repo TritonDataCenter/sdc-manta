@@ -82,10 +82,6 @@ var ARGV = optimist.options({
         describe: 'dump logs to this file (stdout to dump to console)',
         default: '/var/log/manta-init.log'
     },
-    m: {
-        alias: 'marlin_image',
-        describe: 'Use the specified image_uuid instead of searching for latest'
-    },
     n: {
         alias: 'no_download',
         describe: 'omit downloading new images'
@@ -658,7 +654,7 @@ var pipelineFuncs = [
     },
 
     function enableAdminProvisioning(_, cb) {
-        var networks = ['manta', 'mantanat', 'admin'];
+        var networks = ['manta', 'admin'];
 
         vasync.forEachParallel(
             {
@@ -775,10 +771,6 @@ var pipelineFuncs = [
             'workflow.%s',
             extra.metadata['DOMAIN_NAME']
         );
-        extra.metadata['MEDUSA_REFLECTOR'] = sprintf(
-            'medusa.%s',
-            extra.metadata['DOMAIN_NAME']
-        );
 
         extra.metadata['MANTA_URL'] = sprintf(
             'https://%s',
@@ -802,7 +794,7 @@ var pipelineFuncs = [
          */
         extra.metadata['MAKO_HTTP_KEEPALIVE_TIMEOUT'] = 86400;
 
-        // This is filled in when marlin is deployed.
+        // XXX Only needed until jobs are fully removed everywhere.
         extra.metadata['SERVER_COMPUTE_ID_MAPPING'] = {};
 
         extra.master = true;
@@ -946,21 +938,10 @@ var pipelineFuncs = [
 
         log.info({services: services.mSvcNames}, 'finding images for services');
 
-        /*
-         * If the marlin image was given, we filter it out and add it
-         * manually later.
-         */
-        var filtered = services.mSvcNames.filter(function f(svcname) {
-            if (ARGV.m && svcname === 'marlin') {
-                return false;
-            }
-            return true;
-        });
-
         vasync.forEachParallel(
             {
                 func: findLatestImage,
-                inputs: filtered
+                inputs: services.mSvcNames
             },
             function(suberr, results) {
                 var rs = results.successes;
@@ -971,21 +952,6 @@ var pipelineFuncs = [
                         origin: im.origin
                     };
                 });
-
-                // Adding the marlin image manually.
-                if (ARGV.m) {
-                    var imageNames = services.serviceNameToImageNames('marlin');
-                    assert.ok(
-                        imageNames.length === 1,
-                        'the marlin service should have ' +
-                            'exactly one valid image name: ' +
-                            imageNames.join(', ')
-                    );
-                    images.push({
-                        uuid: ARGV.m,
-                        name: imageNames[0]
-                    });
-                }
 
                 ctx.images = images;
                 return cb(suberr);
@@ -1121,13 +1087,6 @@ var pipelineFuncs = [
                         log.info('downloaded image %s', image_uuid);
                     }
                     return subcb();
-                }
-
-                if (
-                    ARGV.m &&
-                    image_from_uuid[image_uuid].name === 'manta-marlin'
-                ) {
-                    image_uuid = ARGV.m;
                 }
 
                 imgapi.adminImportRemoteImageAndWait(
@@ -1295,6 +1254,13 @@ var pipelineFuncs = [
             cb(new Error(m));
             return;
         }
+
+        //
+        // XXX MUSKIE_JOB_* is being left for now, even though job support is
+        // being removed in Manta v2 because muskie still uses these values.
+        // Once job support is removed from muskie, this can be removed here
+        // too.
+        //
 
         if (svc.metadata.hasOwnProperty('MUSKIE_JOB_TOKEN_AES_KEY')) {
             log.info('skipping muskie AES key (already present)');

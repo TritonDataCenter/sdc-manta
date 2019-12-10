@@ -88,12 +88,6 @@ generated config:
         "electric-moray": {
             "ELECTRIC_MORAY_IMAGE0": 1
         },
-        "jobpuller": {
-            "JOBPULLER_IMAGE0": 1
-        },
-        "jobsupervisor": {
-            "JOBSUPERVISOR_IMAGE0": 1
-        },
         "loadbalancer": {
             "LOADBALANCER_IMAGE0": 1
         },
@@ -161,17 +155,8 @@ generated config:
         "electric-moray": {
             "ELECTRIC_MORAY_IMAGE0": 1
         },
-        "jobsupervisor": {
-            "JOBSUPERVISOR_IMAGE0": 1
-        },
         "loadbalancer": {
             "LOADBALANCER_IMAGE0": 1
-        },
-        "madtom": {
-            "MADTOM_IMAGE0": 1
-        },
-        "medusa": {
-            "MEDUSA_IMAGE0": 1
         },
         "moray": {
             "1": {
@@ -231,17 +216,8 @@ generated config:
         "electric-moray": {
             "ELECTRIC_MORAY_IMAGE0": 1
         },
-        "jobpuller": {
-            "JOBPULLER_IMAGE0": 1
-        },
         "loadbalancer": {
             "LOADBALANCER_IMAGE0": 1
-        },
-        "marlin-dashboard": {
-            "DASHBOARD_IMAGE0": 1
-        },
-        "medusa": {
-            "MEDUSA_IMAGE0": 1
         },
         "moray": {
             "1": {
@@ -273,17 +249,11 @@ generated config:
         }
     },
     "server_r00_storage00": {
-        "marlin": {
-            "MARLIN_IMAGE0": 16
-        },
         "storage": {
             "STORAGE_IMAGE0": 1
         }
     },
     "server_r01_storage00": {
-        "marlin": {
-            "MARLIN_IMAGE0": 16
-        },
         "storage": {
             "STORAGE_IMAGE0": 1
         }
@@ -299,13 +269,7 @@ summary:
      authcache            -                2
      webapi               -                3
      loadbalancer         -                3
-     jobsupervisor        -                2
-     jobpuller            -                2
-     medusa               -                2
      ops                  -                1
-     madtom               -                1
-     marlin-dashboard     -                1
-     marlin               -               32
      reshard              -
      pgstatsmon           -
      garbage-collector     -
@@ -645,24 +609,6 @@ generated config:
         "electric-moray": {
             "ELECTRIC_MORAY_IMAGE0": 2
         },
-        "jobpuller": {
-            "JOBPULLER_IMAGE0": 2
-        },
-        "jobsupervisor": {
-            "JOBSUPERVISOR_IMAGE0": 2
-        },
-        "loadbalancer": {
-            "LOADBALANCER_IMAGE0": 2
-        },
-        "madtom": {
-            "MADTOM_IMAGE0": 1
-        },
-        "marlin-dashboard": {
-            "DASHBOARD_IMAGE0": 1
-        },
-        "medusa": {
-            "MEDUSA_IMAGE0": 2
-        },
         "moray": {
             "1": {
                 "MORAY_IMAGE0": 3
@@ -684,9 +630,6 @@ generated config:
         }
     },
     "server_r00_storage00": {
-        "marlin": {
-            "MARLIN_IMAGE0": 16
-        },
         "storage": {
             "STORAGE_IMAGE0": 1
         }
@@ -703,13 +646,7 @@ summary:
      authcache            -                2
      webapi               -                2
      loadbalancer         -                2
-     jobsupervisor        -                2
-     jobpuller            -                2
-     medusa               -                2
      ops                  -                1
-     madtom               -                1
-     marlin-dashboard     -                1
-     marlin               -               16
      reshard              -
      pgstatsmon           -
      garbage-collector     -
@@ -774,23 +711,8 @@ generated config:
         "electric-moray": {
             "ELECTRIC_MORAY_IMAGE0": 2
         },
-        "jobpuller": {
-            "JOBPULLER_IMAGE0": 2
-        },
-        "jobsupervisor": {
-            "JOBSUPERVISOR_IMAGE0": 2
-        },
         "loadbalancer": {
             "LOADBALANCER_IMAGE0": 2
-        },
-        "madtom": {
-            "MADTOM_IMAGE0": 1
-        },
-        "marlin-dashboard": {
-            "DASHBOARD_IMAGE0": 1
-        },
-        "medusa": {
-            "MEDUSA_IMAGE0": 2
         },
         "moray": {
             "1": {
@@ -825,9 +747,6 @@ generated config:
         }
     },
     "server_r00_storage00": {
-        "marlin": {
-            "MARLIN_IMAGE0": 16
-        },
         "storage": {
             "STORAGE_IMAGE0": 1
         }
@@ -844,13 +763,7 @@ summary:
      authcache            -                2
      webapi               -                2
      loadbalancer         -                2
-     jobsupervisor        -                2
-     jobpuller            -                2
-     medusa               -                2
      ops                  -                1
-     madtom               -                1
-     marlin-dashboard     -                1
-     marlin               -               16
      reshard              -
      pgstatsmon           -
      garbage-collector     -
@@ -968,9 +881,6 @@ generated config:
         "loadbalancer": {
             "LOADBALANCER_IMAGE0": 1
         },
-        "medusa": {
-            "MEDUSA_IMAGE0": 1
-        },
         "moray": {
             "1": {
                 "MORAY_IMAGE0": 1
@@ -1005,14 +915,8 @@ generated config:
         "electric-moray": {
             "ELECTRIC_MORAY_IMAGE0": 1
         },
-        "jobsupervisor": {
-            "JOBSUPERVISOR_IMAGE0": 1
-        },
         "loadbalancer": {
             "LOADBALANCER_IMAGE0": 1
-        },
-        "marlin-dashboard": {
-            "DASHBOARD_IMAGE0": 1
         },
         "moray": {
             "2": {
@@ -1034,9 +938,6 @@ generated config:
         },
         "electric-moray": {
             "ELECTRIC_MORAY_IMAGE0": 1
-        },
-        "jobpuller": {
-            "JOBPULLER_IMAGE0": 1
         },
         "loadbalancer": {
             "LOADBALANCER_IMAGE0": 1
@@ -1105,9 +1006,6 @@ generated config:
         "electric-moray": {
             "ELECTRIC_MORAY_IMAGE0": 1
         },
-        "jobsupervisor": {
-            "JOBSUPERVISOR_IMAGE0": 1
-        },
         "loadbalancer": {
             "LOADBALANCER_IMAGE0": 1
         },
@@ -1135,9 +1033,6 @@ generated config:
         "loadbalancer": {
             "LOADBALANCER_IMAGE0": 1
         },
-        "medusa": {
-            "MEDUSA_IMAGE0": 1
-        },
         "webapi": {
             "WEBAPI_IMAGE0": 1
         }
@@ -1161,9 +1056,6 @@ generated config:
         },
         "loadbalancer": {
             "LOADBALANCER_IMAGE0": 1
-        },
-        "madtom": {
-            "MADTOM_IMAGE0": 1
         },
         "moray": {
             "1": {
@@ -1199,9 +1091,6 @@ generated config:
         "electric-moray": {
             "ELECTRIC_MORAY_IMAGE0": 1
         },
-        "jobpuller": {
-            "JOBPULLER_IMAGE0": 1
-        },
         "loadbalancer": {
             "LOADBALANCER_IMAGE0": 1
         },
@@ -1220,25 +1109,16 @@ generated config:
         }
     },
     "server_r00_storage00": {
-        "marlin": {
-            "MARLIN_IMAGE0": 16
-        },
         "storage": {
             "STORAGE_IMAGE0": 1
         }
     },
     "server_r01_storage00": {
-        "marlin": {
-            "MARLIN_IMAGE0": 16
-        },
         "storage": {
             "STORAGE_IMAGE0": 1
         }
     },
     "server_r02_storage00": {
-        "marlin": {
-            "MARLIN_IMAGE0": 16
-        },
         "storage": {
             "STORAGE_IMAGE0": 1
         }
@@ -1253,13 +1133,7 @@ summary:
      authcache            -                2
      webapi               -                8
      loadbalancer         -                8
-     jobsupervisor        -                2
-     jobpuller            -                2
-     medusa               -                2
      ops                  -                1
-     madtom               -                1
-     marlin-dashboard     -                1
-     marlin               -               48
      reshard              -
      pgstatsmon           -
      garbage-collector     -
@@ -1449,9 +1323,6 @@ generated config:
         "electric-moray": {
             "ELECTRIC_MORAY_IMAGE0": 1
         },
-        "jobsupervisor": {
-            "JOBSUPERVISOR_IMAGE0": 1
-        },
         "loadbalancer": {
             "LOADBALANCER_IMAGE0": 1
         },
@@ -1485,9 +1356,6 @@ generated config:
         },
         "electric-moray": {
             "ELECTRIC_MORAY_IMAGE0": 1
-        },
-        "jobpuller": {
-            "JOBPULLER_IMAGE0": 1
         },
         "loadbalancer": {
             "LOADBALANCER_IMAGE0": 1
@@ -1600,9 +1468,6 @@ generated config:
         "electric-moray": {
             "ELECTRIC_MORAY_IMAGE0": 1
         },
-        "jobsupervisor": {
-            "JOBSUPERVISOR_IMAGE0": 1
-        },
         "loadbalancer": {
             "LOADBALANCER_IMAGE0": 1
         },
@@ -1640,9 +1505,6 @@ generated config:
         "loadbalancer": {
             "LOADBALANCER_IMAGE0": 1
         },
-        "medusa": {
-            "MEDUSA_IMAGE0": 1
-        },
         "moray": {
             "3": {
                 "MORAY_IMAGE0": 1
@@ -1676,9 +1538,6 @@ generated config:
         },
         "loadbalancer": {
             "LOADBALANCER_IMAGE0": 1
-        },
-        "madtom": {
-            "MADTOM_IMAGE0": 1
         },
         "moray": {
             "4": {
@@ -1748,9 +1607,6 @@ generated config:
         "electric-moray": {
             "ELECTRIC_MORAY_IMAGE0": 1
         },
-        "jobpuller": {
-            "JOBPULLER_IMAGE0": 1
-        },
         "loadbalancer": {
             "LOADBALANCER_IMAGE0": 1
         },
@@ -1788,9 +1644,6 @@ generated config:
         "loadbalancer": {
             "LOADBALANCER_IMAGE0": 1
         },
-        "medusa": {
-            "MEDUSA_IMAGE0": 1
-        },
         "moray": {
             "3": {
                 "MORAY_IMAGE0": 1
@@ -1825,9 +1678,6 @@ generated config:
         "loadbalancer": {
             "LOADBALANCER_IMAGE0": 1
         },
-        "marlin-dashboard": {
-            "DASHBOARD_IMAGE0": 1
-        },
         "moray": {
             "4": {
                 "MORAY_IMAGE0": 1
@@ -1843,49 +1693,31 @@ generated config:
         }
     },
     "server_r00_storage00": {
-        "marlin": {
-            "MARLIN_IMAGE0": 16
-        },
         "storage": {
             "STORAGE_IMAGE0": 1
         }
     },
     "server_r00_storage01": {
-        "marlin": {
-            "MARLIN_IMAGE0": 16
-        },
         "storage": {
             "STORAGE_IMAGE0": 1
         }
     },
     "server_r01_storage00": {
-        "marlin": {
-            "MARLIN_IMAGE0": 16
-        },
         "storage": {
             "STORAGE_IMAGE0": 1
         }
     },
     "server_r01_storage01": {
-        "marlin": {
-            "MARLIN_IMAGE0": 16
-        },
         "storage": {
             "STORAGE_IMAGE0": 1
         }
     },
     "server_r02_storage00": {
-        "marlin": {
-            "MARLIN_IMAGE0": 16
-        },
         "storage": {
             "STORAGE_IMAGE0": 1
         }
     },
     "server_r02_storage01": {
-        "marlin": {
-            "MARLIN_IMAGE0": 16
-        },
         "storage": {
             "STORAGE_IMAGE0": 1
         }
@@ -1900,13 +1732,7 @@ summary:
      authcache            -                2
      webapi               -               12
      loadbalancer         -               12
-     jobsupervisor        -                2
-     jobpuller            -                2
-     medusa               -                2
      ops                  -                1
-     madtom               -                1
-     marlin-dashboard     -                1
-     marlin               -               96
      reshard              -
      pgstatsmon           -
      garbage-collector     -
@@ -2001,12 +1827,6 @@ generated config:
         "electric-moray": {
             "ELECTRIC_MORAY_IMAGE0": 1
         },
-        "jobpuller": {
-            "JOBPULLER_IMAGE0": 1
-        },
-        "jobsupervisor": {
-            "JOBSUPERVISOR_IMAGE0": 1
-        },
         "loadbalancer": {
             "LOADBALANCER_IMAGE0": 1
         },
@@ -2031,9 +1851,6 @@ generated config:
         }
     },
     "az0_server_r00_storage00": {
-        "marlin": {
-            "MARLIN_IMAGE0": 16
-        },
         "storage": {
             "STORAGE_IMAGE0": 1
         }
@@ -2060,17 +1877,8 @@ generated config:
         "electric-moray": {
             "ELECTRIC_MORAY_IMAGE0": 1
         },
-        "jobsupervisor": {
-            "JOBSUPERVISOR_IMAGE0": 1
-        },
         "loadbalancer": {
             "LOADBALANCER_IMAGE0": 1
-        },
-        "madtom": {
-            "MADTOM_IMAGE0": 1
-        },
-        "medusa": {
-            "MEDUSA_IMAGE0": 1
         },
         "moray": {
             "1": {
@@ -2090,9 +1898,6 @@ generated config:
         }
     },
     "az1_server_r00_storage00": {
-        "marlin": {
-            "MARLIN_IMAGE0": 16
-        },
         "storage": {
             "STORAGE_IMAGE0": 1
         }
@@ -2116,17 +1921,8 @@ generated config:
         "electric-moray": {
             "ELECTRIC_MORAY_IMAGE0": 1
         },
-        "jobpuller": {
-            "JOBPULLER_IMAGE0": 1
-        },
         "loadbalancer": {
             "LOADBALANCER_IMAGE0": 1
-        },
-        "marlin-dashboard": {
-            "DASHBOARD_IMAGE0": 1
-        },
-        "medusa": {
-            "MEDUSA_IMAGE0": 1
         },
         "moray": {
             "1": {
@@ -2146,9 +1942,6 @@ generated config:
         }
     },
     "az2_server_r00_storage00": {
-        "marlin": {
-            "MARLIN_IMAGE0": 16
-        },
         "storage": {
             "STORAGE_IMAGE0": 1
         }
@@ -2163,13 +1956,7 @@ summary:
      authcache            -                1                1
      webapi               -                1                1                1
      loadbalancer         -                1                1                1
-     jobsupervisor        -                1                1
-     jobpuller            -                1                                 1
-     medusa               -                                 1                1
      ops                  -                1
-     madtom               -                                 1
-     marlin-dashboard     -                                                  1
-     marlin               -               16               16               16
      reshard              -
      pgstatsmon           -
      garbage-collector     -
@@ -2258,12 +2045,6 @@ generated config:
         "electric-moray": {
             "ELECTRIC_MORAY_IMAGE0": 1
         },
-        "jobpuller": {
-            "JOBPULLER_IMAGE0": 1
-        },
-        "jobsupervisor": {
-            "JOBSUPERVISOR_IMAGE0": 1
-        },
         "loadbalancer": {
             "LOADBALANCER_IMAGE0": 1
         },
@@ -2294,9 +2075,6 @@ generated config:
         }
     },
     "az0_server_r00_storage00": {
-        "marlin": {
-            "MARLIN_IMAGE0": 16
-        },
         "storage": {
             "STORAGE_IMAGE0": 1
         }
@@ -2329,17 +2107,8 @@ generated config:
         "electric-moray": {
             "ELECTRIC_MORAY_IMAGE0": 1
         },
-        "jobsupervisor": {
-            "JOBSUPERVISOR_IMAGE0": 1
-        },
         "loadbalancer": {
             "LOADBALANCER_IMAGE0": 1
-        },
-        "madtom": {
-            "MADTOM_IMAGE0": 1
-        },
-        "medusa": {
-            "MEDUSA_IMAGE0": 1
         },
         "moray": {
             "1": {
@@ -2365,9 +2134,6 @@ generated config:
         }
     },
     "az1_server_r00_storage00": {
-        "marlin": {
-            "MARLIN_IMAGE0": 16
-        },
         "storage": {
             "STORAGE_IMAGE0": 1
         }
@@ -2397,17 +2163,8 @@ generated config:
         "electric-moray": {
             "ELECTRIC_MORAY_IMAGE0": 1
         },
-        "jobpuller": {
-            "JOBPULLER_IMAGE0": 1
-        },
         "loadbalancer": {
             "LOADBALANCER_IMAGE0": 1
-        },
-        "marlin-dashboard": {
-            "DASHBOARD_IMAGE0": 1
-        },
-        "medusa": {
-            "MEDUSA_IMAGE0": 1
         },
         "moray": {
             "1": {
@@ -2433,9 +2190,6 @@ generated config:
         }
     },
     "az2_server_r00_storage00": {
-        "marlin": {
-            "MARLIN_IMAGE0": 16
-        },
         "storage": {
             "STORAGE_IMAGE0": 1
         }
@@ -2451,13 +2205,7 @@ summary:
      authcache            -                1                1
      webapi               -                1                1                1
      loadbalancer         -                1                1                1
-     jobsupervisor        -                1                1
-     jobpuller            -                1                                 1
-     medusa               -                                 1                1
      ops                  -                1
-     madtom               -                                 1
-     marlin-dashboard     -                                                  1
-     marlin               -               16               16               16
      reshard              -
      pgstatsmon           -
      garbage-collector     -
@@ -2668,9 +2416,6 @@ generated config:
         "electric-moray": {
             "ELECTRIC_MORAY_IMAGE0": 1
         },
-        "jobsupervisor": {
-            "JOBSUPERVISOR_IMAGE0": 1
-        },
         "loadbalancer": {
             "LOADBALANCER_IMAGE0": 1
         },
@@ -2705,9 +2450,6 @@ generated config:
         "electric-moray": {
             "ELECTRIC_MORAY_IMAGE0": 1
         },
-        "jobpuller": {
-            "JOBPULLER_IMAGE0": 1
-        },
         "loadbalancer": {
             "LOADBALANCER_IMAGE0": 1
         },
@@ -2726,25 +2468,16 @@ generated config:
         }
     },
     "az0_server_r00_storage00": {
-        "marlin": {
-            "MARLIN_IMAGE0": 16
-        },
         "storage": {
             "STORAGE_IMAGE0": 1
         }
     },
     "az0_server_r00_storage01": {
-        "marlin": {
-            "MARLIN_IMAGE0": 16
-        },
         "storage": {
             "STORAGE_IMAGE0": 1
         }
     },
     "az0_server_r00_storage02": {
-        "marlin": {
-            "MARLIN_IMAGE0": 16
-        },
         "storage": {
             "STORAGE_IMAGE0": 1
         }
@@ -2773,9 +2506,6 @@ generated config:
         },
         "loadbalancer": {
             "LOADBALANCER_IMAGE0": 1
-        },
-        "madtom": {
-            "MADTOM_IMAGE0": 1
         },
         "moray": {
             "1": {
@@ -2810,9 +2540,6 @@ generated config:
         },
         "electric-moray": {
             "ELECTRIC_MORAY_IMAGE0": 1
-        },
-        "jobsupervisor": {
-            "JOBSUPERVISOR_IMAGE0": 1
         },
         "loadbalancer": {
             "LOADBALANCER_IMAGE0": 1
@@ -2851,9 +2578,6 @@ generated config:
         "loadbalancer": {
             "LOADBALANCER_IMAGE0": 1
         },
-        "medusa": {
-            "MEDUSA_IMAGE0": 1
-        },
         "moray": {
             "3": {
                 "MORAY_IMAGE0": 1
@@ -2869,25 +2593,16 @@ generated config:
         }
     },
     "az1_server_r00_storage00": {
-        "marlin": {
-            "MARLIN_IMAGE0": 16
-        },
         "storage": {
             "STORAGE_IMAGE0": 1
         }
     },
     "az1_server_r00_storage01": {
-        "marlin": {
-            "MARLIN_IMAGE0": 16
-        },
         "storage": {
             "STORAGE_IMAGE0": 1
         }
     },
     "az1_server_r00_storage02": {
-        "marlin": {
-            "MARLIN_IMAGE0": 16
-        },
         "storage": {
             "STORAGE_IMAGE0": 1
         }
@@ -2913,9 +2628,6 @@ generated config:
         },
         "loadbalancer": {
             "LOADBALANCER_IMAGE0": 1
-        },
-        "marlin-dashboard": {
-            "DASHBOARD_IMAGE0": 1
         },
         "moray": {
             "1": {
@@ -2950,9 +2662,6 @@ generated config:
         },
         "electric-moray": {
             "ELECTRIC_MORAY_IMAGE0": 1
-        },
-        "jobpuller": {
-            "JOBPULLER_IMAGE0": 1
         },
         "loadbalancer": {
             "LOADBALANCER_IMAGE0": 1
@@ -2991,9 +2700,6 @@ generated config:
         "loadbalancer": {
             "LOADBALANCER_IMAGE0": 1
         },
-        "medusa": {
-            "MEDUSA_IMAGE0": 1
-        },
         "moray": {
             "3": {
                 "MORAY_IMAGE0": 1
@@ -3009,25 +2715,16 @@ generated config:
         }
     },
     "az2_server_r00_storage00": {
-        "marlin": {
-            "MARLIN_IMAGE0": 16
-        },
         "storage": {
             "STORAGE_IMAGE0": 1
         }
     },
     "az2_server_r00_storage01": {
-        "marlin": {
-            "MARLIN_IMAGE0": 16
-        },
         "storage": {
             "STORAGE_IMAGE0": 1
         }
     },
     "az2_server_r00_storage02": {
-        "marlin": {
-            "MARLIN_IMAGE0": 16
-        },
         "storage": {
             "STORAGE_IMAGE0": 1
         }
@@ -3042,13 +2739,7 @@ summary:
      authcache            -                1                1
      webapi               -                3                3                3
      loadbalancer         -                3                3                3
-     jobsupervisor        -                1                1
-     jobpuller            -                1                                 1
-     medusa               -                                 1                1
      ops                  -                1
-     madtom               -                                 1
-     marlin-dashboard     -                                                  1
-     marlin               -               48               48               48
      reshard              -
      pgstatsmon           -
      garbage-collector     -
