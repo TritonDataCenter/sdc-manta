@@ -42,8 +42,7 @@ BASH_FILES	 = scripts/user-script.sh  \
 		   networking/manta-net.sh \
 		   tools/rsync-to
 DOC_FILES	 = index.md
-JS_FILES	:= $(shell find cmd lib test networking tools -name '*.js')
-ESLINT_FILES	 = $(JS_FILES)
+ESLINT_FILES	:= $(shell find cmd lib test networking tools -name '*.js')
 JSON_FILES	 = package.json \
 		   $(shell find config \
 				manifests \
@@ -123,6 +122,15 @@ check:: $(NODE_EXEC)
 #
 check-probe-files:
 	$(PROBECHK) $(PROBE_FILES)
+
+# Just lint check (no style)
+.PHONY: lint
+lint: | $(ESLINT)
+	$(ESLINT) --rule 'prettier/prettier: off' $(ESLINT_FILES)
+
+.PHONY: fmt
+fmt: | $(ESLINT)
+	$(ESLINT) --fix $(ESLINT_FILES)
 
 prepush: check-probe-files
 
