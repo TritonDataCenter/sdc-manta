@@ -111,9 +111,7 @@ function main() {
     }
 
     if (spec['azs'].indexOf(spec['this_az']) < 0) {
-        fatal(
-            'this availability zone missing from ' + 'availability zone list'
-        );
+        fatal('this availability zone missing from availability zone list');
     }
 
     if (!('admin' in spec)) {

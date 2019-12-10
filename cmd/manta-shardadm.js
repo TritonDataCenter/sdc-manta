@@ -92,8 +92,12 @@ Shardadm.prototype.do_list = function(subcmd, opts, args, cb) {
 };
 Shardadm.prototype.do_list.help = 'List shards';
 
-Shardadm.prototype.do_list.help =
-    'List Manta shards.\n' + '\n' + 'Usage:\n' + '     manta-shardadm list \n';
+Shardadm.prototype.do_list.help = [
+    'List Manta shards.',
+    '',
+    'Usage:',
+    '     manta-shardadm list'
+].join('\n');
 
 function printShards(metadata, cb) {
     var i;

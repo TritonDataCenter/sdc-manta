@@ -282,7 +282,7 @@ async.waterfall(
 
             var log = self.log;
             var script = sprintf(
-                '[[ -d %s ]] || exit 0; ' + '%s/tools/mragentdestroy -f',
+                '[[ -d %s ]] || exit 0; %s/tools/mragentdestroy -f',
                 common.MARLIN_DIR,
                 common.MARLIN_DIR
             );
@@ -327,7 +327,7 @@ async.waterfall(
                         if (err) {
                             log.error(
                                 err,
-                                'failed to ' + 'delete instance %s',
+                                'failed to delete instance %s',
                                 uuid
                             );
                         } else {
@@ -358,11 +358,7 @@ async.waterfall(
                 function(uuid, subcb) {
                     sapi.deleteService(uuid, function(err) {
                         if (err) {
-                            log.error(
-                                err,
-                                'failed to ' + 'delete service %s',
-                                uuid
-                            );
+                            log.error(err, 'failed to delete service %s', uuid);
                         } else {
                             log.info('deleted service %s', uuid);
                         }
@@ -389,11 +385,7 @@ async.waterfall(
 
             sapi.deleteApplication(app.uuid, function(err) {
                 if (err) {
-                    log.error(
-                        err,
-                        'failed to ' + 'delete application %s',
-                        app.uuid
-                    );
+                    log.error(err, 'failed to delete application %s', app.uuid);
                 } else {
                     log.info('deleted application %s', app.uuid);
                 }
@@ -423,11 +415,7 @@ async.waterfall(
 
                     amon.deleteProbe(POSEIDON.uuid, uuid, function(err) {
                         if (err) {
-                            log.error(
-                                err,
-                                'failed to ' + 'delete probe %s',
-                                uuid
-                            );
+                            log.error(err, 'failed to delete probe %s', uuid);
                         } else {
                             log.info('deleted probe %s', uuid);
                         }
@@ -464,7 +452,7 @@ async.waterfall(
                         if (err) {
                             log.error(
                                 err,
-                                'failed to ' + 'delete probe group %s',
+                                'failed to delete probe group %s',
                                 uuid
                             );
                         } else {
@@ -539,7 +527,7 @@ async.waterfall(
                 if (err) {
                     log.error(
                         err,
-                        'failed to remove poseidon ' + 'from operators group'
+                        'failed to remove poseidon from operators group'
                     );
                 }
 
