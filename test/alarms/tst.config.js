@@ -179,7 +179,6 @@ testCases.push({
 	assertplus.ok(perr);
 	assertplus.ok(perr instanceof Error);
 	assertplus.ok(
-	    /* JSSTYLED */
 	    /fetching probes for agent on cn "c1":.*injected error/.test(
 	    perr.message));
     }

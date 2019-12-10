@@ -161,7 +161,6 @@ function generateTestCases()
 		    'mygroup;v=2');
 		assertplus.object(parsed.error, 'error');
 		assertplus.ok(parsed.error instanceof Error);
-		/* JSSTYLED */
 		assertplus.ok(/unrecognized version "2" in probe group/.test(
 		    parsed.error.message));
 		assertplus.strictEqual(parsed.isLegacy, false);
@@ -254,14 +253,12 @@ function generateTestCases()
 	testCases.push({
 	    'name': 'invalid YAML',
 	    'input': '{',
-	    /* JSSTYLED */
 	    'errmsg': /parse "input": unexpected end/
 	});
 
 	testCases.push({
 	    'name':  'schema mismatch: not an array',
 	    'input': JSON.stringify({}),
-	    /* JSSTYLED */
 	    'errmsg': /parse "input":.*object.*found.*array.*required/
 	});
 
