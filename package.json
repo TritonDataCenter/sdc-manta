@@ -1,7 +1,7 @@
 {
     "name": "manta-deployment",
     "description": "Manta deployment configuration",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "author": "Joyent (joyent.com)",
     "license": "MPL-2.0",
     "private": true,
@@ -38,6 +38,11 @@
         "wordwrap": "1.0.0"
     },
     "devDependencies": {
+        "eslint": "^4.19.1",
+        "eslint-config-prettier": "^6.0.0",
+        "eslint-plugin-joyent": "^2.1.0",
+        "eslint-plugin-prettier": "^3.1.0",
+        "prettier": "^1.18.2",
         "strsplit": "^1.0.0"
     }
 }
