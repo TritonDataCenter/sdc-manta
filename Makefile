@@ -41,7 +41,8 @@ NPM_ENV		 = MAKE_OVERRIDES="CTFCONVERT=/bin/true CTFMERGE=/bin/true"
 BASH_FILES	 = scripts/user-script.sh  \
 		   tools/add-dev-user      \
 		   bin/manta-deploy-lab \
-		   networking/manta-net.sh
+		   networking/manta-net.sh \
+		   tools/rsync-to
 DOC_FILES	 = index.md
 JS_FILES	:= $(shell find cmd lib test networking -name '*.js')
 JSL_FILES_NODE	 = $(JS_FILES)
