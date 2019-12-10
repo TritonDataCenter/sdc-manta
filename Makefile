@@ -42,7 +42,7 @@ BASH_FILES	 = scripts/user-script.sh  \
 		   networking/manta-net.sh \
 		   tools/rsync-to
 DOC_FILES	 = index.md
-JS_FILES	:= $(shell find cmd lib test networking -name '*.js')
+JS_FILES	:= $(shell find cmd lib test networking tools -name '*.js')
 ESLINT_FILES	 = $(JS_FILES)
 JSON_FILES	 = package.json \
 		   $(shell find config \
