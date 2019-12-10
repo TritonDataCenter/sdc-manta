@@ -46,7 +46,7 @@ var POSEIDON_PASSWORD = 'trident123';
 
 
 // This manta-init can *only* create mantav2 applications.
-var MANTA_VERSION = 2;
+var MANTAV = 2;
 
 /*
  * If the -c option isn't specified, the default is to download 10 images in
@@ -637,12 +637,12 @@ var pipelineFuncs = [
 
 	function checkMantaApplicationVersion(_, cb) {
 		if (self.manta_app &&
-		    self.manta_app.metadata['MANTAV'] !== MANTA_VERSION) {
+		    self.manta_app.metadata['MANTAV'] !== MANTAV) {
 			return cb(new VError(
 			    'A v%s Manta application was found on this ' +
 			    'Triton instance which conflicts with the ' +
 			    'version being deployed. ' +
-			    'You must delete that application before ' +
+			    'You must resolve that problem before ' +
 			    'attempting to deploy a new Manta application.',
 			    self.manta_app.metadata['MANTAV']));
 		}
@@ -663,7 +663,7 @@ var pipelineFuncs = [
 			metadata: {
 				// This authoritatively indicates that this is a
 				// mantav2 deployment.
-				MANTAV: MANTA_VERSION
+				MANTAV: MANTAV
 			}
 		};
 
