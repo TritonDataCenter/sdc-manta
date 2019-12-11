@@ -40,7 +40,6 @@ var POSEIDON;
 var POSEIDON_LOGIN = 'poseidon';
 var POSEIDON_PASSWORD = 'trident123';
 
-
 // This manta-init can *only* create mantav2 applications.
 var MANTAV = 2;
 
@@ -699,19 +698,22 @@ var pipelineFuncs = [
         });
     },
 
-	function checkMantaApplicationVersion(_, cb) {
-		if (self.manta_app &&
-		    self.manta_app.metadata['MANTAV'] !== MANTAV) {
-			return cb(new VError(
-			    'A v%s Manta application was found on this ' +
-			    'Triton instance which conflicts with the ' +
-			    'version being deployed. ' +
-			    'You must resolve that problem before ' +
-			    'attempting to deploy a new Manta application.',
-			    self.manta_app.metadata['MANTAV']));
-		}
-		return (cb(null));
-	},
+    function checkMantaApplicationVersion(_, cb) {
+        if (state.manta_app && state.manta_app.metadata['MANTAV'] !== MANTAV) {
+            cb(
+                new VError(
+                    'A v%s Manta application was found on this ' +
+                        'Triton instance which conflicts with the ' +
+                        'version being deployed. ' +
+                        'You must resolve that problem before ' +
+                        'attempting to deploy a new Manta application.',
+                    state.manta_app.metadata['MANTAV']
+                )
+            );
+            return;
+        }
+        cb(null);
+    },
 
     function createMantaApplication(_, cb) {
         var log = state.log;
