@@ -6,7 +6,7 @@
  */
 
 /*
- * Copyright (c) 2019, Joyent, Inc.
+ * Copyright 2019 Joyent, Inc.
  */
 
 /*
@@ -31,7 +31,6 @@ var util = require('util');
 var vasync = require('vasync');
 
 var common = require('../lib/common');
-var deploy = require('../lib/deploy');
 var madm = require('../lib/adm');
 
 var VError = require('verror').VError;
@@ -40,29 +39,27 @@ var MultiError = require('verror').MultiError;
 var maGcCfgArg0 = path.basename(process.argv[1]);
 
 var maGcCfgCommonOptions = {
-    'confirm': {
-	'names': [ 'confirm', 'y' ],
-	'type': 'bool',
-	'help': 'Bypass all confirmations (be careful!)'
+    confirm: {
+        names: ['confirm', 'y'],
+        type: 'bool',
+        help: 'Bypass all confirmations (be careful!)'
     }
 };
 
-function MantaGcConfigAdm()
-{
-	cmdln.Cmdln.call(this, {
-	    name: 'manta-gc-configadm',
-	    desc: 'Tool for special operations involving ' +
-		'garbage-collector configuration.\n\nMost use-' +
-		'cases do not require this tool. Make sure ' +
-		'the desired operation\nis not already ' +
-		'implemented by `manta-adm accel-gc`.',
-	    options: [
-		{names: ['help', 'h'], type: 'bool',
-		    help: 'Print help and exit.'},
-		{name: 'version', type: 'bool',
-		    help: 'Print version and exit.'}
-	    ]
-	});
+function MantaGcConfigAdm() {
+    cmdln.Cmdln.call(this, {
+        name: 'manta-gc-configadm',
+        desc:
+            'Tool for special operations involving ' +
+            'garbage-collector configuration.\n\nMost use-' +
+            'cases do not require this tool. Make sure ' +
+            'the desired operation\nis not already ' +
+            'implemented by `manta-adm accel-gc`.',
+        options: [
+            {names: ['help', 'h'], type: 'bool', help: 'Print help and exit.'},
+            {name: 'version', type: 'bool', help: 'Print version and exit.'}
+        ]
+    });
 }
 util.inherits(MantaGcConfigAdm, cmdln.Cmdln);
 
@@ -70,45 +67,50 @@ util.inherits(MantaGcConfigAdm, cmdln.Cmdln);
  * Performs common initialization steps used by most subcommands.  "opts" are
  * the cmdln-parsed CLI options.  This function processes the "log_file" option.
  */
-MantaGcConfigAdm.prototype.initAdm = function (opts, callback)
-{
-	var logstreams;
+MantaGcConfigAdm.prototype.initAdm = function(opts, callback) {
+    var logstreams;
 
-	if (opts.log_file == 'stdout') {
-		logstreams = [ {
-		    'level': 'debug',
-		    'stream': process.stdout
-		} ];
-	} else if (opts.log_file) {
-		logstreams = [ {
-		    'level': 'debug',
-		    'path': opts.log_file
-		} ];
-		console.error('logs at ' + opts.log_file);
-	} else {
-		logstreams = [ {
-		    'level': process.env['LOG_LEVEL'] || 'fatal',
-		    'stream': process.stderr
-		} ];
-	}
+    if (opts.log_file === 'stdout') {
+        logstreams = [
+            {
+                level: 'debug',
+                stream: process.stdout
+            }
+        ];
+    } else if (opts.log_file) {
+        logstreams = [
+            {
+                level: 'debug',
+                path: opts.log_file
+            }
+        ];
+        console.error('logs at ' + opts.log_file);
+    } else {
+        logstreams = [
+            {
+                level: process.env['LOG_LEVEL'] || 'fatal',
+                stream: process.stderr
+            }
+        ];
+    }
 
-	this.madm_log = new bunyan({
-	    'name': maGcCfgArg0,
-	    'streams': logstreams,
-	    'serializers': restifyClients.bunyan.serializers
-	});
+    this.madm_log = new bunyan({
+        name: maGcCfgArg0,
+        streams: logstreams,
+        serializers: restifyClients.bunyan.serializers
+    });
 
-	this.madm_adm = new madm.MantaAdm(this.madm_log);
-	this.madm_adm.loadSdcConfig(function (err) {
-		if (err)
-			fatal(err.message);
-		callback();
-	});
+    this.madm_adm = new madm.MantaAdm(this.madm_log);
+    this.madm_adm.loadSdcConfig(function(err) {
+        if (err) {
+            fatal(err.message);
+        }
+        callback();
+    });
 };
 
-MantaGcConfigAdm.prototype.finiAdm = function ()
-{
-	this.madm_adm.close();
+MantaGcConfigAdm.prototype.finiAdm = function() {
+    this.madm_adm.close();
 };
 
 /*
@@ -144,205 +146,231 @@ MantaGcConfigAdm.prototype.finiAdm = function ()
  * garbage-collectors come up with the 'union' configuration, the `--cleanup`
  * option may be passed to get rid of the deprecated variables.
  */
-MantaGcConfigAdm.prototype.do_migrate_config =
-function (subcmd, opts, args, callback)
-{
-	var self = this;
-	var adm, log;
+MantaGcConfigAdm.prototype.do_migrate_config = function(
+    _subcmd,
+    opts,
+    _args,
+    callback
+) {
+    var self = this;
+    var adm, log;
 
-	var oldFields = [
-		'GC_SHARD_NUM_LO',
-		'GC_SHARD_NUM_HI'
-	];
-	var oldServiceFields = [
-		'GC_MANTA_FASTDELETE_QUEUE_CONCURRENCY'
-	];
-	var newFields = common.GC_METADATA_FIELDS;
+    var oldFields = ['GC_SHARD_NUM_LO', 'GC_SHARD_NUM_HI'];
+    var oldServiceFields = ['GC_MANTA_FASTDELETE_QUEUE_CONCURRENCY'];
+    var newFields = common.GC_METADATA_FIELDS;
 
-	var changes = {
-	    instances: {
-		add: {},
-		remove: {}
-	    },
-	    service: {
-		add: {},
-		remove: {}
-	    }
-	};
+    var changes = {
+        instances: {
+            add: {},
+            remove: {}
+        },
+        service: {
+            add: {},
+            remove: {}
+        }
+    };
 
-	var funcs = [
-		function (next) {
-			adm.fetchDeployed(function (err) {
-				next(err);
-			});
-		},
-		function (next) {
-			adm.getDeployedInstanceMetadataJson({
-				fields: oldFields.concat(newFields),
-				svcname: 'garbage-collector'
-			}, function (err, metadata) {
-				log.debug({
-					err: err,
-					metadata: metadata
-				}, 'got deployed garbage-collector ' +
-				    'configs');
-				next(err, metadata);
-			});
-		},
-		function (metadata, next) {
-			validateGcInstanceConfigs(metadata, oldFields,
-			    newFields, function (err) {
-				log.debug({
-					err: err
-				}, 'validated garbage-collector ' +
-				    'configs');
-				next(err, metadata);
-			});
-		},
-		function (metadata, next) {
-			translateGcInstanceConfigs(adm.ma_app, metadata,
-			    function (err) {
-				log.debug({
-					err: err,
-					metadata: metadata
-				}, 'transformed garbage-collector ' +
-				    'configs');
-				next(err, metadata);
-			});
-		},
-		function (metadata, next) {
-			var remove = {};
-			if (opts.cleanup) {
-				function markFieldForRemove(uuid, field) {
-					if (!remove.hasOwnProperty(uuid))
-						remove[uuid] = {};
-					if (!metadata[uuid] ||
-					    !metadata[uuid].hasOwnProperty(
-					    field))
-						return;
-					remove[uuid][field] =
-					    metadata[uuid][field];
-				}
-				Object.keys(metadata).forEach(function (uuid) {
-					oldFields.forEach(function (field) {
-						markFieldForRemove(uuid, field);
-					});
-				});
-			}
-			changes.instances = {
-			    add: metadata,
-			    remove: remove
-			};
-			next();
-		},
-		function (next) {
-			loadGcServiceMetadataUpdates(adm, next);
-		},
-		function (fileMetadata, next) {
-			adm.getDeployedServiceMetadata({
-			    svcname: 'garbage-collector',
-			    fields: oldFields.concat(
-				oldServiceFields)
-			}, function (err, deployedMetadata) {
-				next(err, jsprim.mergeObjects(
-				    deployedMetadata, fileMetadata));
-			});
-		},
-		function (metadata, next) {
-			var removeMetadata = {};
-			if (opts.cleanup) {
-				function markFieldForRemove(field) {
-					if (!metadata.hasOwnProperty(field))
-						return;
-					removeMetadata[field] =
-					    metadata[field];
-				}
-				Object.keys(metadata).forEach(function (uuid) {
-					oldFields.forEach(
-					    markFieldForRemove);
-					oldServiceFields.forEach(
-					    markFieldForRemove);
-				});
-			}
-			changes.service = {
-			    add: metadata,
-			    remove: removeMetadata
-			};
-			next();
-		},
-		function (next) {
-			if (opts.confirm) {
-				next();
-				return;
-			}
-			dumpConfigMigrationChanges(changes, process.stdout);
-			common.confirm('Apply migration? (y/N): ',
-			    function (proceed) {
-				process.stdout.write('\n');
-				if (!proceed) {
-					next(new Error('aborted by user'));
-				} else {
-					next();
-				}
-			});
-		},
-		function (next) {
-			var instChanges = changes.instances;
-			adm.updateDeployedInstanceMetadata({
-			    svcname: 'garbage-collector'
-			}, instChanges.add, instChanges.remove, function (err) {
-				log.debug({
-				    err: err,
-				    add: instChanges.add,
-				    remove: instChanges.remove
-				}, 'updated SAPI instance(s) metadata');
-				next(err);
-			});
-		},
-		function (next) {
-			var svcChanges = changes.service;
-			adm.updateDeployedServiceMetadata({
-			    svcname: 'garbage-collector'
-			}, svcChanges.add, svcChanges.remove,
-			    function (updateErr) {
-				adm.ma_log.debug({
-				    err: updateErr,
-				    add: svcChanges.add,
-				    remove: svcChanges.remove
-				}, 'updated garbage-collector ' +
-				    'service metadata');
-				next(updateErr);
-			});
-		}
-	];
+    var funcs = [
+        function(next) {
+            adm.fetchDeployed(function(err) {
+                next(err);
+            });
+        },
+        function(next) {
+            adm.getDeployedInstanceMetadataJson(
+                {
+                    fields: oldFields.concat(newFields),
+                    svcname: 'garbage-collector'
+                },
+                function(err, metadata) {
+                    log.debug(
+                        {
+                            err: err,
+                            metadata: metadata
+                        },
+                        'got deployed garbage-collector configs'
+                    );
+                    next(err, metadata);
+                }
+            );
+        },
+        function(metadata, next) {
+            validateGcInstanceConfigs(metadata, oldFields, newFields, function(
+                err
+            ) {
+                log.debug(
+                    {
+                        err: err
+                    },
+                    'validated garbage-collector configs'
+                );
+                next(err, metadata);
+            });
+        },
+        function(metadata, next) {
+            translateGcInstanceConfigs(adm.ma_app, metadata, function(err) {
+                log.debug(
+                    {
+                        err: err,
+                        metadata: metadata
+                    },
+                    'transformed garbage-collector configs'
+                );
+                next(err, metadata);
+            });
+        },
+        function(metadata, next) {
+            var remove = {};
+            if (opts.cleanup) {
+                Object.keys(metadata).forEach(function(uuid) {
+                    oldFields.forEach(function(field) {
+                        if (!remove.hasOwnProperty(uuid)) {
+                            remove[uuid] = {};
+                        }
+                        if (
+                            !metadata[uuid] ||
+                            !metadata[uuid].hasOwnProperty(field)
+                        ) {
+                            return;
+                        }
+                        remove[uuid][field] = metadata[uuid][field];
+                    });
+                });
+            }
+            changes.instances = {
+                add: metadata,
+                remove: remove
+            };
+            next();
+        },
+        function(next) {
+            loadGcServiceMetadataUpdates(adm, next);
+        },
+        function(fileMetadata, next) {
+            adm.getDeployedServiceMetadata(
+                {
+                    svcname: 'garbage-collector',
+                    fields: oldFields.concat(oldServiceFields)
+                },
+                function(err, deployedMetadata) {
+                    next(
+                        err,
+                        jsprim.mergeObjects(deployedMetadata, fileMetadata)
+                    );
+                }
+            );
+        },
+        function(metadata, next) {
+            var removeMetadata = {};
+            if (opts.cleanup) {
+                Object.keys(metadata).forEach(function() {
+                    oldFields.forEach(function(field) {
+                        if (metadata.hasOwnProperty(field)) {
+                            removeMetadata[field] = metadata[field];
+                        }
+                    });
+                    oldServiceFields.forEach(function(field) {
+                        if (metadata.hasOwnProperty(field)) {
+                            removeMetadata[field] = metadata[field];
+                        }
+                    });
+                });
+            }
+            changes.service = {
+                add: metadata,
+                remove: removeMetadata
+            };
+            next();
+        },
+        function(next) {
+            if (opts.confirm) {
+                next();
+                return;
+            }
+            dumpConfigMigrationChanges(changes, process.stdout);
+            common.confirm('Apply migration? (y/N): ', function(proceed) {
+                process.stdout.write('\n');
+                if (!proceed) {
+                    next(new Error('aborted by user'));
+                } else {
+                    next();
+                }
+            });
+        },
+        function(next) {
+            var instChanges = changes.instances;
+            adm.updateDeployedInstanceMetadata(
+                {
+                    svcname: 'garbage-collector'
+                },
+                instChanges.add,
+                instChanges.remove,
+                function(err) {
+                    log.debug(
+                        {
+                            err: err,
+                            add: instChanges.add,
+                            remove: instChanges.remove
+                        },
+                        'updated SAPI instance(s) metadata'
+                    );
+                    next(err);
+                }
+            );
+        },
+        function(next) {
+            var svcChanges = changes.service;
+            adm.updateDeployedServiceMetadata(
+                {
+                    svcname: 'garbage-collector'
+                },
+                svcChanges.add,
+                svcChanges.remove,
+                function(updateErr) {
+                    adm.ma_log.debug(
+                        {
+                            err: updateErr,
+                            add: svcChanges.add,
+                            remove: svcChanges.remove
+                        },
+                        'updated garbage-collector service metadata'
+                    );
+                    next(updateErr);
+                }
+            );
+        }
+    ];
 
-	self.initAdm(opts, function () {
-		adm = self.madm_adm;
-		log = self.madm_log;
+    self.initAdm(opts, function() {
+        adm = self.madm_adm;
+        log = self.madm_log;
 
-		vasync.waterfall(funcs, function (err) {
-			if (err)
-				fatal(err.message);
-			self.finiAdm();
-			callback();
-		});
-	});
+        vasync.waterfall(funcs, function(err) {
+            if (err) {
+                fatal(err.message);
+            }
+            self.finiAdm();
+            callback();
+        });
+    });
 };
 
 MantaGcConfigAdm.prototype.do_migrate_config.help =
     'Migrate garbage-collector SAPI configuration in a deployment.\n\n' +
-    '    manta-gc-configadm migrate-config [OPTIONS]\n\n'               +
+    '    manta-gc-configadm migrate-config [OPTIONS]\n\n' +
     '{{options}}';
 
 MantaGcConfigAdm.prototype.do_migrate_config.options = [
     maGcCfgCommonOptions.confirm,
     {
-	'names': ['cleanup', 'c'],
-	'type': 'bool',
-	'help': 'Remove deprecated SAPI variables after migrating the ' +
-	    'configuration. It is recommended that this option only '   +
-	    'be used after migration without removal has succeeded.'
-    }];
+        names: ['cleanup', 'c'],
+        type: 'bool',
+        help:
+            'Remove deprecated SAPI variables after migrating the ' +
+            'configuration. It is recommended that this option only ' +
+            'be used after migration without removal has succeeded.'
+    }
+];
 
 /*
  * Some Manta deployments may have garbage-collectors that expect a particular
@@ -374,41 +402,43 @@ MantaGcConfigAdm.prototype.do_migrate_config.options = [
  * - `newFields`: An array of strings representing the new SAPI fields
  * - `callback`: A function that may be invoked with an error.
  */
-function validateGcInstanceConfigs(metadata, oldFields, newFields, callback)
-{
-	var errors = [];
-	Object.keys(metadata).forEach(function (uuid) {
-		assertplus.uuid(uuid, 'expected garbage-collector ' +
-		    'instance uuid');
-		var md = metadata[uuid];
-		var missingOld = oldFields.filter(
-		    function (field) {
-			return (!md.hasOwnProperty(field));
-		});
-		var missingNew = newFields.filter(function (field) {
-			/*
-			 * If `GC_CONCURRENCY` is not overridden for the
-			 * instance, then it is set on the service.
-			 */
-			if (field === 'GC_CONCURRENCY')
-				return (false);
-			return (!md.hasOwnProperty(field));
-		});
-		if (missingOld.length != 0 &&
-		    missingNew.length != 0) {
-			errors.push(new VError('garbage-collector "%s" '  +
-			    'has an incomplete instance config. Missing ' +
-			    'old fields: %s. Missing new fields: %s',
-			    uuid, missingOld.join(', '),
-			    missingNew.join(', ')));
-		}
-	});
+function validateGcInstanceConfigs(metadata, oldFields, newFields, callback) {
+    var errors = [];
+    Object.keys(metadata).forEach(function(uuid) {
+        assertplus.uuid(uuid, 'expected garbage-collector instance uuid');
+        var md = metadata[uuid];
+        var missingOld = oldFields.filter(function(field) {
+            return !md.hasOwnProperty(field);
+        });
+        var missingNew = newFields.filter(function(field) {
+            /*
+             * If `GC_CONCURRENCY` is not overridden for the
+             * instance, then it is set on the service.
+             */
+            if (field === 'GC_CONCURRENCY') {
+                return false;
+            }
+            return !md.hasOwnProperty(field);
+        });
+        if (missingOld.length !== 0 && missingNew.length !== 0) {
+            errors.push(
+                new VError(
+                    'garbage-collector "%s" ' +
+                        'has an incomplete instance config. Missing ' +
+                        'old fields: %s. Missing new fields: %s',
+                    uuid,
+                    missingOld.join(', '),
+                    missingNew.join(', ')
+                )
+            );
+        }
+    });
 
-	if (errors.length > 0) {
-		callback(new MultiError(errors));
-		return;
-	}
-	callback();
+    if (errors.length > 0) {
+        callback(new MultiError(errors));
+        return;
+    }
+    callback();
 }
 
 /*
@@ -426,144 +456,151 @@ function validateGcInstanceConfigs(metadata, oldFields, newFields, callback)
  *   SAPI instance metadata object.
  * - `callback`: A function that may be invoked with an error.
  */
-function translateGcInstanceConfigs(app, metadata, callback)
-{
-	Object.keys(metadata).forEach(function (uuid) {
-		assertplus.uuid(uuid, 'expected garbage-collector ' +
-		    'instance uuid');
-		var md = metadata[uuid];
-		var assignedShards = [];
-		var lo = md['GC_SHARD_NUM_LO'] || 0;
-		var hi = md['GC_SHARD_NUM_HI'] || 0;
+function translateGcInstanceConfigs(app, metadata, callback) {
+    Object.keys(metadata).forEach(function(uuid) {
+        assertplus.uuid(uuid, 'expected garbage-collector instance uuid');
+        var md = metadata[uuid];
+        var assignedShards = [];
+        var lo = md['GC_SHARD_NUM_LO'] || 0;
+        var hi = md['GC_SHARD_NUM_HI'] || 0;
 
-		var domain = app.metadata['DOMAIN_NAME'];
+        var domain = app.metadata['DOMAIN_NAME'];
 
-		if (!(lo === hi && lo === 0)) {
-			for (var i = lo; i <= hi; i++) {
-				assignedShards.push({
-					host: [i, 'moray',
-					    domain].join('.')
-				});
-			}
-			assignedShards[
-			    assignedShards.length - 1].last = true;
-		}
+        if (!(lo === hi && lo === 0)) {
+            for (var i = lo; i <= hi; i++) {
+                assignedShards.push({
+                    host: [i, 'moray', domain].join('.')
+                });
+            }
+            assignedShards[assignedShards.length - 1].last = true;
+        }
 
-		/*
-		 * If we already have the target properties, then the migration
-		 * has already been attempted. Don't overwrite it.
-		 */
-		md['GC_ASSIGNED_SHARDS'] = md['GC_ASSIGNED_SHARDS'] ||
-		    assignedShards;
+        /*
+         * If we already have the target properties, then the migration
+         * has already been attempted. Don't overwrite it.
+         */
+        md['GC_ASSIGNED_SHARDS'] = md['GC_ASSIGNED_SHARDS'] || assignedShards;
 
-		/*
-		 * `GC_MANTA_FASTDELETE_QUEUE_CONCURRENCY` may or may not be set
-		 * on the instance-level object. If it is set, we need to copy
-		 * it. If it's not set, then the property is inherited from the
-		 * service.
-		 */
-		var oldConcurrency =
-		    md['GC_MANTA_FASTDELETE_QUEUE_CONCURRENCY'];
-    		if (oldConcurrency)
-			md['GC_CONCURRENCY'] = md['GC_CONCURRENCY'] ||
-			    oldConcurrency;
-	});
-	callback();
+        /*
+         * `GC_MANTA_FASTDELETE_QUEUE_CONCURRENCY` may or may not be set
+         * on the instance-level object. If it is set, we need to copy
+         * it. If it's not set, then the property is inherited from the
+         * service.
+         */
+        var oldConcurrency = md['GC_MANTA_FASTDELETE_QUEUE_CONCURRENCY'];
+        if (oldConcurrency) {
+            md['GC_CONCURRENCY'] = md['GC_CONCURRENCY'] || oldConcurrency;
+        }
+    });
+    callback();
 }
 
-function loadGcServiceMetadataUpdates(adm, callback)
-{
-	var file = util.format('%s/../config/services/%s/service.json',
-	    path.dirname(__filename), 'garbage-collector');
-	var size = adm.ma_app.metadata['SIZE'];
+function loadGcServiceMetadataUpdates(adm, callback) {
+    var file = util.format(
+        '%s/../config/services/%s/service.json',
+        path.dirname(__filename),
+        'garbage-collector'
+    );
+    var size = adm.ma_app.metadata['SIZE'];
 
-	file = [file, size].join('.');
+    file = [file, size].join('.');
 
-	fs.readFile(file, function (err, contents) {
-		var addMetadata;
-		if (err) {
-			callback(err);
-			return;
-		}
-		try {
-			addMetadata = JSON.parse(
-			    contents.toString('utf8')).metadata;
-		} catch (e) {
-			callback(new VError(e, 'parse "%s"', file));
-			return;
-		}
+    fs.readFile(file, function(err, contents) {
+        var addMetadata;
+        if (err) {
+            callback(err);
+            return;
+        }
+        try {
+            addMetadata = JSON.parse(contents.toString('utf8')).metadata;
+        } catch (e) {
+            callback(new VError(e, 'parse "%s"', file));
+            return;
+        }
 
-		callback(null, addMetadata);
-	});
+        callback(null, addMetadata);
+    });
 }
 
-function dumpConfigMigrationChanges(changes, sout)
-{
-	function formatValue(val) {
-		return (util.inspect(val));
-	}
+function dumpConfigMigrationChanges(changes, sout) {
+    function formatValue(val) {
+        return util.inspect(val);
+    }
 
-	var fields;
-	var instAdd = changes.instances.add;
-	var instRemove = changes.instances.remove;
+    var fields;
+    var instAdd = changes.instances.add;
+    var instRemove = changes.instances.remove;
 
-	Object.keys(instAdd).forEach(function (uuid) {
-		fprintf(sout, '\ngarbage-collector instance "%s"\n\n', uuid);
-		fprintf(sout, ' maintain/add fields/values below: \n\n');
-		fields = Object.keys(instAdd[uuid] || {});
-		fields.forEach(function (field) {
-			if (instAdd[uuid][field] === undefined)
-				return;
-			fprintf(sout, '\t%s : %s\n', field,
-			    formatValue(instAdd[uuid][field]));
-		});
-		if (fields.length === 0)
-			fprintf(sout, '\t(none)\n\n');
+    Object.keys(instAdd).forEach(function(uuid) {
+        fprintf(sout, '\ngarbage-collector instance "%s"\n\n', uuid);
+        fprintf(sout, ' maintain/add fields/values below: \n\n');
+        fields = Object.keys(instAdd[uuid] || {});
+        fields.forEach(function(field) {
+            if (instAdd[uuid][field] === undefined) {
+                return;
+            }
+            fprintf(
+                sout,
+                '\t%s : %s\n',
+                field,
+                formatValue(instAdd[uuid][field])
+            );
+        });
+        if (fields.length === 0) {
+            fprintf(sout, '\t(none)\n\n');
+        }
 
-		fprintf(sout, '\n remove fields (if present) below:\n\n');
-		fields = Object.keys(instRemove[uuid] || {});
-		fields.forEach(function (field) {
-			if (instRemove[uuid][field] === undefined)
-				return;
-			fprintf(sout, '\t%s : %s\n', field,
-			    formatValue(instRemove[uuid][field]));
-		});
-		if (fields.length === 0)
-			fprintf(sout, '\t(none)\n');
-	});
+        fprintf(sout, '\n remove fields (if present) below:\n\n');
+        fields = Object.keys(instRemove[uuid] || {});
+        fields.forEach(function(field) {
+            if (instRemove[uuid][field] === undefined) {
+                return;
+            }
+            fprintf(
+                sout,
+                '\t%s : %s\n',
+                field,
+                formatValue(instRemove[uuid][field])
+            );
+        });
+        if (fields.length === 0) {
+            fprintf(sout, '\t(none)\n');
+        }
+    });
 
-	var svcAdd = changes.service.add;
-	var svcRemove = changes.service.remove;
+    var svcAdd = changes.service.add;
+    var svcRemove = changes.service.remove;
 
-	fprintf(sout, '\ngarbage-collector service\n\n');
+    fprintf(sout, '\ngarbage-collector service\n\n');
 
-	fprintf(sout, ' maintain/add fields/values below:\n\n');
-	fields = Object.keys(svcAdd);
-	fields.forEach(function (field) {
-		if (svcAdd[field] === undefined)
-			return;
-		fprintf(sout, '\t%s : %s\n', field,
-		    formatValue(svcAdd[field]));
-	});
-	if (fields.length === 0)
-		fprintf(sout, '\t(none)\n');
+    fprintf(sout, ' maintain/add fields/values below:\n\n');
+    fields = Object.keys(svcAdd);
+    fields.forEach(function(field) {
+        if (svcAdd[field] === undefined) {
+            return;
+        }
+        fprintf(sout, '\t%s : %s\n', field, formatValue(svcAdd[field]));
+    });
+    if (fields.length === 0) {
+        fprintf(sout, '\t(none)\n');
+    }
 
-	fprintf(sout, '\n remove fields (if present) below:\n\n');
-	fields = Object.keys(svcRemove);
-	fields.forEach(function (field) {
-		if (svcRemove[field] === undefined)
-			return;
-		fprintf(sout, '\t%s : %s\n', field,
-		    formatValue(svcRemove[field]));
-	});
-	if (fields.length === 0)
-		fprintf(sout, '\t(none)\n\n');
+    fprintf(sout, '\n remove fields (if present) below:\n\n');
+    fields = Object.keys(svcRemove);
+    fields.forEach(function(field) {
+        if (svcRemove[field] === undefined) {
+            return;
+        }
+        fprintf(sout, '\t%s : %s\n', field, formatValue(svcRemove[field]));
+    });
+    if (fields.length === 0) {
+        fprintf(sout, '\t(none)\n\n');
+    }
 }
 
-function fatal(msg)
-{
-	console.error('%s: %s', maGcCfgArg0, msg);
-	process.exit(1);
+function fatal(msg) {
+    console.error('%s: %s', maGcCfgArg0, msg);
+    process.exit(1);
 }
 
 cmdutil.exitOnEpipe();

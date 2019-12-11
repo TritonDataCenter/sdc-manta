@@ -1,0 +1,29 @@
+{
+    "plugins": [
+        "joyent",
+        "prettier"
+    ],
+    "extends": [
+        "eslint:recommended",
+        "plugin:joyent/style",
+        "plugin:joyent/lint",
+        "plugin:prettier/recommended"
+    ],
+    "parserOptions": {
+        "ecmaVersion": 6,
+        "sourceType": "script"
+    },
+    "env": {
+        "node": true
+    },
+    "rules": {
+        // Disable "callback-return" that was added in
+        // https://github.com/joyent/node-eslint-plugin-joyent/issues/7
+        // See https://github.com/joyent/node-eslint-plugin-joyent/issues/8
+        // request to remove it.
+        "callback-return": "off",
+        "curly": "error",
+
+        "prettier/prettier": "error"
+    }
+}
