@@ -112,9 +112,6 @@ function printShards(metadata, cb) {
         }
     }
 
-    if (metadata[common.MARLIN_SHARD]) {
-        console.log(sprintf(fmt, 'Marlin', metadata[common.MARLIN_SHARD]));
-    }
     if (metadata[common.STORAGE_SHARD]) {
         console.log(sprintf(fmt, 'Storage', metadata[common.STORAGE_SHARD]));
     }
@@ -157,10 +154,6 @@ Shardadm.prototype.do_set = function(subcmd, opts, args, cb) {
         var domain_name = '.' + app.metadata['DOMAIN_NAME'];
 
         var metadata = {};
-
-        if (opts.m) {
-            metadata[common.MARLIN_SHARD] = addSuffix(opts.m, domain_name);
-        }
 
         if (opts.s) {
             metadata[common.STORAGE_SHARD] = addSuffix(opts.s, domain_name);
