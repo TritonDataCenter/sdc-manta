@@ -27,7 +27,7 @@ var sprintf = extsprintf.sprintf;
 var alarm_metadata = require('../../lib/alarms/metadata');
 
 var sampleEvent = 'upset.manta.test_event';
-var sampleScope = {service: 'madtom'};
+var sampleScope = {service: 'prometheus'};
 var sampleChecks = [{type: 'cmd', config: {test: 'prop'}}];
 var sampleKa = {
     title: 'sample title',

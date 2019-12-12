@@ -772,9 +772,9 @@ function generateTestCases() {
      *   - 3 "nameservice" probes for the "each" template
      *   - 5 probes for the "all" template
      *
-     * totalling 13 probes.
+     * totalling 11 probes.
      */
-    nprobesfull = 13;
+    nprobesfull = 11;
 
     /*
      * For the multi-DC case, we've got:
@@ -784,9 +784,9 @@ function generateTestCases() {
      *   - 1 "global" probe for the "global" template
      *     (again, because other nameservice instances are in other DCs)
      *   - 1 "nameservice" probe for the "each" template
-     *   - 2 probes for the "all" template
+     *   - 1 probe for the "all" template
      */
-    nprobesmulti = 5;
+    nprobesmulti = 4;
 
     testCases.push({
         name: 'empty DC, undeployed, configure with no metadata',
@@ -1035,6 +1035,8 @@ function generateTestCases() {
             assertplus.strictEqual(plan.mup_groups_remove.length, 0);
             assertplus.strictEqual(plan.mup_probes_remove.length, 0);
             assertplus.strictEqual(plan.mup_groups_add.length, ngroupsfull);
+            console.log('mup_probes_add:');
+            console.log(JSON.stringify(plan.mup_probes_add));
             assertplus.strictEqual(plan.mup_probes_add.length, nprobesmulti);
         }
     });

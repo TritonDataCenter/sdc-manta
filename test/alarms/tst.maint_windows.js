@@ -623,6 +623,8 @@ var validPipeline = [
             function(err, result) {
                 var warnings;
 
+                console.error(JSON.stringify(result));
+
                 assertplus.ok(!err);
                 warnings = result.stderr
                     .trim()
@@ -685,7 +687,7 @@ var validPipeline = [
             assertplus.equal(
                 found.length,
                 6,
-                'expected six test windows created so far'
+                'expected six test windows created so far saw ' + found.length
             );
             ctx.ctx_new = found;
             callback();

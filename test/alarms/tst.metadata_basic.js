@@ -25,7 +25,7 @@ var services = require('../../lib/services');
 var testCases = [];
 var sampleEvent = 'upset.manta.test_event';
 var sampleLegacyName = 'my sample probe';
-var sampleScope = {service: 'madtom'};
+var sampleScope = {service: 'prometheus'};
 var sampleChecks = [{type: 'cmd', config: {test: 'prop'}}];
 var sampleKa = {
     title: 'sample title',
@@ -430,7 +430,7 @@ function generateTestCases() {
         input: JSON.stringify([
             {
                 event: sampleEvent,
-                scope: {service: 'madtom', extraProp: 17},
+                scope: {service: 'prometheus', extraProp: 17},
                 checks: sampleChecks,
                 ka: sampleKa
             }
@@ -447,7 +447,7 @@ function generateTestCases() {
         input: JSON.stringify([
             {
                 event: sampleEvent,
-                scope: {service: 'madtom', global: 'false'},
+                scope: {service: 'prometheus', global: 'false'},
                 checks: sampleChecks,
                 ka: sampleKa
             }
@@ -464,7 +464,7 @@ function generateTestCases() {
         input: JSON.stringify([
             {
                 event: sampleEvent,
-                scope: {service: 'madtom', checkFrom: 'each'},
+                scope: {service: 'prometheus', checkFrom: 'each'},
                 checks: sampleChecks,
                 ka: sampleKa
             }

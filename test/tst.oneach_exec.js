@@ -35,7 +35,7 @@ var test_cases = [
             execCommand: 'ls | foo > bar && echo bob'
         },
         expected_results: {
-            count: 8,
+            count: 9,
             zone: true,
             output: 'in zone'
         }
