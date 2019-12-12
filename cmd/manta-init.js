@@ -44,6 +44,10 @@ var POSEIDON;
 var POSEIDON_LOGIN = 'poseidon';
 var POSEIDON_PASSWORD = 'trident123';
 
+
+// This manta-init can *only* create mantav1 applications.
+var MANTAV = 1;
+
 /*
  * If the -c option isn't specified, the default is to download 10 images in
  * parallel.
@@ -631,6 +635,20 @@ var pipelineFuncs = [
 		});
 	},
 
+	function checkMantaApplicationVersion(_, cb) {
+		if (self.manta_app &&
+		    self.manta_app.metadata['MANTAV'] !== MANTAV) {
+			return cb(new VError(
+			    'A v%s Manta application was found on this ' +
+			    'Triton instance which conflicts with the ' +
+			    'version being deployed. ' +
+			    'You must resolve that problem before ' +
+			    'attempting to deploy a new Manta application.',
+			    self.manta_app.metadata['MANTAV']));
+		}
+		return (cb(null));
+	},
+
 	function createMantaApplication(_, cb) {
 		var log = self.log;
 		var sapi = self.SAPI;
@@ -643,7 +661,7 @@ var pipelineFuncs = [
 
 		var extra = {
 			metadata: {
-				MANTAV: 1
+				MANTAV: MANTAV
 			}
 		};
 
