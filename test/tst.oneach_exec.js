@@ -454,10 +454,7 @@ function setupMockManta(_, callback) {
          * zone5 is put in service "svc002" in order to test service
          * filtering.  All other zones are in "svc001".
          */
-        svcid =
-            zoneid === 'zone5'
-                ? 'svc002'
-                : 'svc001';
+        svcid = zoneid === 'zone5' ? 'svc002' : 'svc001';
         fakeDeployedTopology.instances[svcid].push({
             uuid: zoneid,
             params: {server_uuid: cnid},
