@@ -66,22 +66,6 @@ function main() {
     }
     spec = JSON.parse(mod_fs.readFileSync(process.argv[2]));
 
-    if (!('marlin_nodes' in spec)) {
-        fatal('missing marlin_nodes');
-    }
-
-    if (!Array.isArray(spec['marlin_nodes'])) {
-        fatal('marlin_nodes should be an array');
-    }
-
-    if (spec['marlin_nodes'].length === 0) {
-        fatal('no marlin CNs listed');
-    }
-
-    if (!('manta_nodes' in spec)) {
-        fatal('missing manta_nodes');
-    }
-
     if (!Array.isArray(spec['manta_nodes'])) {
         fatal('manta_nodes should be an array');
     }
@@ -122,10 +106,6 @@ function main() {
         fatal('missing manta network information');
     }
 
-    if (!('marlin' in spec)) {
-        fatal('missing marlin network information');
-    }
-
     if (!('nic_tag' in spec['admin'])) {
         fatal('admin section missing nic tag name');
     }
@@ -142,14 +122,6 @@ function main() {
         fatal('manta section missing network name');
     }
 
-    if (!('nic_tag' in spec['marlin'])) {
-        fatal('marlin section missing nic tag name');
-    }
-
-    if (!('network' in spec['marlin'])) {
-        fatal('marlin section missing network name');
-    }
-
     if (!('mac_mappings' in spec) && !('nic_mappings' in spec)) {
         fatal('missing nic_mappings or mac_mappings');
     }
@@ -161,7 +133,6 @@ function main() {
     mappings = spec['mac_mappings'] || spec['nic_mappings'];
 
     validateMappings('manta', mappings, spec);
-    validateMappings('marlin', mappings, spec);
 
     for (i = 0; i < spec['azs'].length; i++) {
         az = spec['azs'][i];
@@ -171,10 +142,6 @@ function main() {
 
         if (!(az in spec['manta'])) {
             fatal('missing information for az ' + az + 'in the manta block');
-        }
-
-        if (!(az in spec['marlin'])) {
-            fatal('missing information for az ' + az + 'in the marlin block');
         }
     }
 

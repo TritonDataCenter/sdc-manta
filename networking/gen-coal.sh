@@ -6,7 +6,7 @@
 #
 
 #
-# Copyright (c) 2014, Joyent, Inc.
+# Copyright 2019 Joyent, Inc.
 #
 
 #
@@ -69,7 +69,6 @@ function write_config
 {
 	"this_az": "coal",
         "manta_nodes": [ "$gc_server" ],
-        "marlin_nodes": [ "$gc_server" ],
 	"azs": [ "coal" ],
 	"admin": {
 		"nic_tag": "admin",
@@ -89,20 +88,9 @@ function write_config
                         "end":  "10.77.77.254",
                         "gateway": "10.77.77.2"
                 }
-        }, "marlin": {
-		"nic_tag": "mantanat",
-		"network": "mantanat",
-                "coal": {
-                        "vlan_id": 0,
-                        "subnet":  "10.66.66.0/24",
-                        "start":   "10.66.66.5",
-                        "end":  "10.66.66.254",
-                        "gateway": "10.66.66.2"
-                }
 	}, "mac_mappings": {
 		"$gc_server": {
-			"manta": "$gc_mac",
-			"mantanat": "$gc_mac"
+			"manta": "$gc_mac"
 		}
 	}
 }

@@ -35,7 +35,7 @@ var test_cases = [
             execCommand: 'ls | foo > bar && echo bob'
         },
         expected_results: {
-            count: 8,
+            count: 9,
             zone: true,
             output: 'in zone'
         }
@@ -120,15 +120,6 @@ var test_cases = [
         error: /unrecognized service: "devnullapi"/,
         args: {
             scopeServices: ['devnullapi'],
-            execMode: oneach.MZ_EM_COMMAND,
-            execCommand: 'date'
-        }
-    },
-    {
-        name: 'marlin zones explicitly disallowed',
-        error: /unsupported service: "marlin"/,
-        args: {
-            scopeServices: ['marlin'],
             execMode: oneach.MZ_EM_COMMAND,
             execCommand: 'date'
         }
@@ -446,13 +437,11 @@ function setupMockManta(_, callback) {
     fakeDeployedTopology.app.name = 'manta';
     fakeDeployedTopology.services = {
         svc001: {name: 'webapi'},
-        svc002: {name: 'postgres'},
-        svc003: {name: 'marlin'}
+        svc002: {name: 'postgres'}
     };
     fakeDeployedTopology.instances = {
         svc001: [],
-        svc002: [],
-        svc003: []
+        svc002: []
     };
     fakeDeployedTopology.vms = {};
     fakeDeployedTopology.images = {};
@@ -463,17 +452,9 @@ function setupMockManta(_, callback) {
 
         /*
          * zone5 is put in service "svc002" in order to test service
-         * filtering.  zone8 is put in service "svc003", but it should
-         * never be used for anything because "svc003" is "marlin",
-         * which is explicitly disallowed.  All other zones are in
-         * "svc001".
+         * filtering.  All other zones are in "svc001".
          */
-        svcid =
-            zoneid === 'zone5'
-                ? 'svc002'
-                : zoneid === 'zone8'
-                ? 'svc003'
-                : 'svc001';
+        svcid = zoneid === 'zone5' ? 'svc002' : 'svc001';
         fakeDeployedTopology.instances[svcid].push({
             uuid: zoneid,
             params: {server_uuid: cnid},

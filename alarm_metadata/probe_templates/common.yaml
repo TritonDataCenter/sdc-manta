@@ -5,7 +5,7 @@
 #
 
 #
-# Copyright (c) 2017, Joyent, Inc.
+# Copyright 2019 Joyent, Inc.
 #
 
 #
@@ -130,15 +130,9 @@
         impact: >-
             There is no impact to end-user service.  However, failure to upload
             files is often indicative of problems affecting end user requests.
-
-            If the affected logs are used for metering, then metering reports
-            and access logs for end users may be unavailable or incomplete until
-            the affected logs are uploaded and the relevant metering jobs re-run
-            by an operator.
         action: >-
             Identify the reason for the failure and resolve the underlying
-            issue.  If logs used for metering were affected, you may need to
-            re-run the relevant metering jobs once all logs are available.
+            issue.
 
             In most components, the log "/var/log/mbackup.log" has a record of
             recent upload attempts and results.  Another common cause of log

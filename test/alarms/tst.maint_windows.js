@@ -685,7 +685,7 @@ var validPipeline = [
             assertplus.equal(
                 found.length,
                 6,
-                'expected six test windows created so far'
+                'expected six test windows created so far saw ' + found.length
             );
             ctx.ctx_new = found;
             callback();

@@ -24,16 +24,13 @@ var separator = '--------------------------------------------------';
 
 var fakeDeployed = {
     cn001: {
-        marlin: {img001: 10},
         moray: {
             '1': {img002: 3},
             '2': {img002: 3},
             '3': {img002: 3}
-        },
-        medusa: {img004: 2}
+        }
     },
     cn002: {
-        marlin: {img001: 10},
         moray: {
             '1': {img002: 3},
             '2': {img002: 3},
@@ -51,7 +48,6 @@ var fakeDeployed = {
         }
     },
     cn003: {
-        marlin: {img001: 10},
         postgres: {
             '1': {img003: 3},
             '2': {img003: 3},
@@ -59,7 +55,6 @@ var fakeDeployed = {
         }
     },
     cn004: {
-        marlin: {img001: 2},
         postgres: {
             '1': {img003: 1},
             '2': {img003: 1}

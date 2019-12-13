@@ -11,8 +11,8 @@
 
 #
 # Set up manta networking.  This script does many things, but at a high level,
-# it creates the manta and mantanat networks, and configures all servers in a
-# datacenter with those networks.
+# it creates the manta network, and configures all servers in a datacenter with
+# that network.
 #
 
 set -o xtrace
@@ -153,42 +153,18 @@ function add_network
 
 	tmpfile=/tmp/net_create.$$
 	#
-	# Things are a bit different depending on whether we are in the manta
-	# stanza or the marlin stanza. In the former we have to assemble the
-	# other routes to DCs, but don't set resolvers. In the latter, we have
-	# to set resolvers and a gateway, but not routes.
+	# Assemble the other routes to DCs, but don't set resolvers.
 	#
-	if [[ "$stanza" == "marlin" ]]; then
-		# Steal the external networks resolvers for now
-		resolvers=$(sdc-napi /networks?name=external | \
-		    json -Ha resolvers)
-		[[ $? -eq 0 ]] || fatal "failed to get external resolvers"
-		[[ -z "$resolvers" ]] && fatal "no external network resolvers"
-		json > $tmpfile <<EOF
-{
-	"name": "$name",
-	"vlan_id": $vlan,
-	"subnet": "$subnet",
-	"provision_start_ip": "$start",
-	"provision_end_ip": "$end",
-	"nic_tag": "$tag",
-	"gateway": "$gateway",
-	"resolvers": $resolvers,
-	"owner_uuids": [ "$mn_ufds_adminid" ]
-}
-EOF
+	fetch_routes $stanza
+	croutes="$mn_tmp_routes"
+	mn_tmp_routes=
+	if [[ -n "$croutes" ]]; then
+		uniqueify_routes "$gateway" "$croutes"
+		routes=$mn_tmp_routes
 	else
-		# Grab our routes to other AZs
-		fetch_routes $stanza
-		croutes="$mn_tmp_routes"
-		mn_tmp_routes=
-		if [[ -n "$croutes" ]]; then
-			uniqueify_routes "$gateway" "$croutes"
-			routes=$mn_tmp_routes
-		else
-			routes="{}"
-		fi
-		json > $tmpfile <<EOF
+		routes="{}"
+	fi
+	json > $tmpfile <<EOF
 {
 	"name": "$name",
 	"vlan_id": $vlan,
@@ -200,7 +176,6 @@ EOF
 	"owner_uuids": [ "$mn_ufds_adminid" ]
 }
 EOF
-	fi
 	json=$(cat $tmpfile | json)
 	[[ $? -eq 0 ]] || fatal "failed to get json for the network"
 	# XXX Curl failures, seriously.
@@ -522,8 +497,7 @@ EOF
 
 #
 # We need to create a service for all nodes that imports the routes for the
-# alternate admin networks as well as the alternate manta networks. We do not
-# need to worry about the marlin network here.
+# alternate admin networks as well as the alternate manta networks.
 #
 function create_smf_route_svc
 {
@@ -789,9 +763,9 @@ ifconfig \$mn_vnname \$mn_ip netmask \$mn_subnet || fatal "failed to assign ip"
 
 #
 # Update sysinfo and then tell CNAPI to refresh it.  This is necessary for
-# other parts of Manta (e.g., the marlin dashboard configurator) to see the
-# newly created VNIC.  These steps are both best-effort.  If CNAPI is
-# temporarily down, we don't want to stop this service from coming up.
+# other parts of Manta to see the newly created VNIC.  These steps are both
+# best-effort.  If CNAPI is temporarily down, we don't want to stop this
+# service from coming up.
 #
 server_uuid=\$(sysinfo -f | json UUID) &&
     sdc-cnapi /servers/\$server_uuid/sysinfo-refresh -X POST
@@ -930,16 +904,13 @@ fetch_distribute_svcs || fatal "failed to determine if GZ SMF services" \
     "should be distributed"
 handle_tag 'admin' || fatal "failed to handle tag for admin nic_tag"
 handle_tag 'manta' || fatal "failed to handle manta nic_tag"
-handle_tag 'marlin' || fatal "failed to handle marlin nic_tag"
 
 handle_network 'admin' || fatal "failed to handle admin network"
 handle_network 'manta' || fatal "failed to handle manta network"
-handle_network 'marlin' || fatal "failed to handle marlin network"
 
 update_admin_routes || fatal "failed to fix up admin networks"
 
 add_tags 'manta' 'manta_nodes' || fatal "failed to add manta nic tag to CNs"
-add_tags 'marlin' 'marlin_nodes' || fatal "failed to add marlin nic tag to CNs"
 
 setup_output_dir || fatal "failed to setup output directory"
 allocate_manta_ips || fatal "failed to allocate ips for manta nics for GZs"

@@ -5,7 +5,7 @@
 #
 
 #
-# Copyright (c) 2017, Joyent, Inc.
+# Copyright 2019 Joyent, Inc.
 #
 
 #
@@ -35,8 +35,7 @@
         severity: major
         response: No automated response will be taken.
         impact: >-
-            A small number of end-user requests may have failed.  Some job
-            tasks may experience increased latency to dispatch.  If the problem
+            A small number of end-user requests may have failed.  If the problem
             persists, many requests and tasks may be affected.
         action: >-
             Determine the scope of the problem based on the log message and
