@@ -343,7 +343,12 @@ MantaAdmGc.prototype.do_show.options = [
     }
 ];
 
-MantaAdmGc.prototype.do_update = function do_update(_subcmd, opts, args, callback) {
+MantaAdmGc.prototype.do_update = function do_update(
+    _subcmd,
+    opts,
+    args,
+    callback
+) {
     var self, adm;
     var filename;
 
@@ -405,8 +410,12 @@ MantaAdmGc.prototype.do_update.help =
 
 MantaAdmGc.prototype.do_update.options = [];
 
-MantaAdmGc.prototype.do_gen_shard_assignment =
-function do_gen_shard_assignment(_subcmd, opts, _args, callback) {
+MantaAdmGc.prototype.do_gen_shard_assignment = function do_gen_shard_assignment(
+    _subcmd,
+    opts,
+    _args,
+    callback
+) {
     var self = this;
 
     self.magc_parent.initAdm(opts, function() {
@@ -440,8 +449,12 @@ MantaAdmGc.prototype.do_gen_shard_assignment.help =
 
 MantaAdmGc.prototype.do_gen_shard_assignment.options = [];
 
-MantaAdmGc.prototype.do_genconfig =
-function do_genconfig(_subcmd, opts, args, callback) {
+MantaAdmGc.prototype.do_genconfig = function do_genconfig(
+    _subcmd,
+    opts,
+    args,
+    callback
+) {
     var num_collectors, max_cns;
     var avoid_svcs;
     var imageuuid;
@@ -530,6 +543,69 @@ MantaAdmGc.prototype.do_genconfig.options = [
             'satisfiable in all deployments.'
     }
 ];
+
+MantaAdm.prototype.do_genconfig = function(_subcmd, opts, args, callback) {
+    var self = this;
+    var fromfile = opts.from_file;
+
+    if (fromfile) {
+        if (args.length !== 0) {
+            callback(new Error('unexpected arguments'));
+            return;
+        }
+    } else if (args.length !== 1 || (args[0] !== 'lab' && args[0] !== 'coal')) {
+        callback(new Error('expected "lab", "coal", or --from-file option'));
+        return;
+    } else if (opts.directory) {
+        callback(new Error('--directory can only be used with --from-file'));
+        return;
+    }
+
+    this.initAdm(opts, function() {
+        var adm = self.madm_adm;
+        var func;
+        var options = {};
+
+        if (args[0] === 'lab') {
+            func = adm.dumpConfigLab;
+            options['outstream'] = process.stdout;
+        } else if (args[0] === 'coal') {
+            func = adm.dumpConfigCoal;
+            options['outstream'] = process.stdout;
+        } else {
+            assertplus.string(fromfile);
+            func = adm.genconfigFromFile;
+            options['filename'] = fromfile;
+            if (opts.directory) {
+                options['outDirectory'] = opts.directory;
+            } else {
+                options['outstream'] = process.stdout;
+            }
+            options['errstream'] = process.stderr;
+        }
+
+        adm.fetchDeployed(function(err) {
+            if (err) {
+                fatal(err.message);
+            }
+
+            func.call(adm, options, function(serr, nissues) {
+                if (serr) {
+                    fatal(serr.message);
+                }
+
+                if (nissues !== 0) {
+                    console.error(
+                        'error: bailing out because of at least one issue'
+                    );
+                    process.exit(1);
+                }
+
+                self.finiAdm();
+            });
+        });
+    });
+};
 
 MantaAdm.prototype.do_genconfig.help =
     'Generate a config for COAL, lab, or a larger deployment.\n' +
