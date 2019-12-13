@@ -32,6 +32,7 @@ var knownServices = [
     'webapi',
     'loadbalancer',
     'ops',
+    'madtom',
     'reshard',
     'pgstatsmon',
     'garbage-collector',

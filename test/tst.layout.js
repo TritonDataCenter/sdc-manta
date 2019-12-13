@@ -366,6 +366,7 @@ var images = {
     webapi: 'WEBAPI_IMAGE0',
     loadbalancer: 'LOADBALANCER_IMAGE0',
     ops: 'OPS_IMAGE0',
+    madtom: 'MADTOM_IMAGE0',
     'buckets-api': 'BUCKETS_API_IMAGE0',
     'buckets-postgres': 'BUCKETS_POSTGRES_IMAGE0',
     boray: 'BORAY_IMAGE0',

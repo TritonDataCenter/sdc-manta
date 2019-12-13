@@ -85,6 +85,9 @@ Services that are part of the Manta application include:
 **loadbalancer**
   Handles SSL termination and loadbalancing for "webapi"
 
+**madtom**
+  Operational dashboard for component health
+
 **moray**
   Key-value store used to access PostgreSQL
 
