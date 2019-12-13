@@ -33,7 +33,6 @@ manta-deploy moray -z 1
 manta-deploy moray -z 2
 
 manta-shardadm set -i "1.moray 2.moray"
-manta-shardadm set -m "1.moray"
 manta-shardadm set -s "1.moray"
 
 manta-deploy electric-moray

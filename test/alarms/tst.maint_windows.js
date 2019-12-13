@@ -623,8 +623,6 @@ var validPipeline = [
             function(err, result) {
                 var warnings;
 
-                console.error(JSON.stringify(result));
-
                 assertplus.ok(!err);
                 warnings = result.stderr
                     .trim()

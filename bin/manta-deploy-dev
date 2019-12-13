@@ -82,7 +82,6 @@ set -o errexit
 set -o xtrace
 
 manta-shardadm set -i "$mdl_index_shards"
-manta-shardadm set -m "1.moray"
 manta-shardadm set -s "1.moray"
 
 set +o errexit
