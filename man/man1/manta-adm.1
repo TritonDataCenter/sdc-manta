@@ -78,26 +78,11 @@ Moray proxy that handles sharding using consistent hashing
 \fBgarbage\-collector\fP
 Processes delete records in specialized Postgres tables
 .TP
-\fBjobpuller\fP
-Manages the archival of completed user compute jobs
-.TP
-\fBjobsupervisor\fP
-Manages the execution of user compute jobs
-.TP
 \fBloadbalancer\fP
 Handles SSL termination and loadbalancing for "webapi"
 .TP
 \fBmadtom\fP
 Operational dashboard for component health
-.TP
-\fBmarlin\-dashboard\fP
-Operational dashboard for job activity
-.TP
-\fBmarlin\fP
-Zones used to execute end user compute tasks
-.TP
-\fBmedusa\fP
-Manages end user interactive shell sessions
 .TP
 \fBmoray\fP
 Key\-value store used to access PostgreSQL
@@ -109,7 +94,7 @@ internal DNS nameservers and ZooKeeper nodes
 Manages asynchronous operations like garbage collection, metering, and auditing
 .TP
 \fBpostgres\fP
-PostgreSQL databases used for storing object and job metadata
+PostgreSQL databases used for storing object metadata
 .TP
 \fBpgstatsmon\fP
 Monitoring system for Postgres
@@ -601,7 +586,7 @@ Example: list hostnames in form suitable for "sdc\-oneachnode \-n":
 .RE
 .PP
 Example: list storage CNs with their associated storage id (used in object
-metadata) and compute ids (used by the compute jobs subsystem):
+metadata) and compute ids (vestigial):
 .PP
 .RS
 .nf
@@ -648,10 +633,7 @@ servers in \fB\fCFILE\fR span more than one availability zone.
 The input JSON file \fB\fCFILE\fR should contain a single object with properties:
 .TP
 \fB\fCnshards\fR (positive integer)
-the number of database shards to create, which is usually one more than the
-number of shards that are intended to store object metadata (in order to
-accommodate jobs and low\-volume system metadata that's typically stored in
-shard 1)
+the number of database shards to create.
 .TP
 \fB\fCservers\fR (array of objects)
 the list of servers available for deployment
