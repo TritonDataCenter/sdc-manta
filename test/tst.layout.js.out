@@ -1054,6 +1054,9 @@ generated config:
         "loadbalancer": {
             "LOADBALANCER_IMAGE0": 1
         },
+        "madtom": {
+            "MADTOM_IMAGE0": 1
+        },
         "moray": {
             "2": {
                 "MORAY_IMAGE0": 1
@@ -1107,9 +1110,6 @@ generated config:
         },
         "loadbalancer": {
             "LOADBALANCER_IMAGE0": 1
-        },
-        "madtom": {
-            "MADTOM_IMAGE0": 1
         },
         "moray": {
             "1": {
@@ -1548,6 +1548,9 @@ generated config:
         "loadbalancer": {
             "LOADBALANCER_IMAGE0": 1
         },
+        "madtom": {
+            "MADTOM_IMAGE0": 1
+        },
         "moray": {
             "2": {
                 "MORAY_IMAGE0": 1
@@ -1621,9 +1624,6 @@ generated config:
         },
         "loadbalancer": {
             "LOADBALANCER_IMAGE0": 1
-        },
-        "madtom": {
-            "MADTOM_IMAGE0": 1
         },
         "moray": {
             "4": {
@@ -2068,8 +2068,8 @@ summary:
      authcache            -                1                1                 
      webapi               -                1                1                1
      loadbalancer         -                1                1                1
-     madtom               -                                 1
      ops                  -                1                                  
+     madtom               -                                 1                 
      reshard              -                                                   
      pgstatsmon           -                                                   
      garbage-collector     -                                                   
@@ -2331,8 +2331,8 @@ summary:
      authcache            -                1                1                 
      webapi               -                1                1                1
      loadbalancer         -                1                1                1
-     madtom               -                                 1
      ops                  -                1                                  
+     madtom               -                                 1                 
      reshard              -                                                   
      pgstatsmon           -                                                   
      garbage-collector     -                                                   
@@ -2647,9 +2647,6 @@ generated config:
         "loadbalancer": {
             "LOADBALANCER_IMAGE0": 1
         },
-        "madtom": {
-            "MADTOM_IMAGE0": 1
-        },
         "moray": {
             "1": {
                 "MORAY_IMAGE0": 1
@@ -2689,6 +2686,9 @@ generated config:
         },
         "loadbalancer": {
             "LOADBALANCER_IMAGE0": 1
+        },
+        "madtom": {
+            "MADTOM_IMAGE0": 1
         },
         "moray": {
             "2": {
@@ -2898,7 +2898,7 @@ summary:
      webapi               -                3                3                3
      loadbalancer         -                3                3                3
      ops                  -                1                                  
-     madtom               -                                 1
+     madtom               -                                 1                 
      reshard              -                                                   
      pgstatsmon           -                                                   
      garbage-collector     -                                                   
