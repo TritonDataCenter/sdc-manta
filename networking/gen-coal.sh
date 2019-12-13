@@ -68,7 +68,7 @@ function write_config
 	cat <<EOF
 {
 	"this_az": "coal",
-        "manta_nodes": [ "$gc_server" ]
+        "manta_nodes": [ "$gc_server" ],
 	"azs": [ "coal" ],
 	"admin": {
 		"nic_tag": "admin",
