@@ -4,11 +4,11 @@
 manta\-adm \- administer a Manta deployment
 .SH SYNOPSIS
 .PP
-\fB\fCmanta\-adm accel\-gc SUBCOMMAND... [OPTIONS...]\fR
-.PP
 \fB\fCmanta\-adm alarm SUBCOMMAND... [OPTIONS...]\fR
 .PP
 \fB\fCmanta\-adm cn [\-l LOG_FILE] [\-H] [\-o FIELD...] [\-n] [\-s] CN_FILTER\fR
+.PP
+\fB\fCmanta\-adm gc SUBCOMMAND... [OPTIONS...]\fR
 .PP
 \fB\fCmanta\-adm genconfig "lab" | "coal"\fR
 .PP
@@ -30,14 +30,14 @@ deployment.  This command only operates on zones within the same datacenter.
 The command may need to be repeated in other datacenters in order to execute it
 across an entire Manta deployment.
 .TP
-\fB\fCmanta\-adm accel\-gc\fR
-Administer garbage\-collector zones and accelerated gc\-enabled accounts.
-.TP
 \fB\fCmanta\-adm alarm\fR
 List and configure amon\-based alarms for Manta.
 .TP
 \fB\fCmanta\-adm cn\fR
 Show information about Manta servers in this DC.
+.TP
+\fB\fCmanta\-adm gc\fR
+Administer garbage\-collector zones.
 .TP
 \fB\fCmanta\-adm genconfig\fR
 Generate a configuration for a COAL, lab, or multi\-server deployment.
@@ -165,58 +165,41 @@ subcommand is still considered an experimental interface.  All other documented
 subcommands, options, and arguments are committed, and you can use the exit
 status of the program to determine success or failure.
 .SH SUBCOMMANDS
-.SS "accel\-gc" subcommand
+.SS "gc" subcommand
 .PP
-\fB\fCmanta\-adm accel\-gc show [\-j]\fR
+\fB\fCmanta\-adm gc show [\-j]\fR
 .PP
-\fB\fCmanta\-adm accel\-gc update CONFIG_FILE\fR
+\fB\fCmanta\-adm gc update CONFIG_FILE\fR
 .PP
-\fB\fCmanta\-adm accel\-gc gen\-shard\-assignment\fR
+\fB\fCmanta\-adm gc gen\-shard\-assignment\fR
 .PP
-\fB\fCmanta\-adm accel\-gc genconfig [\-m MAX_CNS] [\-a SERVICE...] [\-i] IMAGE_UUID
-NCOLLECTORS\fR
+\fB\fCmanta\-adm gc genconfig [\-m MAX_CNS] [\-a SERVICE...] [\-i] IMAGE_UUID NCOLLECTORS\fR
 .PP
-\fB\fCmanta\-adm accel\-gc enable ACCOUNT_LOGIN\fR
+Garbage collection is the process that cleans up files on storage zones that are
+no longer referenced in the metadata tier.
 .PP
-\fB\fCmanta\-adm accel\-gc disable ACCOUNT_LOGIN\fR
-.PP
-\fB\fCmanta\-adm accel\-gc accounts [\-H] [\-o FIELD...]\fR
-.PP
-Accelerated garbage\-collection is a low\-latency alternative to the backup\-based
-garbage\-collection pipeline in the Mola software consolidation. The system
-allows users to trade Manta's snaplink functionality for faster storage space
-reclamation.
-.PP
-Accounts that do not have any snaplinks can be marked as snaplink\-disabled,
-indicating that all of the objects owned by the account have a single reference
-in the metadata tier. This constrained setting allows garbage\-collector zones,
-each of which is responsible for processing deleted objects on some subset of
-the index shards, to coordinate object file cleanup as soon as a front\-door
-delete request completes.
-.PP
-The \fB\fCmanta\-adm accel\-gc\fR subcommand provides tools that allow operators:
+The \fB\fCmanta\-adm gc\fR subcommand provides tools that allow operators:
 .RS
 .IP \(bu 2
-manage the assignment of metadata shards to garbage\-collector instances
+generate a configuration for deploying garbage\-collector instances
 .IP \(bu 2
-toggle accelerated garbage\-collection for individual accounts
+manage the assignment of metadata shards to garbage\-collector instances
 .RE
 .PP
-\fB\fCmanta\-adm accel\-gc show \-j\fR
+\fB\fCmanta\-adm gc show \-j\fR
 .PP
 Dump a mapping that shows which shards are assigned to which garbage\-collectors.
 The output of this command can be re\-purposed as input to \fB\fCmanta\-adm
-accel\-gc update\fR\&. The interaction between these commands is similar to that
+gc update\fR\&. The interaction between these commands is similar to that
 between \fB\fCmanta\-adm show\fR and \fB\fCmanta\-adm update\fR\&.
 .PP
-\fB\fCmanta\-adm accel\-gc update CONFIG_FILE\fR
+\fB\fCmanta\-adm gc update CONFIG_FILE\fR
 .PP
 Update the mapping from shards to garbage\-collectors. This will require restarting
 the garbage\-collectors so that they pick up the new assigned shards. CONFIG_FILE
-here should have the same format as the output of \fB\fCmanta\-adm accel\-gc show \-j\fR\&.
+here should have the same format as the output of \fB\fCmanta\-adm gc show \-j\fR\&.
 .PP
-\fB\fCmanta\-adm accel\-gc genconfig [\-m MAX_CNS] [\-a SERVICE...] [\-i] IMAGE_UUID
-NCOLLECTORS\fR
+\fB\fCmanta\-adm gc genconfig [\-m MAX_CNS] [\-a SERVICE...] [\-i] IMAGE_UUID NCOLLECTORS\fR
 .PP
 Generate a service deployment layout (interpretable by manta\-adm update) by
 layering NCOLLECTORS garbage\-collector zones onto the existing deployment
@@ -242,30 +225,10 @@ production deployments.
 To change the list of services to avoid, pass multiple SERVICEs in a
 comma\-separated list or with repeated \-a flags.
 .PP
-\fB\fCmanta\-adm accel\-gc gen\-shard\-assignment\fR
+\fB\fCmanta\-adm gc gen\-shard\-assignment\fR
 .PP
 Generate a mapping from shards to garbage\-collectors based on SAPI metadata that
 distributes index shards to garbage\-collectors as evenly as possible.
-.PP
-\fB\fCmanta\-adm accel\-gc enable ACCOUNT_LOGIN\fR
-.PP
-Enable accelerated garbage\-collection for the account. No snaplinks to data
-owned by this account will be allowed after this command completes. Note that
-this command does not get rid of any existing snaplinks to objects owned by the
-account. It is not safe to use accelerated garbage\-collection for an account
-that may own snaplinked data.
-.PP
-\fB\fCmanta\-adm accel\-gc disable ACCOUNT_LOGIN\fR
-.PP
-Disable accelerated garbage\-collection for the account. Objects owned by the
-account which are deleted while the account has accelerated garbage\-collection
-disabled will have to be garbage\-collected with the offline garbage\-collection
-defined in the Mola software consolidation.
-.PP
-\fB\fCmanta\-adm accel\-gc accounts [\-H] [\-o FIELD]\fR
-.PP
-List accounts for which accelerated garbage\-collection is enabled in a
-human\-readable format.
 .SS "alarm" subcommand
 .PP
 \fB\fCmanta\-adm alarm close ALARM_ID...\fR
