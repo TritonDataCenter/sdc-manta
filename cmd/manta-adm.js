@@ -13,24 +13,24 @@
 /*
  * manta-adm.js: manage manta deployments.  Provides subcommands:
  *
- *     alarm		view and configure information about alarms
+ *     alarm            view and configure information about alarms
  *
- *     cn		show information about CNs
+ *     cn               show information about CNs
  *
- *     show		show information about all deployed services
+ *     show             show information about all deployed services
  *
- *     update		given a JSON file describing the desired Manta
- *     			configuration, figure out how to get from the current
- *     			state to the desired state, and start taking those
- *     			actions
+ *     update           given a JSON file describing the desired Manta
+ *                      configuration, figure out how to get from the current
+ *                      state to the desired state, and start taking those
+ *                      actions
  *
- *     genconfig	generate a configuration suitable for a single-system
- *     			install on COAL or a lab machine or based on a
- *     			configuration file describing available resources
+ *     genconfig        generate a configuration suitable for a single-system
+ *                      install on COAL or a lab machine or based on a
+ *                      configuration file describing available resources
  *
- *     zk		view and manage configured nameserver instances
+ *     zk               view and manage configured nameserver instances
  *
- *     gc  configure garbage collection
+ *     gc               configure garbage collection
  *
  *     create-topology  generate a hash ring for electric-moray
  *
