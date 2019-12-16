@@ -2472,7 +2472,7 @@ MantaAdm.prototype.do_create_topology.options = [
         type: 'integer',
         helpArg: 'PORT',
         help:
-            'Port of moray/boray instances that electric-moray will connect to'
+            'Port of moray instances that electric-moray will connect to'
     },
     {
         names: ['f'],
@@ -2486,9 +2486,9 @@ MantaAdm.prototype.do_create_topology.options = [
 /*
  * Named arguments:
  *
- *     opts		options provided by cmdln
+ *     opts             options provided by cmdln
  *
- *     allowed		allowed column names
+ *     allowed          allowed column names
  *
  * Returns either an Error describing invalid command-line arguments or an
  * object with "columns" and "omitHeader" set according to the options.
