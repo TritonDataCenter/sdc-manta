@@ -969,11 +969,11 @@ var pipelineFuncs = [
      * image *exists* but is incomplete (state=unactivated), and it will
      * error out:
      *
-     *	OriginIsNotActiveError: origin image "..." is not active
+     * 	OriginIsNotActiveError: origin image "..." is not active
      *
      * or hit this similar unlucky timing error:
      *
-     *	Error: image uuid "<origin image uuid>" already exists
+     * 	Error: image uuid "<origin image uuid>" already exists
      *
      * Until IMGAPI supports this (TRITON-1766), some work around options
      * are:
