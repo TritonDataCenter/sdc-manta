@@ -97,14 +97,20 @@ Services that are part of the Manta application include:
 **ops**
   Manages asynchronous operations like garbage collection, metering, and auditing
 
-**postgres**
-  PostgreSQL databases used for storing object metadata
-
 **pgstatsmon**
   Monitoring system for Postgres
 
+**picker**
+  Service to select the best storage nodes for new writes.
+
+**postgres**
+  PostgreSQL databases used for storing object metadata
+
 **prometheus**
   Time-series database that aggregates Manta and Triton metrics
+
+**rebalancer**
+  Service to handle storage node evacuation and storage balancing.
 
 **reshard**
   Automated resharding system for Manta

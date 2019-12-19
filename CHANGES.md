@@ -1,5 +1,9 @@
 # sdc-manta changelog
 
+# 1.3.0
+
+- MANTA-4881 make picker a first class Manta component
+
 # 1.2.0
 
 - MANTA-4533 make 'rebalancer' a first class Manta service

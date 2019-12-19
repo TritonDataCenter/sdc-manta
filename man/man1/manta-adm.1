@@ -93,14 +93,20 @@ internal DNS nameservers and ZooKeeper nodes
 \fBops\fP
 Manages asynchronous operations like garbage collection, metering, and auditing
 .TP
-\fBpostgres\fP
-PostgreSQL databases used for storing object metadata
-.TP
 \fBpgstatsmon\fP
 Monitoring system for Postgres
 .TP
+\fBpicker\fP
+Service to select the best storage nodes for new writes.
+.TP
+\fBpostgres\fP
+PostgreSQL databases used for storing object metadata
+.TP
 \fBprometheus\fP
 Time\-series database that aggregates Manta and Triton metrics
+.TP
+\fBrebalancer\fP
+Service to handle storage node evacuation and storage balancing.
 .TP
 \fBreshard\fP
 Automated resharding system for Manta
