@@ -543,10 +543,15 @@ async.waterfall(
                     return;
                 }
 
-                log.info('removing "%s" dclocalconfig for poseidon',
-                    config.dclocalconfig);
-                ufds.deleteDcLocalConfig(POSEIDON.uuid, config.dclocalconfig,
-                    cb);
+                log.info(
+                    'removing "%s" dclocalconfig for poseidon',
+                    config.dclocalconfig
+                );
+                ufds.deleteDcLocalConfig(
+                    POSEIDON.uuid,
+                    config.dclocalconfig,
+                    cb
+                );
             });
         },
 
