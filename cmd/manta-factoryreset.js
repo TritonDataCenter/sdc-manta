@@ -523,6 +523,33 @@ async.waterfall(
             });
         },
 
+        function _removePoseidonDcLocalConfig(cb) {
+            if (!POSEIDON) {
+                cb();
+                return;
+            }
+
+            var ufds = self.UFDS;
+            var log = self.log;
+
+            ufds.listDcLocalConfig(POSEIDON.uuid, function(err, config) {
+                if (err) {
+                    cb(err);
+                    return;
+                }
+                if (!config) {
+                    log.info('no dclocalconfig for poseidon.');
+                    cb();
+                    return;
+                }
+
+                log.info('removing "%s" dclocalconfig for poseidon',
+                    config.dclocalconfig);
+                ufds.deleteDcLocalConfig(POSEIDON.uuid, config.dclocalconfig,
+                    cb);
+            });
+        },
+
         function _deletePoseidonKeys(cb) {
             if (!POSEIDON) {
                 cb();
