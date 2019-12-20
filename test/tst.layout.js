@@ -369,8 +369,8 @@ var images = {
     madtom: 'MADTOM_IMAGE0',
     'buckets-api': 'BUCKETS_API_IMAGE0',
     'buckets-postgres': 'BUCKETS_POSTGRES_IMAGE0',
-    boray: 'BORAY_IMAGE0',
-    'electric-boray': 'ELECTRIC_BORAY_IMAGE0'
+    'buckets-mdapi': 'BUCKETS_MDAPI_IMAGE0',
+    'buckets-mdplacement': 'BUCKETS_MDPLACEMENT_IMAGE0'
 };
 
 var nrun = 0;

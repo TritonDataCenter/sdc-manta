@@ -64,8 +64,8 @@ Services that are part of the Manta application include:
 **authcache**
   Stores user identity information
 
-**boray**
-  PostgreSQL interface for manta buckets system
+**buckets-mdapi**
+  Manta buckets metadata API
 
 **buckets-postgres**
   PostgreSQL databases used for storing object metadata for the buckets system
@@ -73,8 +73,8 @@ Services that are part of the Manta application include:
 **buckets-api**
   Handles end user buckets API requests
 
-**electric-boray**
-  Boray proxy for buckets that handles sharding using consistent hashing
+**buckets-mdplacement**
+  Metadata placement service for Manta buckets
 
 **electric-moray**
   Moray proxy that handles sharding using consistent hashing

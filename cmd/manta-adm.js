@@ -2471,8 +2471,7 @@ MantaAdm.prototype.do_create_topology.options = [
         names: ['p'],
         type: 'integer',
         helpArg: 'PORT',
-        help:
-            'Port of moray/boray instances that electric-moray will connect to'
+        help: 'Port of moray instances that electric-moray will connect to'
     },
     {
         names: ['f'],

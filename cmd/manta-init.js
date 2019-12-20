@@ -761,8 +761,8 @@ var pipelineFuncs = [
             'electric-moray.%s',
             extra.metadata['DOMAIN_NAME']
         );
-        extra.metadata['ELECTRIC_BORAY'] = sprintf(
-            'electric-boray.%s',
+        extra.metadata['BUCKETS_MDPLACEMENT'] = sprintf(
+            'buckets-mdplacement.%s',
             extra.metadata['DOMAIN_NAME']
         );
         extra.metadata['POSEIDON_UUID'] = POSEIDON.uuid;

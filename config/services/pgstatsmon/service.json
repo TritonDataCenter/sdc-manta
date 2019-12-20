@@ -15,7 +15,7 @@
 			"database": "moray"
 		}, {
 			"name": "buckets-postgres",
-			"database": "boray",
+			"database": "buckets_metadata",
 			"last": true
 		} ]
 	}

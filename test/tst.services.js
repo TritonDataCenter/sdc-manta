@@ -39,8 +39,8 @@ var knownServices = [
     'prometheus',
     'buckets-api',
     'buckets-postgres',
-    'boray',
-    'electric-boray'
+    'buckets-mdapi',
+    'buckets-mdplacement'
 ];
 
 function main() {
@@ -72,7 +72,7 @@ function main() {
      */
     sharded = knownServices.filter(services.serviceIsSharded).sort();
     assertplus.deepEqual(
-        ['boray', 'buckets-postgres', 'moray', 'postgres'],
+        ['buckets-mdapi', 'buckets-postgres', 'moray', 'postgres'],
         sharded
     );
 

@@ -57,19 +57,22 @@ generated config:
         "authcache": {
             "AUTHCACHE_IMAGE0": 1
         },
-        "boray": {
-            "1": {
-                "BORAY_IMAGE0": 1
-            },
-            "2": {
-                "BORAY_IMAGE0": 1
-            },
-            "3": {
-                "BORAY_IMAGE0": 1
-            }
-        },
         "buckets-api": {
             "BUCKETS_API_IMAGE0": 1
+        },
+        "buckets-mdapi": {
+            "1": {
+                "BUCKETS_MDAPI_IMAGE0": 1
+            },
+            "2": {
+                "BUCKETS_MDAPI_IMAGE0": 1
+            },
+            "3": {
+                "BUCKETS_MDAPI_IMAGE0": 1
+            }
+        },
+        "buckets-mdplacement": {
+            "BUCKETS_MDPLACEMENT_IMAGE0": 1
         },
         "buckets-postgres": {
             "1": {
@@ -81,9 +84,6 @@ generated config:
             "3": {
                 "BUCKETS_POSTGRES_IMAGE0": 1
             }
-        },
-        "electric-boray": {
-            "ELECTRIC_BORAY_IMAGE0": 1
         },
         "electric-moray": {
             "ELECTRIC_MORAY_IMAGE0": 1
@@ -127,19 +127,22 @@ generated config:
         "authcache": {
             "AUTHCACHE_IMAGE0": 1
         },
-        "boray": {
-            "1": {
-                "BORAY_IMAGE0": 1
-            },
-            "2": {
-                "BORAY_IMAGE0": 1
-            },
-            "3": {
-                "BORAY_IMAGE0": 1
-            }
-        },
         "buckets-api": {
             "BUCKETS_API_IMAGE0": 1
+        },
+        "buckets-mdapi": {
+            "1": {
+                "BUCKETS_MDAPI_IMAGE0": 1
+            },
+            "2": {
+                "BUCKETS_MDAPI_IMAGE0": 1
+            },
+            "3": {
+                "BUCKETS_MDAPI_IMAGE0": 1
+            }
+        },
+        "buckets-mdplacement": {
+            "BUCKETS_MDPLACEMENT_IMAGE0": 1
         },
         "buckets-postgres": {
             "1": {
@@ -151,9 +154,6 @@ generated config:
             "3": {
                 "BUCKETS_POSTGRES_IMAGE0": 1
             }
-        },
-        "electric-boray": {
-            "ELECTRIC_BORAY_IMAGE0": 1
         },
         "electric-moray": {
             "ELECTRIC_MORAY_IMAGE0": 1
@@ -194,19 +194,22 @@ generated config:
         }
     },
     "server_r02_metadata00": {
-        "boray": {
-            "1": {
-                "BORAY_IMAGE0": 1
-            },
-            "2": {
-                "BORAY_IMAGE0": 1
-            },
-            "3": {
-                "BORAY_IMAGE0": 1
-            }
-        },
         "buckets-api": {
             "BUCKETS_API_IMAGE0": 1
+        },
+        "buckets-mdapi": {
+            "1": {
+                "BUCKETS_MDAPI_IMAGE0": 1
+            },
+            "2": {
+                "BUCKETS_MDAPI_IMAGE0": 1
+            },
+            "3": {
+                "BUCKETS_MDAPI_IMAGE0": 1
+            }
+        },
+        "buckets-mdplacement": {
+            "BUCKETS_MDPLACEMENT_IMAGE0": 1
         },
         "buckets-postgres": {
             "1": {
@@ -218,9 +221,6 @@ generated config:
             "3": {
                 "BUCKETS_POSTGRES_IMAGE0": 1
             }
-        },
-        "electric-boray": {
-            "ELECTRIC_BORAY_IMAGE0": 1
         },
         "electric-moray": {
             "ELECTRIC_MORAY_IMAGE0": 1
@@ -285,7 +285,7 @@ summary:
      garbage-collector     -                 
      prometheus           -                 
      buckets-api          -                3
-     electric-boray       -                3
+     buckets-mdplacement     -                3
      postgres             1                3
      postgres             2                3
      postgres             3                3
@@ -295,9 +295,9 @@ summary:
      buckets-postgres     1                3
      buckets-postgres     2                3
      buckets-postgres     3                3
-     boray                1                3
-     boray                2                3
-     boray                3                3
+     buckets-mdapi        1                3
+     buckets-mdapi        2                3
+     buckets-mdapi        3                3
 --------------------------------------------------
 --------------------------------------------------
 test case: invalid config: missing value (nshards)
@@ -604,21 +604,21 @@ generated config:
         "authcache": {
             "AUTHCACHE_IMAGE0": 2
         },
-        "boray": {
-            "1": {
-                "BORAY_IMAGE0": 3
-            }
-        },
         "buckets-api": {
             "BUCKETS_API_IMAGE0": 2
+        },
+        "buckets-mdapi": {
+            "1": {
+                "BUCKETS_MDAPI_IMAGE0": 3
+            }
+        },
+        "buckets-mdplacement": {
+            "BUCKETS_MDPLACEMENT_IMAGE0": 2
         },
         "buckets-postgres": {
             "1": {
                 "BUCKETS_POSTGRES_IMAGE0": 3
             }
-        },
-        "electric-boray": {
-            "ELECTRIC_BORAY_IMAGE0": 2
         },
         "electric-moray": {
             "ELECTRIC_MORAY_IMAGE0": 2
@@ -673,11 +673,11 @@ summary:
      garbage-collector     -                 
      prometheus           -                 
      buckets-api          -                2
-     electric-boray       -                2
+     buckets-mdplacement     -                2
      postgres             1                3
      moray                1                3
      buckets-postgres     1                3
-     boray                1                3
+     buckets-mdapi        1                3
 --------------------------------------------------
 --------------------------------------------------
 test case: trivial two-system case, 3 shards
@@ -705,19 +705,22 @@ generated config:
         "authcache": {
             "AUTHCACHE_IMAGE0": 2
         },
-        "boray": {
-            "1": {
-                "BORAY_IMAGE0": 3
-            },
-            "2": {
-                "BORAY_IMAGE0": 3
-            },
-            "3": {
-                "BORAY_IMAGE0": 3
-            }
-        },
         "buckets-api": {
             "BUCKETS_API_IMAGE0": 2
+        },
+        "buckets-mdapi": {
+            "1": {
+                "BUCKETS_MDAPI_IMAGE0": 3
+            },
+            "2": {
+                "BUCKETS_MDAPI_IMAGE0": 3
+            },
+            "3": {
+                "BUCKETS_MDAPI_IMAGE0": 3
+            }
+        },
+        "buckets-mdplacement": {
+            "BUCKETS_MDPLACEMENT_IMAGE0": 2
         },
         "buckets-postgres": {
             "1": {
@@ -729,9 +732,6 @@ generated config:
             "3": {
                 "BUCKETS_POSTGRES_IMAGE0": 3
             }
-        },
-        "electric-boray": {
-            "ELECTRIC_BORAY_IMAGE0": 2
         },
         "electric-moray": {
             "ELECTRIC_MORAY_IMAGE0": 2
@@ -798,7 +798,7 @@ summary:
      garbage-collector     -                 
      prometheus           -                 
      buckets-api          -                2
-     electric-boray       -                2
+     buckets-mdplacement     -                2
      postgres             1                3
      postgres             2                3
      postgres             3                3
@@ -808,9 +808,9 @@ summary:
      buckets-postgres     1                3
      buckets-postgres     2                3
      buckets-postgres     3                3
-     boray                1                3
-     boray                2                3
-     boray                3                3
+     buckets-mdapi        1                3
+     buckets-mdapi        2                3
+     buckets-mdapi        3                3
 --------------------------------------------------
 --------------------------------------------------
 test case: one rack with fewer servers
@@ -892,21 +892,21 @@ generated config:
         "authcache": {
             "AUTHCACHE_IMAGE0": 1
         },
-        "boray": {
-            "1": {
-                "BORAY_IMAGE0": 1
-            }
-        },
         "buckets-api": {
             "BUCKETS_API_IMAGE0": 1
+        },
+        "buckets-mdapi": {
+            "1": {
+                "BUCKETS_MDAPI_IMAGE0": 1
+            }
+        },
+        "buckets-mdplacement": {
+            "BUCKETS_MDPLACEMENT_IMAGE0": 1
         },
         "buckets-postgres": {
             "1": {
                 "BUCKETS_POSTGRES_IMAGE0": 1
             }
-        },
-        "electric-boray": {
-            "ELECTRIC_BORAY_IMAGE0": 1
         },
         "electric-moray": {
             "ELECTRIC_MORAY_IMAGE0": 1
@@ -932,21 +932,21 @@ generated config:
         }
     },
     "server_r00_metadata01": {
-        "boray": {
-            "2": {
-                "BORAY_IMAGE0": 1
-            }
-        },
         "buckets-api": {
             "BUCKETS_API_IMAGE0": 1
+        },
+        "buckets-mdapi": {
+            "2": {
+                "BUCKETS_MDAPI_IMAGE0": 1
+            }
+        },
+        "buckets-mdplacement": {
+            "BUCKETS_MDPLACEMENT_IMAGE0": 1
         },
         "buckets-postgres": {
             "2": {
                 "BUCKETS_POSTGRES_IMAGE0": 1
             }
-        },
-        "electric-boray": {
-            "ELECTRIC_BORAY_IMAGE0": 1
         },
         "electric-moray": {
             "ELECTRIC_MORAY_IMAGE0": 1
@@ -975,8 +975,8 @@ generated config:
         "buckets-api": {
             "BUCKETS_API_IMAGE0": 1
         },
-        "electric-boray": {
-            "ELECTRIC_BORAY_IMAGE0": 1
+        "buckets-mdplacement": {
+            "BUCKETS_MDPLACEMENT_IMAGE0": 1
         },
         "electric-moray": {
             "ELECTRIC_MORAY_IMAGE0": 1
@@ -992,21 +992,21 @@ generated config:
         "authcache": {
             "AUTHCACHE_IMAGE0": 1
         },
-        "boray": {
-            "1": {
-                "BORAY_IMAGE0": 1
-            }
-        },
         "buckets-api": {
             "BUCKETS_API_IMAGE0": 1
+        },
+        "buckets-mdapi": {
+            "1": {
+                "BUCKETS_MDAPI_IMAGE0": 1
+            }
+        },
+        "buckets-mdplacement": {
+            "BUCKETS_MDPLACEMENT_IMAGE0": 1
         },
         "buckets-postgres": {
             "1": {
                 "BUCKETS_POSTGRES_IMAGE0": 1
             }
-        },
-        "electric-boray": {
-            "ELECTRIC_BORAY_IMAGE0": 1
         },
         "electric-moray": {
             "ELECTRIC_MORAY_IMAGE0": 1
@@ -1032,21 +1032,21 @@ generated config:
         }
     },
     "server_r01_metadata01": {
-        "boray": {
-            "2": {
-                "BORAY_IMAGE0": 1
-            }
-        },
         "buckets-api": {
             "BUCKETS_API_IMAGE0": 1
+        },
+        "buckets-mdapi": {
+            "2": {
+                "BUCKETS_MDAPI_IMAGE0": 1
+            }
+        },
+        "buckets-mdplacement": {
+            "BUCKETS_MDPLACEMENT_IMAGE0": 1
         },
         "buckets-postgres": {
             "2": {
                 "BUCKETS_POSTGRES_IMAGE0": 1
             }
-        },
-        "electric-boray": {
-            "ELECTRIC_BORAY_IMAGE0": 1
         },
         "electric-moray": {
             "ELECTRIC_MORAY_IMAGE0": 1
@@ -1075,8 +1075,8 @@ generated config:
         "buckets-api": {
             "BUCKETS_API_IMAGE0": 1
         },
-        "electric-boray": {
-            "ELECTRIC_BORAY_IMAGE0": 1
+        "buckets-mdplacement": {
+            "BUCKETS_MDPLACEMENT_IMAGE0": 1
         },
         "electric-moray": {
             "ELECTRIC_MORAY_IMAGE0": 1
@@ -1089,21 +1089,21 @@ generated config:
         }
     },
     "server_r02_metadata00": {
-        "boray": {
-            "1": {
-                "BORAY_IMAGE0": 1
-            }
-        },
         "buckets-api": {
             "BUCKETS_API_IMAGE0": 1
+        },
+        "buckets-mdapi": {
+            "1": {
+                "BUCKETS_MDAPI_IMAGE0": 1
+            }
+        },
+        "buckets-mdplacement": {
+            "BUCKETS_MDPLACEMENT_IMAGE0": 1
         },
         "buckets-postgres": {
             "1": {
                 "BUCKETS_POSTGRES_IMAGE0": 1
             }
-        },
-        "electric-boray": {
-            "ELECTRIC_BORAY_IMAGE0": 1
         },
         "electric-moray": {
             "ELECTRIC_MORAY_IMAGE0": 1
@@ -1129,21 +1129,21 @@ generated config:
         }
     },
     "server_r02_metadata02": {
-        "boray": {
-            "2": {
-                "BORAY_IMAGE0": 1
-            }
-        },
         "buckets-api": {
             "BUCKETS_API_IMAGE0": 1
+        },
+        "buckets-mdapi": {
+            "2": {
+                "BUCKETS_MDAPI_IMAGE0": 1
+            }
+        },
+        "buckets-mdplacement": {
+            "BUCKETS_MDPLACEMENT_IMAGE0": 1
         },
         "buckets-postgres": {
             "2": {
                 "BUCKETS_POSTGRES_IMAGE0": 1
             }
-        },
-        "electric-boray": {
-            "ELECTRIC_BORAY_IMAGE0": 1
         },
         "electric-moray": {
             "ELECTRIC_MORAY_IMAGE0": 1
@@ -1197,15 +1197,15 @@ summary:
      garbage-collector     -                 
      prometheus           -                 
      buckets-api          -                8
-     electric-boray       -                8
+     buckets-mdplacement     -                8
      postgres             1                3
      postgres             2                3
      moray                1                3
      moray                2                3
      buckets-postgres     1                3
      buckets-postgres     2                3
-     boray                1                3
-     boray                2                3
+     buckets-mdapi        1                3
+     buckets-mdapi        2                3
 --------------------------------------------------
 --------------------------------------------------
 test case: 3-rack, 4-shard deployment
@@ -1329,21 +1329,21 @@ generated config:
         "authcache": {
             "AUTHCACHE_IMAGE0": 1
         },
-        "boray": {
-            "1": {
-                "BORAY_IMAGE0": 1
-            }
-        },
         "buckets-api": {
             "BUCKETS_API_IMAGE0": 1
+        },
+        "buckets-mdapi": {
+            "1": {
+                "BUCKETS_MDAPI_IMAGE0": 1
+            }
+        },
+        "buckets-mdplacement": {
+            "BUCKETS_MDPLACEMENT_IMAGE0": 1
         },
         "buckets-postgres": {
             "1": {
                 "BUCKETS_POSTGRES_IMAGE0": 1
             }
-        },
-        "electric-boray": {
-            "ELECTRIC_BORAY_IMAGE0": 1
         },
         "electric-moray": {
             "ELECTRIC_MORAY_IMAGE0": 1
@@ -1369,21 +1369,21 @@ generated config:
         }
     },
     "server_r00_metadata01": {
-        "boray": {
-            "2": {
-                "BORAY_IMAGE0": 1
-            }
-        },
         "buckets-api": {
             "BUCKETS_API_IMAGE0": 1
+        },
+        "buckets-mdapi": {
+            "2": {
+                "BUCKETS_MDAPI_IMAGE0": 1
+            }
+        },
+        "buckets-mdplacement": {
+            "BUCKETS_MDPLACEMENT_IMAGE0": 1
         },
         "buckets-postgres": {
             "2": {
                 "BUCKETS_POSTGRES_IMAGE0": 1
             }
-        },
-        "electric-boray": {
-            "ELECTRIC_BORAY_IMAGE0": 1
         },
         "electric-moray": {
             "ELECTRIC_MORAY_IMAGE0": 1
@@ -1409,21 +1409,21 @@ generated config:
         }
     },
     "server_r00_metadata02": {
-        "boray": {
-            "3": {
-                "BORAY_IMAGE0": 1
-            }
-        },
         "buckets-api": {
             "BUCKETS_API_IMAGE0": 1
+        },
+        "buckets-mdapi": {
+            "3": {
+                "BUCKETS_MDAPI_IMAGE0": 1
+            }
+        },
+        "buckets-mdplacement": {
+            "BUCKETS_MDPLACEMENT_IMAGE0": 1
         },
         "buckets-postgres": {
             "3": {
                 "BUCKETS_POSTGRES_IMAGE0": 1
             }
-        },
-        "electric-boray": {
-            "ELECTRIC_BORAY_IMAGE0": 1
         },
         "electric-moray": {
             "ELECTRIC_MORAY_IMAGE0": 1
@@ -1446,21 +1446,21 @@ generated config:
         }
     },
     "server_r00_metadata03": {
-        "boray": {
-            "4": {
-                "BORAY_IMAGE0": 1
-            }
-        },
         "buckets-api": {
             "BUCKETS_API_IMAGE0": 1
+        },
+        "buckets-mdapi": {
+            "4": {
+                "BUCKETS_MDAPI_IMAGE0": 1
+            }
+        },
+        "buckets-mdplacement": {
+            "BUCKETS_MDPLACEMENT_IMAGE0": 1
         },
         "buckets-postgres": {
             "4": {
                 "BUCKETS_POSTGRES_IMAGE0": 1
             }
-        },
-        "electric-boray": {
-            "ELECTRIC_BORAY_IMAGE0": 1
         },
         "electric-moray": {
             "ELECTRIC_MORAY_IMAGE0": 1
@@ -1486,21 +1486,21 @@ generated config:
         "authcache": {
             "AUTHCACHE_IMAGE0": 1
         },
-        "boray": {
-            "1": {
-                "BORAY_IMAGE0": 1
-            }
-        },
         "buckets-api": {
             "BUCKETS_API_IMAGE0": 1
+        },
+        "buckets-mdapi": {
+            "1": {
+                "BUCKETS_MDAPI_IMAGE0": 1
+            }
+        },
+        "buckets-mdplacement": {
+            "BUCKETS_MDPLACEMENT_IMAGE0": 1
         },
         "buckets-postgres": {
             "1": {
                 "BUCKETS_POSTGRES_IMAGE0": 1
             }
-        },
-        "electric-boray": {
-            "ELECTRIC_BORAY_IMAGE0": 1
         },
         "electric-moray": {
             "ELECTRIC_MORAY_IMAGE0": 1
@@ -1526,21 +1526,21 @@ generated config:
         }
     },
     "server_r01_metadata01": {
-        "boray": {
-            "2": {
-                "BORAY_IMAGE0": 1
-            }
-        },
         "buckets-api": {
             "BUCKETS_API_IMAGE0": 1
+        },
+        "buckets-mdapi": {
+            "2": {
+                "BUCKETS_MDAPI_IMAGE0": 1
+            }
+        },
+        "buckets-mdplacement": {
+            "BUCKETS_MDPLACEMENT_IMAGE0": 1
         },
         "buckets-postgres": {
             "2": {
                 "BUCKETS_POSTGRES_IMAGE0": 1
             }
-        },
-        "electric-boray": {
-            "ELECTRIC_BORAY_IMAGE0": 1
         },
         "electric-moray": {
             "ELECTRIC_MORAY_IMAGE0": 1
@@ -1566,21 +1566,21 @@ generated config:
         }
     },
     "server_r01_metadata02": {
-        "boray": {
-            "3": {
-                "BORAY_IMAGE0": 1
-            }
-        },
         "buckets-api": {
             "BUCKETS_API_IMAGE0": 1
+        },
+        "buckets-mdapi": {
+            "3": {
+                "BUCKETS_MDAPI_IMAGE0": 1
+            }
+        },
+        "buckets-mdplacement": {
+            "BUCKETS_MDPLACEMENT_IMAGE0": 1
         },
         "buckets-postgres": {
             "3": {
                 "BUCKETS_POSTGRES_IMAGE0": 1
             }
-        },
-        "electric-boray": {
-            "ELECTRIC_BORAY_IMAGE0": 1
         },
         "electric-moray": {
             "ELECTRIC_MORAY_IMAGE0": 1
@@ -1603,21 +1603,21 @@ generated config:
         }
     },
     "server_r01_metadata03": {
-        "boray": {
-            "4": {
-                "BORAY_IMAGE0": 1
-            }
-        },
         "buckets-api": {
             "BUCKETS_API_IMAGE0": 1
+        },
+        "buckets-mdapi": {
+            "4": {
+                "BUCKETS_MDAPI_IMAGE0": 1
+            }
+        },
+        "buckets-mdplacement": {
+            "BUCKETS_MDPLACEMENT_IMAGE0": 1
         },
         "buckets-postgres": {
             "4": {
                 "BUCKETS_POSTGRES_IMAGE0": 1
             }
-        },
-        "electric-boray": {
-            "ELECTRIC_BORAY_IMAGE0": 1
         },
         "electric-moray": {
             "ELECTRIC_MORAY_IMAGE0": 1
@@ -1640,21 +1640,21 @@ generated config:
         }
     },
     "server_r02_metadata00": {
-        "boray": {
-            "1": {
-                "BORAY_IMAGE0": 1
-            }
-        },
         "buckets-api": {
             "BUCKETS_API_IMAGE0": 1
+        },
+        "buckets-mdapi": {
+            "1": {
+                "BUCKETS_MDAPI_IMAGE0": 1
+            }
+        },
+        "buckets-mdplacement": {
+            "BUCKETS_MDPLACEMENT_IMAGE0": 1
         },
         "buckets-postgres": {
             "1": {
                 "BUCKETS_POSTGRES_IMAGE0": 1
             }
-        },
-        "electric-boray": {
-            "ELECTRIC_BORAY_IMAGE0": 1
         },
         "electric-moray": {
             "ELECTRIC_MORAY_IMAGE0": 1
@@ -1680,21 +1680,21 @@ generated config:
         }
     },
     "server_r02_metadata01": {
-        "boray": {
-            "2": {
-                "BORAY_IMAGE0": 1
-            }
-        },
         "buckets-api": {
             "BUCKETS_API_IMAGE0": 1
+        },
+        "buckets-mdapi": {
+            "2": {
+                "BUCKETS_MDAPI_IMAGE0": 1
+            }
+        },
+        "buckets-mdplacement": {
+            "BUCKETS_MDPLACEMENT_IMAGE0": 1
         },
         "buckets-postgres": {
             "2": {
                 "BUCKETS_POSTGRES_IMAGE0": 1
             }
-        },
-        "electric-boray": {
-            "ELECTRIC_BORAY_IMAGE0": 1
         },
         "electric-moray": {
             "ELECTRIC_MORAY_IMAGE0": 1
@@ -1717,21 +1717,21 @@ generated config:
         }
     },
     "server_r02_metadata02": {
-        "boray": {
-            "3": {
-                "BORAY_IMAGE0": 1
-            }
-        },
         "buckets-api": {
             "BUCKETS_API_IMAGE0": 1
+        },
+        "buckets-mdapi": {
+            "3": {
+                "BUCKETS_MDAPI_IMAGE0": 1
+            }
+        },
+        "buckets-mdplacement": {
+            "BUCKETS_MDPLACEMENT_IMAGE0": 1
         },
         "buckets-postgres": {
             "3": {
                 "BUCKETS_POSTGRES_IMAGE0": 1
             }
-        },
-        "electric-boray": {
-            "ELECTRIC_BORAY_IMAGE0": 1
         },
         "electric-moray": {
             "ELECTRIC_MORAY_IMAGE0": 1
@@ -1754,21 +1754,21 @@ generated config:
         }
     },
     "server_r02_metadata03": {
-        "boray": {
-            "4": {
-                "BORAY_IMAGE0": 1
-            }
-        },
         "buckets-api": {
             "BUCKETS_API_IMAGE0": 1
+        },
+        "buckets-mdapi": {
+            "4": {
+                "BUCKETS_MDAPI_IMAGE0": 1
+            }
+        },
+        "buckets-mdplacement": {
+            "BUCKETS_MDPLACEMENT_IMAGE0": 1
         },
         "buckets-postgres": {
             "4": {
                 "BUCKETS_POSTGRES_IMAGE0": 1
             }
-        },
-        "electric-boray": {
-            "ELECTRIC_BORAY_IMAGE0": 1
         },
         "electric-moray": {
             "ELECTRIC_MORAY_IMAGE0": 1
@@ -1837,7 +1837,7 @@ summary:
      garbage-collector     -                 
      prometheus           -                 
      buckets-api          -               12
-     electric-boray       -               12
+     buckets-mdplacement     -               12
      postgres             1                3
      postgres             2                3
      postgres             3                3
@@ -1850,10 +1850,10 @@ summary:
      buckets-postgres     2                3
      buckets-postgres     3                3
      buckets-postgres     4                3
-     boray                1                3
-     boray                2                3
-     boray                3                3
-     boray                4                3
+     buckets-mdapi        1                3
+     buckets-mdapi        2                3
+     buckets-mdapi        3                3
+     buckets-mdapi        4                3
 --------------------------------------------------
 --------------------------------------------------
 test case: 3-AZ, 1-rack-per-AZ, 1-shard deployment
@@ -1911,21 +1911,21 @@ generated config:
         "authcache": {
             "AUTHCACHE_IMAGE0": 1
         },
-        "boray": {
-            "1": {
-                "BORAY_IMAGE0": 1
-            }
-        },
         "buckets-api": {
             "BUCKETS_API_IMAGE0": 1
+        },
+        "buckets-mdapi": {
+            "1": {
+                "BUCKETS_MDAPI_IMAGE0": 1
+            }
+        },
+        "buckets-mdplacement": {
+            "BUCKETS_MDPLACEMENT_IMAGE0": 1
         },
         "buckets-postgres": {
             "1": {
                 "BUCKETS_POSTGRES_IMAGE0": 1
             }
-        },
-        "electric-boray": {
-            "ELECTRIC_BORAY_IMAGE0": 1
         },
         "electric-moray": {
             "ELECTRIC_MORAY_IMAGE0": 1
@@ -1964,21 +1964,21 @@ generated config:
         "authcache": {
             "AUTHCACHE_IMAGE0": 1
         },
-        "boray": {
-            "1": {
-                "BORAY_IMAGE0": 1
-            }
-        },
         "buckets-api": {
             "BUCKETS_API_IMAGE0": 1
+        },
+        "buckets-mdapi": {
+            "1": {
+                "BUCKETS_MDAPI_IMAGE0": 1
+            }
+        },
+        "buckets-mdplacement": {
+            "BUCKETS_MDPLACEMENT_IMAGE0": 1
         },
         "buckets-postgres": {
             "1": {
                 "BUCKETS_POSTGRES_IMAGE0": 1
             }
-        },
-        "electric-boray": {
-            "ELECTRIC_BORAY_IMAGE0": 1
         },
         "electric-moray": {
             "ELECTRIC_MORAY_IMAGE0": 1
@@ -2014,21 +2014,21 @@ generated config:
 }
 {
     "az2_server_r00_metadata00": {
-        "boray": {
-            "1": {
-                "BORAY_IMAGE0": 1
-            }
-        },
         "buckets-api": {
             "BUCKETS_API_IMAGE0": 1
+        },
+        "buckets-mdapi": {
+            "1": {
+                "BUCKETS_MDAPI_IMAGE0": 1
+            }
+        },
+        "buckets-mdplacement": {
+            "BUCKETS_MDPLACEMENT_IMAGE0": 1
         },
         "buckets-postgres": {
             "1": {
                 "BUCKETS_POSTGRES_IMAGE0": 1
             }
-        },
-        "electric-boray": {
-            "ELECTRIC_BORAY_IMAGE0": 1
         },
         "electric-moray": {
             "ELECTRIC_MORAY_IMAGE0": 1
@@ -2075,11 +2075,11 @@ summary:
      garbage-collector     -                                                   
      prometheus           -                                                   
      buckets-api          -                1                1                1
-     electric-boray       -                1                1                1
+     buckets-mdplacement     -                1                1                1
      postgres             1                1                1                1
      moray                1                1                1                1
      buckets-postgres     1                1                1                1
-     boray                1                1                1                1
+     buckets-mdapi        1                1                1                1
 --------------------------------------------------
 --------------------------------------------------
 test case: 3-AZ, 1-rack-per-AZ, 2-shard deployment
@@ -2137,16 +2137,19 @@ generated config:
         "authcache": {
             "AUTHCACHE_IMAGE0": 1
         },
-        "boray": {
-            "1": {
-                "BORAY_IMAGE0": 1
-            },
-            "2": {
-                "BORAY_IMAGE0": 1
-            }
-        },
         "buckets-api": {
             "BUCKETS_API_IMAGE0": 1
+        },
+        "buckets-mdapi": {
+            "1": {
+                "BUCKETS_MDAPI_IMAGE0": 1
+            },
+            "2": {
+                "BUCKETS_MDAPI_IMAGE0": 1
+            }
+        },
+        "buckets-mdplacement": {
+            "BUCKETS_MDPLACEMENT_IMAGE0": 1
         },
         "buckets-postgres": {
             "1": {
@@ -2155,9 +2158,6 @@ generated config:
             "2": {
                 "BUCKETS_POSTGRES_IMAGE0": 1
             }
-        },
-        "electric-boray": {
-            "ELECTRIC_BORAY_IMAGE0": 1
         },
         "electric-moray": {
             "ELECTRIC_MORAY_IMAGE0": 1
@@ -2202,16 +2202,19 @@ generated config:
         "authcache": {
             "AUTHCACHE_IMAGE0": 1
         },
-        "boray": {
-            "1": {
-                "BORAY_IMAGE0": 1
-            },
-            "2": {
-                "BORAY_IMAGE0": 1
-            }
-        },
         "buckets-api": {
             "BUCKETS_API_IMAGE0": 1
+        },
+        "buckets-mdapi": {
+            "1": {
+                "BUCKETS_MDAPI_IMAGE0": 1
+            },
+            "2": {
+                "BUCKETS_MDAPI_IMAGE0": 1
+            }
+        },
+        "buckets-mdplacement": {
+            "BUCKETS_MDPLACEMENT_IMAGE0": 1
         },
         "buckets-postgres": {
             "1": {
@@ -2220,9 +2223,6 @@ generated config:
             "2": {
                 "BUCKETS_POSTGRES_IMAGE0": 1
             }
-        },
-        "electric-boray": {
-            "ELECTRIC_BORAY_IMAGE0": 1
         },
         "electric-moray": {
             "ELECTRIC_MORAY_IMAGE0": 1
@@ -2264,16 +2264,19 @@ generated config:
 }
 {
     "az2_server_r00_metadata00": {
-        "boray": {
-            "1": {
-                "BORAY_IMAGE0": 1
-            },
-            "2": {
-                "BORAY_IMAGE0": 1
-            }
-        },
         "buckets-api": {
             "BUCKETS_API_IMAGE0": 1
+        },
+        "buckets-mdapi": {
+            "1": {
+                "BUCKETS_MDAPI_IMAGE0": 1
+            },
+            "2": {
+                "BUCKETS_MDAPI_IMAGE0": 1
+            }
+        },
+        "buckets-mdplacement": {
+            "BUCKETS_MDPLACEMENT_IMAGE0": 1
         },
         "buckets-postgres": {
             "1": {
@@ -2282,9 +2285,6 @@ generated config:
             "2": {
                 "BUCKETS_POSTGRES_IMAGE0": 1
             }
-        },
-        "electric-boray": {
-            "ELECTRIC_BORAY_IMAGE0": 1
         },
         "electric-moray": {
             "ELECTRIC_MORAY_IMAGE0": 1
@@ -2338,15 +2338,15 @@ summary:
      garbage-collector     -                                                   
      prometheus           -                                                   
      buckets-api          -                1                1                1
-     electric-boray       -                1                1                1
+     buckets-mdplacement     -                1                1                1
      postgres             1                1                1                1
      postgres             2                1                1                1
      moray                1                1                1                1
      moray                2                1                1                1
      buckets-postgres     1                1                1                1
      buckets-postgres     2                1                1                1
-     boray                1                1                1                1
-     boray                2                1                1                1
+     buckets-mdapi        1                1                1                1
+     buckets-mdapi        2                1                1                1
 --------------------------------------------------
 --------------------------------------------------
 test case: 3-AZ, 2-racks-per-AZ, 3-shard deployment
@@ -2488,21 +2488,21 @@ generated config:
         "authcache": {
             "AUTHCACHE_IMAGE0": 1
         },
-        "boray": {
-            "1": {
-                "BORAY_IMAGE0": 1
-            }
-        },
         "buckets-api": {
             "BUCKETS_API_IMAGE0": 1
+        },
+        "buckets-mdapi": {
+            "1": {
+                "BUCKETS_MDAPI_IMAGE0": 1
+            }
+        },
+        "buckets-mdplacement": {
+            "BUCKETS_MDPLACEMENT_IMAGE0": 1
         },
         "buckets-postgres": {
             "1": {
                 "BUCKETS_POSTGRES_IMAGE0": 1
             }
-        },
-        "electric-boray": {
-            "ELECTRIC_BORAY_IMAGE0": 1
         },
         "electric-moray": {
             "ELECTRIC_MORAY_IMAGE0": 1
@@ -2528,21 +2528,21 @@ generated config:
         }
     },
     "az0_server_r00_metadata01": {
-        "boray": {
-            "2": {
-                "BORAY_IMAGE0": 1
-            }
-        },
         "buckets-api": {
             "BUCKETS_API_IMAGE0": 1
+        },
+        "buckets-mdapi": {
+            "2": {
+                "BUCKETS_MDAPI_IMAGE0": 1
+            }
+        },
+        "buckets-mdplacement": {
+            "BUCKETS_MDPLACEMENT_IMAGE0": 1
         },
         "buckets-postgres": {
             "2": {
                 "BUCKETS_POSTGRES_IMAGE0": 1
             }
-        },
-        "electric-boray": {
-            "ELECTRIC_BORAY_IMAGE0": 1
         },
         "electric-moray": {
             "ELECTRIC_MORAY_IMAGE0": 1
@@ -2568,21 +2568,21 @@ generated config:
         }
     },
     "az0_server_r00_metadata02": {
-        "boray": {
-            "3": {
-                "BORAY_IMAGE0": 1
-            }
-        },
         "buckets-api": {
             "BUCKETS_API_IMAGE0": 1
+        },
+        "buckets-mdapi": {
+            "3": {
+                "BUCKETS_MDAPI_IMAGE0": 1
+            }
+        },
+        "buckets-mdplacement": {
+            "BUCKETS_MDPLACEMENT_IMAGE0": 1
         },
         "buckets-postgres": {
             "3": {
                 "BUCKETS_POSTGRES_IMAGE0": 1
             }
-        },
-        "electric-boray": {
-            "ELECTRIC_BORAY_IMAGE0": 1
         },
         "electric-moray": {
             "ELECTRIC_MORAY_IMAGE0": 1
@@ -2625,21 +2625,21 @@ generated config:
         "authcache": {
             "AUTHCACHE_IMAGE0": 1
         },
-        "boray": {
-            "1": {
-                "BORAY_IMAGE0": 1
-            }
-        },
         "buckets-api": {
             "BUCKETS_API_IMAGE0": 1
+        },
+        "buckets-mdapi": {
+            "1": {
+                "BUCKETS_MDAPI_IMAGE0": 1
+            }
+        },
+        "buckets-mdplacement": {
+            "BUCKETS_MDPLACEMENT_IMAGE0": 1
         },
         "buckets-postgres": {
             "1": {
                 "BUCKETS_POSTGRES_IMAGE0": 1
             }
-        },
-        "electric-boray": {
-            "ELECTRIC_BORAY_IMAGE0": 1
         },
         "electric-moray": {
             "ELECTRIC_MORAY_IMAGE0": 1
@@ -2665,21 +2665,21 @@ generated config:
         }
     },
     "az1_server_r00_metadata01": {
-        "boray": {
-            "2": {
-                "BORAY_IMAGE0": 1
-            }
-        },
         "buckets-api": {
             "BUCKETS_API_IMAGE0": 1
+        },
+        "buckets-mdapi": {
+            "2": {
+                "BUCKETS_MDAPI_IMAGE0": 1
+            }
+        },
+        "buckets-mdplacement": {
+            "BUCKETS_MDPLACEMENT_IMAGE0": 1
         },
         "buckets-postgres": {
             "2": {
                 "BUCKETS_POSTGRES_IMAGE0": 1
             }
-        },
-        "electric-boray": {
-            "ELECTRIC_BORAY_IMAGE0": 1
         },
         "electric-moray": {
             "ELECTRIC_MORAY_IMAGE0": 1
@@ -2705,21 +2705,21 @@ generated config:
         }
     },
     "az1_server_r00_metadata02": {
-        "boray": {
-            "3": {
-                "BORAY_IMAGE0": 1
-            }
-        },
         "buckets-api": {
             "BUCKETS_API_IMAGE0": 1
+        },
+        "buckets-mdapi": {
+            "3": {
+                "BUCKETS_MDAPI_IMAGE0": 1
+            }
+        },
+        "buckets-mdplacement": {
+            "BUCKETS_MDPLACEMENT_IMAGE0": 1
         },
         "buckets-postgres": {
             "3": {
                 "BUCKETS_POSTGRES_IMAGE0": 1
             }
-        },
-        "electric-boray": {
-            "ELECTRIC_BORAY_IMAGE0": 1
         },
         "electric-moray": {
             "ELECTRIC_MORAY_IMAGE0": 1
@@ -2759,21 +2759,21 @@ generated config:
 }
 {
     "az2_server_r00_metadata00": {
-        "boray": {
-            "1": {
-                "BORAY_IMAGE0": 1
-            }
-        },
         "buckets-api": {
             "BUCKETS_API_IMAGE0": 1
+        },
+        "buckets-mdapi": {
+            "1": {
+                "BUCKETS_MDAPI_IMAGE0": 1
+            }
+        },
+        "buckets-mdplacement": {
+            "BUCKETS_MDPLACEMENT_IMAGE0": 1
         },
         "buckets-postgres": {
             "1": {
                 "BUCKETS_POSTGRES_IMAGE0": 1
             }
-        },
-        "electric-boray": {
-            "ELECTRIC_BORAY_IMAGE0": 1
         },
         "electric-moray": {
             "ELECTRIC_MORAY_IMAGE0": 1
@@ -2799,21 +2799,21 @@ generated config:
         }
     },
     "az2_server_r00_metadata01": {
-        "boray": {
-            "2": {
-                "BORAY_IMAGE0": 1
-            }
-        },
         "buckets-api": {
             "BUCKETS_API_IMAGE0": 1
+        },
+        "buckets-mdapi": {
+            "2": {
+                "BUCKETS_MDAPI_IMAGE0": 1
+            }
+        },
+        "buckets-mdplacement": {
+            "BUCKETS_MDPLACEMENT_IMAGE0": 1
         },
         "buckets-postgres": {
             "2": {
                 "BUCKETS_POSTGRES_IMAGE0": 1
             }
-        },
-        "electric-boray": {
-            "ELECTRIC_BORAY_IMAGE0": 1
         },
         "electric-moray": {
             "ELECTRIC_MORAY_IMAGE0": 1
@@ -2836,21 +2836,21 @@ generated config:
         }
     },
     "az2_server_r00_metadata02": {
-        "boray": {
-            "3": {
-                "BORAY_IMAGE0": 1
-            }
-        },
         "buckets-api": {
             "BUCKETS_API_IMAGE0": 1
+        },
+        "buckets-mdapi": {
+            "3": {
+                "BUCKETS_MDAPI_IMAGE0": 1
+            }
+        },
+        "buckets-mdplacement": {
+            "BUCKETS_MDPLACEMENT_IMAGE0": 1
         },
         "buckets-postgres": {
             "3": {
                 "BUCKETS_POSTGRES_IMAGE0": 1
             }
-        },
-        "electric-boray": {
-            "ELECTRIC_BORAY_IMAGE0": 1
         },
         "electric-moray": {
             "ELECTRIC_MORAY_IMAGE0": 1
@@ -2904,7 +2904,7 @@ summary:
      garbage-collector     -                                                   
      prometheus           -                                                   
      buckets-api          -                3                3                3
-     electric-boray       -                3                3                3
+     buckets-mdplacement     -                3                3                3
      postgres             1                1                1                1
      postgres             2                1                1                1
      postgres             3                1                1                1
@@ -2914,7 +2914,7 @@ summary:
      buckets-postgres     1                1                1                1
      buckets-postgres     2                1                1                1
      buckets-postgres     3                1                1                1
-     boray                1                1                1                1
-     boray                2                1                1                1
-     boray                3                1                1                1
+     buckets-mdapi        1                1                1                1
+     buckets-mdapi        2                1                1                1
+     buckets-mdapi        3                1                1                1
 --------------------------------------------------
