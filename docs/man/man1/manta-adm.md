@@ -715,7 +715,7 @@ Example: show only postgres zones in the current datacenter
 
 ### "update" subcommand
 
-`manta-adm update [-l LOG_FILE] [-n] [-y] [--no-reprovision] [--skip-verify-channel] FILE [SERVICE]`
+`manta-adm update [-l LOG_FILE] [-n] [-y] [-C CHANNEL] [--no-reprovision] [--skip-verify-channel] FILE [SERVICE]`
 
 The `manta-adm update` command updates a Manta deployment to match the JSON
 configuration stored at path `FILE`.  The JSON configuration describes the
@@ -741,15 +741,19 @@ upgrading all components.**
 This command supports the `-l/--log_file`, `-n/--dryrun`, and `-y/--confirm`
 options described above, plus:
 
+`-C CHANNEL, --channel CHANNEL`
+  When upgrading, verify that the images being provisioned or reprovisioned
+  are present on the "remote" (usually https://updates.joyent.com) imgapi
+  channel passed as the `CHANNEL` argument. The default is to use the imgapi
+  channel that was set on the headnode using the `sdcadm channel` command.
+
 `--no-reprovision`
   When upgrading a zone, always provision a new zone and deprovision the
   previous one, rather than reprovisioning the existing one.
 
 `--skip-verify-channel`
-  When upgrading, do not verify that the images being provisioned or
-  reprovisioned are present on the "remote" (usually https://updates.joyent.com)
-  imgapi channel that was set on the headnode using the `sdcadm channel`
-  command.
+  When upgrading, do not verify that images being provisioned or reprovisioned
+  come from any particular channel.
 
 If `SERVICE` is specified, then only instances of the named service are
 changed.

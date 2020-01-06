@@ -760,6 +760,15 @@ MantaAdm.prototype.do_update = function(_subcmd, opts, args, callback) {
         return;
     }
 
+    if (opts.channel && opts.skip_verify_channel) {
+        callback(
+            new Error(
+                '-C and --skip-verify-channel cannot be used ' +
+                    'at the same time'
+            )
+        );
+    }
+
     filename = args[0];
     if (args.length === 2) {
         service = args[1];
@@ -782,6 +791,10 @@ MantaAdm.prototype.do_update = function(_subcmd, opts, args, callback) {
                 },
                 function determineDefaultChannel(_, stepcb) {
                     if (opts.skip_verify_channel) {
+                        stepcb();
+                        return;
+                    } else if (opts.channel) {
+                        adm.ma_channel = opts.channel;
                         stepcb();
                         return;
                     }
@@ -874,6 +887,14 @@ MantaAdm.prototype.do_update.options = [
     maCommonOptions.logFile,
     maCommonOptions.dryrun,
     maCommonOptions.confirm,
+    {
+        names: ['channel', 'C'],
+        type: 'string',
+        help:
+            'When provisioning an image, verify that the image ' +
+            'comes from this update channel. The default is to use the ' +
+            'update channel set for this datacenter.'
+    },
     {
         names: ['no-reprovision'],
         type: 'bool',
