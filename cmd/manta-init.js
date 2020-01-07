@@ -635,7 +635,7 @@ var pipelineFuncs = [
 		});
 	},
 
-	function checkMantaApplicationVersion(_, cb) {
+	function ensureMantavMetadatum(_, cb) {
 		var log = self.log;
 		var sapi = self.SAPI;
 		if (self.manta_app &&
