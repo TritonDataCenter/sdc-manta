@@ -7,7 +7,7 @@
  */
 
 /*
- * Copyright 2019 Joyent, Inc.
+ * Copyright 2020 Joyent, Inc.
  */
 
 /*
@@ -635,9 +635,32 @@ var pipelineFuncs = [
 		});
 	},
 
-	function checkMantaApplicationVersion(_, cb) {
+	function ensureMantavMetadatum(_, cb) {
+		var log = self.log;
+		var sapi = self.SAPI;
 		if (self.manta_app &&
 		    self.manta_app.metadata['MANTAV'] !== MANTAV) {
+			// For older mantav1 deployments, having no 'MANTAV'
+			// property is possible, so add one now if that's the
+			// case.
+			// The same is not true for mantav2, which always
+			// has a 'MANTAV' property.
+			if (self.manta_app.metadata['MANTAV'] === undefined) {
+				self.manta_app.metadata['MANTAV'] = MANTAV;
+				sapi.updateApplication(
+					self.manta_app.uuid,
+					{metadata: self.manta_app.metadata},
+				    function (err) {
+						if (err) {
+							log.error(err,
+							    'failed to set ' +
+							    'MANTAV value');
+							return (cb(err));
+						}
+						cb(null);
+					});
+				return;
+			}
 			return cb(new VError(
 			    'A v%s Manta application was found on this ' +
 			    'Triton instance which conflicts with the ' +
