@@ -886,6 +886,7 @@ MantaAdm.prototype.do_update.help =
 MantaAdm.prototype.do_update.options = [
     maCommonOptions.logFile,
     maCommonOptions.dryrun,
+<<<<<<< HEAD
     maCommonOptions.confirm,
     {
         names: ['channel', 'C'],
@@ -916,6 +917,34 @@ MantaAdm.prototype.do_update.options = [
         default: false
     }
 ];
+=======
+	maCommonOptions.confirm,
+{
+    'names': [ 'channel', 'C' ],
+    'type': 'string',
+    'help': 'When provisioning an image, verify that the image ' +
+	'comes from this update channel. The default is to use the ' +
+	'update channel set for this datacenter.'
+},
+{
+    'names': [ 'no-reprovision' ],
+    'type': 'bool',
+    'help': 'When upgrading a zone, always provision and deprovision ' +
+	'rather than reprovision'
+},
+{
+    'names': [ 'experimental', 'X' ],
+    'type':  'bool',
+    'help': 'Allow deployment of experimental services'
+},
+{
+    'names': [ 'skip-verify-channel' ],
+    'type': 'bool',
+    'help': 'When provisioning an image, avoid verifying that this image ' +
+    'comes from the default update channel for this datacenter',
+    'default': false
+} ];
+>>>>>>> refs/remotes/origin/prr-MANTA-4861
 
 MantaAdm.prototype.do_zk = MantaAdmZk;
 
