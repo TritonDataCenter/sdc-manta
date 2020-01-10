@@ -6,12 +6,26 @@
 #
 
 #
-# Copyright 2019 Joyent, Inc.
+# Copyright 2020 Joyent, Inc.
 #
 
 #
 # deploy-dev: deploys a manta install on a coal or lab system
 #
+
+if [[ -n "$TRACE" ]]; then
+    export PS4='[\D{%FT%TZ}] ${BASH_SOURCE}:${LINENO}: ${FUNCNAME[0]:+${FUNCNAME[0]}(): }'
+    set -o xtrace
+fi
+set -o errexit
+set -o pipefail
+
+
+# Must be kept in sync with the value in lib/common.js
+RING_EXISTS_EXIT_STATUS=3
+
+
+# ---- internal functions
 
 #
 # fail ERRMESSAGE: prints the error message to stderr and exits
@@ -41,14 +55,14 @@ function confirm
 	[[ $REPLY =~ ^[Yy]$ ]]
 }
 
-# Must be kept in sync with the value in lib/common.js
-RING_EXISTS_EXIT_STATUS=3
+
+# ---- mainline
 
 mdl_tmpdir="${TMPDIR:-/var/tmp}"
 mdl_conffile="$mdl_tmpdir/lab-config.json"
 mdl_override="false"		# override confirmation prompts
 mdl_topo_size=			# number of fash virtual nodes
-mdl_index_shards=		# manatee shards to use for indexing tier
+mdl_dir_index_shards=		# manatee shards to use for indexing tier
 mdl_genconfig=			# manta-adm genconfig kind
 
 if [[ "$1" == "-y" ]]; then
@@ -60,13 +74,17 @@ fi
 case "$1" in
 	coal)
 		mdl_genconfig="coal"
-		mdl_topo_size=100000
-		mdl_index_shards="1.moray"
+		mdl_dir_index_shards="1.moray"
+		mdl_dir_topo_size=100000
+		mdl_buckets_index_shards="1.buckets-mdapi"
+		mdl_buckets_topo_size=4
 		;;
 	lab)
 		mdl_genconfig="lab"
-		mdl_topo_size=131072
-		mdl_index_shards="1.moray 2.moray"
+		mdl_dir_index_shards="1.moray 2.moray"
+		mdl_dir_topo_size=131072
+		mdl_buckets_index_shards="1.buckets-mdapi 2.buckets-mdapi"
+		mdl_buckets_topo_size=16
 		;;
 	*)
 		echo "usage: $(basename $0) [-y] coal | lab" >&2
@@ -74,29 +92,56 @@ case "$1" in
 		;;
 esac
 
-echo "index shards:   $mdl_index_shards" >&2
-echo "fash vnodes:    $mdl_topo_size" >&2
-echo "genconfig mode: $mdl_genconfig" >&2
+echo "genconfig mode:        $mdl_genconfig" >&2
+echo "dir index shards:      $mdl_dir_index_shards" >&2
+echo "dir vnodes:            $mdl_dir_topo_size" >&2
+echo "buckets index shards:  $mdl_buckets_index_shards" >&2
+echo "buckets vnodes:        $mdl_buckets_topo_size" >&2
 
-set -o errexit
-set -o xtrace
+# Directory API shard/topology setup
 
-manta-shardadm set -i "$mdl_index_shards"
+manta-shardadm set -i "$mdl_dir_index_shards"
 manta-shardadm set -s "1.moray"
 
 set +o errexit
-manta-adm create-topology -v $mdl_topo_size -p 2020
+manta-adm create-topology -t directory -v $mdl_dir_topo_size -p 2020
 case "$?" in
 	${RING_EXISTS_EXIT_STATUS})
-		echo "hash ring already exists"
+		echo "dir hash ring (topology) already exists"
 		;;
 	0)
-		echo "successfully generated hash ring"
+		echo "successfully generated dir hash ring (topology)"
 		;;
 	*)
-		fail "could not generate hash ring"
+		fail "could not generate dir hash ring (topology)"
 esac
 set -o errexit
+
+
+# Buckets API shard/topology setup
+
+manta-shardadm set -b "$mdl_buckets_index_shards"
+
+set +o errexit
+manta-adm create-topology -t buckets -v $mdl_buckets_topo_size -p 2030
+case "$?" in
+	${RING_EXISTS_EXIT_STATUS})
+		echo "buckets hash ring (topology) already exists"
+		;;
+	0)
+		echo "successfully generated buckets hash ring (topology)"
+		;;
+	*)
+		fail "could not generate buckets hash ring (topology)"
+esac
+set -o errexit
+
+
+# Deploy nameservice first
+#
+# Dev Note: I'm not sure this is required or helpful. `manta-adm update` will
+# ensure nameservice is setup first. Perhaps it should also wait to ensure
+# nameservice is up and working before proceeding.
 
 manta-adm genconfig $mdl_genconfig > $mdl_conffile
 manta-adm update --skip-verify-channel -y $mdl_conffile nameservice
@@ -109,6 +154,7 @@ those zones are up and running.
 EOF
 confirm "Are you ready to proceed? (y/N) " || fail "aborted by user"
 
-set -o xtrace
+
+# Deploy the rest
+
 manta-adm update --skip-verify-channel -y $mdl_conffile
-set +o xtrace
