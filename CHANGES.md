@@ -1,5 +1,9 @@
 # sdc-manta changelog
 
+# 1.4.0
+
+- MANTA-4861 manta-adm should have a -C option to override the channel
+
 # 1.3.1
 
 - MANTA-4920 fix and doc Manta service deployment ordering (#45)
