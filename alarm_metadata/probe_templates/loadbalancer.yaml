@@ -24,8 +24,6 @@
             type: cmd
             config:
                 cmd: "ps -o rss= -p \"$(pgrep -d, -c \"$(svcs -H -o ctid haproxy)\")\" | awk '$1 > 4194304 { printf(\"haproxy %u RSS too large\\n\", $1); exit(1); }'"
-                stdoutMatch:
-                    pattern: haproxy rss too large
                 interval: 120
                 threshold: 2
                 period: 360
