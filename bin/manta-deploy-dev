@@ -27,6 +27,25 @@ RING_EXISTS_EXIT_STATUS=3
 
 # ---- internal functions
 
+function usage () {
+	echo "Usage:"
+	echo "    $(basename $0) [OPTIONS] coal|lab"
+	echo ""
+	echo "Options:"
+	echo "    -h          Show this help and exit."
+	echo "    -y          Skip confirmations."
+	echo ""
+	echo "  'lab' options:"
+	echo "    -s SERVERS    Comma-separated list of server UUIDs to use for"
+	echo "                  for deployment. Defaults to all servers."
+	echo "    -S SERVERS    Comma-separated list of server UUIDs to use for"
+	echo "                  for deployment of *storage* instances. Defaults"
+	echo "                  the value for '-s SERVERS'."
+	echo "    -1 SVCNAMES   Comma-separated list of service names for which"
+	echo "                  to ensure at least one instance is deployed to"
+	echo "                  the headnode, for developer convenience."
+}
+
 #
 # fail ERRMESSAGE: prints the error message to stderr and exits
 #
@@ -61,42 +80,69 @@ function confirm
 mdl_tmpdir="${TMPDIR:-/var/tmp}"
 mdl_conffile="$mdl_tmpdir/lab-config.json"
 mdl_override="false"		# override confirmation prompts
-mdl_topo_size=			# number of fash virtual nodes
-mdl_dir_index_shards=		# manatee shards to use for indexing tier
-mdl_genconfig=			# manta-adm genconfig kind
+mdl_size=			# manta-adm genconfig 'SIZE' arg
+mdl_servers=			# manta-adm genconfig '-s SERVERS' opt
+mdl_storage_servers=		# manta-adm genconfig '-S SERVERS' opt
+mdl_one_on_headnode=		# manta-adm genconfig '-1 SVCNAMES' opt
 
-if [[ "$1" == "-y" ]]; then
-	shift
-	mdl_override="true"
-	echo "note: bypassing confirmations" >&2
-fi
+while getopts "hys:S:1:" opt; do
+	case "$opt" in
+	h)
+		usage
+		exit 0
+		;;
+	y)
+		mdl_override="true"
+		;;
+	s)
+		mdl_servers=$OPTARG
+		;;
+	S)
+		mdl_storage_servers=$OPTARG
+		;;
+	1)
+		mdl_one_on_headnode=$OPTARG
+		;;
+	*)
+		echo "error: invalid option '-$opt'" >&2
+		usage
+		exit 2
+		;;
+	esac
+done
+shift $(( OPTIND - 1 ))
 
 case "$1" in
 	coal)
-		mdl_genconfig="coal"
+		mdl_size="coal"
 		mdl_dir_index_shards="1.moray"
 		mdl_dir_topo_size=100000
 		mdl_buckets_index_shards="1.buckets-mdapi"
 		mdl_buckets_topo_size=4
 		;;
 	lab)
-		mdl_genconfig="lab"
+		mdl_size="lab"
 		mdl_dir_index_shards="1.moray 2.moray"
 		mdl_dir_topo_size=131072
 		mdl_buckets_index_shards="1.buckets-mdapi 2.buckets-mdapi"
 		mdl_buckets_topo_size=16
 		;;
 	*)
-		echo "usage: $(basename $0) [-y] coal | lab" >&2
+		echo "error: invalid genconfig size: must be one of 'coal' or 'lab'" >&2
+		usage
 		exit 2
 		;;
 esac
 
-echo "genconfig mode:        $mdl_genconfig" >&2
-echo "dir index shards:      $mdl_dir_index_shards" >&2
-echo "dir vnodes:            $mdl_dir_topo_size" >&2
-echo "buckets index shards:  $mdl_buckets_index_shards" >&2
-echo "buckets vnodes:        $mdl_buckets_topo_size" >&2
+echo "genconfig size:          $mdl_size" >&2
+echo "dir index shards:        $mdl_dir_index_shards" >&2
+echo "dir vnodes:              $mdl_dir_topo_size" >&2
+echo "buckets index shards:    $mdl_buckets_index_shards" >&2
+echo "buckets vnodes:          $mdl_buckets_topo_size" >&2
+echo "deploy servers:          $mdl_servers" >&2
+echo "deploy storage servers:  $mdl_storage_servers" >&2
+echo "deploy on on headnode:   $mdl_one_on_headnode" >&2
+
 
 # Directory API shard/topology setup
 
@@ -143,7 +189,17 @@ set -o errexit
 # ensure nameservice is setup first. Perhaps it should also wait to ensure
 # nameservice is up and working before proceeding.
 
-manta-adm genconfig $mdl_genconfig > $mdl_conffile
+genconfig_opts=
+if [[ -n "$mdl_servers" ]]; then
+    genconfig_opts+=" -s $mdl_servers"
+fi
+if [[ -n "$mdl_storage_servers" ]]; then
+    genconfig_opts+=" -S $mdl_storage_servers"
+fi
+if [[ -n "$mdl_one_on_headnode" ]]; then
+    genconfig_opts+=" -1 $mdl_one_on_headnode"
+fi
+manta-adm genconfig $genconfig_opts $mdl_size > $mdl_conffile
 manta-adm update --skip-verify-channel -y $mdl_conffile nameservice
 
 set +o xtrace
