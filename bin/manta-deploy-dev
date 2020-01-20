@@ -141,7 +141,7 @@ echo "buckets index shards:    $mdl_buckets_index_shards" >&2
 echo "buckets vnodes:          $mdl_buckets_topo_size" >&2
 echo "deploy servers:          $mdl_servers" >&2
 echo "deploy storage servers:  $mdl_storage_servers" >&2
-echo "deploy on on headnode:   $mdl_one_on_headnode" >&2
+echo "deploy one on headnode:  $mdl_one_on_headnode" >&2
 
 
 # Directory API shard/topology setup
