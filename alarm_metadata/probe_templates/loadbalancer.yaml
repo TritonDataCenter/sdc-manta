@@ -5,9 +5,8 @@
 #
 
 #
-# Copyright (c) 2017, Joyent, Inc.
+# Copyright 2020 Joyent, Inc.
 #
-
 #
 # amon probes for the "loadbalancer" service
 #
@@ -17,16 +16,14 @@
 
 -
     event: upset.manta.loadbalancer.haproxy.memory
-    legacyName: "haproxy memory size (1G)"
+    legacyName: "haproxy memory size (4G)"
     scope:
         service: loadbalancer
     checks:
         -
             type: cmd
             config:
-                cmd: "ps -o rss= -p \"$(pgrep -c \"$(svcs -H -o ctid haproxy)\")\" | awk '$1 > 1048576{ printf(\"haproxy rss too large\\n\"); }'"
-                stdoutMatch:
-                    pattern: haproxy rss too large
+                cmd: "ps -o rss= -p \"$(pgrep -d, -c \"$(svcs -H -o ctid haproxy)\")\" | awk '$1 > 4194304 { printf(\"haproxy %u RSS too large\\n\", $1); exit(1); }'"
                 interval: 120
                 threshold: 2
                 period: 360
@@ -43,34 +40,6 @@
             end-user requests.
         action:
             You may restart the "haproxy" service to alleviate the issue
-            temporarily, though this will impact some end user requests, and it
-            will not resolve the underlying cause of any resource leak.
-
--
-    event: upset.manta.loadbalancer.stud.memory
-    legacyName: "stud memory size (1G)"
-    scope:
-        service: loadbalancer
-    checks:
-        -
-            type: cmd
-            config:
-                cmd: "test ! $(ps -orss -p \"`pgrep stud`\" | grep -v RSS | nawk '{t+=$1}END{print t}') -gt 1048576"
-                interval: 120
-                threshold: 2
-                period: 360
-    ka:
-        title: Loadbalancer "stud" using too much memory
-        description: >-
-            Loadbalancer "stud" processes are using more memory than expected.
-        severity: minor
-        response: No automated response will be taken.
-        impact: >-
-            There is no immediate impact.  However, if processes are leaking
-            memory, then performance may degrade and errors may be induced in
-            end-user requests.
-        action:
-            You may restart the "stud" service to alleviate the issue
             temporarily, though this will impact some end user requests, and it
             will not resolve the underlying cause of any resource leak.
 
