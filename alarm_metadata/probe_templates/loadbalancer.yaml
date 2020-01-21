@@ -102,7 +102,7 @@
         -
             type: cmd
             config:
-                cmd: "test $(/opt/smartdc/muppet/build/node/bin/node /opt/smartdc/muppet/node_modules/.bin/haproxystat showStat /tmp/haproxy  | /opt/smartdc/muppet/build/node/bin/node -e 's=\"\"; process.stdin.resume(); process.stdin.on(\"data\",function(c){s+=c}); process.stdin.on(\"end\",function(){o=eval(\"(\"+s+\")\");console.log(JSON.stringify(o)); });' | /usr/bin/json  -c 'this.type == \"backend\" && !/stats/.test(this.pxname) && act == 0' -a pxname | wc -l) -eq 0"
+                cmd: "test $(/opt/smartdc/muppet/build/node/bin/node /opt/smartdc/muppet/node_modules/.bin/haproxystat showStat /tmp/haproxy  | /opt/smartdc/muppet/build/node/bin/node -e 's=\"\"; process.stdin.resume(); process.stdin.on(\"data\",function(c){s+=c}); process.stdin.on(\"end\",function(){o=eval(\"(\"+s+\")\");console.log(JSON.stringify(o)); });' | /usr/bin/json  -c 'this.type == \"backend\" && !/stats/.test(this.pxname) && !/buckets_api/.test(this.pxname) && act == 0' -a pxname | wc -l) -eq 0"
                 timeout: 10
                 interval: 60
                 threshold: 2
