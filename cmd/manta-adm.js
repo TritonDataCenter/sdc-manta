@@ -118,9 +118,36 @@ var maCommonOptions = {
     }
 };
 
-/*
- * node-cmdln interface for the manta-adm tool.
- */
+// ---- other support stuff
+
+function parseCommaSepStringNoEmpties(_option, _optstr, arg) {
+    // JSSTYLED
+    return arg
+        .trim()
+        .split(/\s*,\s*/g)
+        .filter(function(part) {
+            return part;
+        });
+}
+
+cmdln.dashdash.addOptionType({
+    name: 'commaSepString',
+    takesArg: true,
+    helpArg: 'STRING',
+    parseArg: parseCommaSepStringNoEmpties
+});
+
+cmdln.dashdash.addOptionType({
+    name: 'arrayOfCommaSepString',
+    takesArg: true,
+    helpArg: 'STRING',
+    parseArg: parseCommaSepStringNoEmpties,
+    array: true,
+    arrayFlatten: true
+});
+
+// ---- manta-adm tool interface
+
 function MantaAdm() {
     cmdln.Cmdln.call(this, {
         name: maArg0,
@@ -544,11 +571,15 @@ MantaAdmGc.prototype.do_genconfig.options = [
     }
 ];
 
-MantaAdm.prototype.do_genconfig = function(_subcmd, opts, args, callback) {
+MantaAdm.prototype.do_genconfig = function(subcmd, opts, args, callback) {
+    var genFunc;
+    var genOpts = {};
     var self = this;
-    var fromfile = opts.from_file;
 
-    if (fromfile) {
+    if (opts.help) {
+        this.do_help('help', {}, [subcmd], callback);
+        return;
+    } else if (opts.from_file) {
         if (args.length !== 0) {
             callback(new Error('unexpected arguments'));
             return;
@@ -563,25 +594,35 @@ MantaAdm.prototype.do_genconfig = function(_subcmd, opts, args, callback) {
 
     this.initAdm(opts, function() {
         var adm = self.madm_adm;
-        var func;
-        var options = {};
 
         if (args[0] === 'lab') {
-            func = adm.dumpConfigLab;
-            options['outstream'] = process.stdout;
+            genFunc = adm.dumpConfigLab;
+            genOpts.outstream = process.stdout;
+            genOpts.servers = opts.servers;
+            genOpts.storageServers = opts.storage_servers;
+            genOpts.oneOnHnSvcNames = opts.one_on_headnode || [
+                // Because LB on the headnode is easier to proxy and doesn't
+                // require the extra setup step of an 'external' NIC on the
+                // non-headnode server.
+                'loadbalancer',
+                // These on the headnode to facilitate zlogin to debug them.
+                // Granted, the same is true of other services.
+                'webapi',
+                'buckets-api'
+            ];
         } else if (args[0] === 'coal') {
-            func = adm.dumpConfigCoal;
-            options['outstream'] = process.stdout;
+            genFunc = adm.dumpConfigCoal;
+            genOpts['outstream'] = process.stdout;
         } else {
-            assertplus.string(fromfile);
-            func = adm.genconfigFromFile;
-            options['filename'] = fromfile;
+            assertplus.string(opts.from_file);
+            genFunc = adm.genconfigFromFile;
+            genOpts['filename'] = opts.from_file;
             if (opts.directory) {
-                options['outDirectory'] = opts.directory;
+                genOpts['outDirectory'] = opts.directory;
             } else {
-                options['outstream'] = process.stdout;
+                genOpts['outstream'] = process.stdout;
             }
-            options['errstream'] = process.stderr;
+            genOpts['errstream'] = process.stderr;
         }
 
         adm.fetchDeployed(function(err) {
@@ -589,7 +630,7 @@ MantaAdm.prototype.do_genconfig = function(_subcmd, opts, args, callback) {
                 fatal(err.message);
             }
 
-            func.call(adm, options, function(serr, nissues) {
+            genFunc.call(adm, genOpts, function(serr, nissues) {
                 if (serr) {
                     fatal(serr.message);
                 }
@@ -607,16 +648,60 @@ MantaAdm.prototype.do_genconfig = function(_subcmd, opts, args, callback) {
     });
 };
 
-MantaAdm.prototype.do_genconfig.help =
-    'Generate a config for COAL, lab, or a larger deployment.\n' +
-    '\n' +
-    'Usage:\n' +
-    '\n' +
-    '    manta-adm genconfig lab\n' +
-    ' or manta-adm genconfig coal\n' +
-    ' or manta-adm genconfig [--directory DIR] --from-file=FILE\n';
+MantaAdm.prototype.do_genconfig.help = [
+    'Generate a suggested deployment config for COAL, lab, or a larger deployment.',
+    '',
+    'Usage:',
+    '    manta-adm genconfig coal           # single-server minimal Manta',
+    '    manta-adm genconfig [OPTIONS] lab  # few-server small Manta',
+    '    manta-adm genconfig [-d DIR] --from-file=FILE  # larger Manta',
+    '',
+    '{{options}}'
+].join('\n');
+
+MantaAdm.prototype.do_genconfig.helpOpts = {
+    helpCol: 23
+};
 
 MantaAdm.prototype.do_genconfig.options = [
+    {
+        names: ['help', 'h'],
+        type: 'bool',
+        help: 'Show this help.'
+    },
+    {
+        group: '"lab" options'
+    },
+    {
+        names: ['servers', 's'],
+        type: 'arrayOfCommaSepString',
+        helpArg: 'SERVERS',
+        help:
+            'Specify servers to use for Manta service instances. SERVERS ' +
+            'a comma-separated list of server UUIDs. If not specified, the ' +
+            'deployment will use *all* available servers.'
+    },
+    {
+        names: ['storage-servers', 'S'],
+        type: 'arrayOfCommaSepString',
+        helpArg: 'SERVERS',
+        help:
+            'Specify servers to use for Manta "storage" service instances. ' +
+            'SERVERS a comma-separated list of server UUIDs. If not ' +
+            'specified, the servers given by "--servers" will be used.'
+    },
+    {
+        names: ['one-on-headnode', '1'],
+        type: 'arrayOfCommaSepString',
+        helpArg: 'SVCNAMES',
+        help:
+            'Specify service names to ensure at least one instance is ' +
+            'deployed to the headnode. This is for developer convenience. If ' +
+            'not specified, it defaults to: "loadbalancer,webapi,buckets-api"'
+    },
+    {
+        group: '"--from-file" options'
+    },
     {
         names: ['from-file'],
         type: 'string',
