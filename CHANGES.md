@@ -1,5 +1,11 @@
 # sdc-manta changelog
 
+# 1.5.0
+
+- MANTA-4965 manta-deploy-lab should support multiple servers
+- MANTA-4969 correct amon probes for loadbalancer
+- MANTA-4957 deploy buckets and rebalancer infra by default with manta-deploy-coal/lab
+
 # 1.4.0
 
 - MANTA-4861 manta-adm should have a -C option to override the channel
