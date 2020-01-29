@@ -100,9 +100,6 @@ Services that are part of the Manta application include:
 **pgstatsmon**
   Monitoring system for Postgres
 
-**picker**
-  Service to select the best storage nodes for new writes.
-
 **postgres**
   PostgreSQL databases used for storing object metadata
 
@@ -117,6 +114,9 @@ Services that are part of the Manta application include:
 
 **storage**
   Stores actual object data
+
+**storinfo**
+  Service that provides view of storage node utilization. 
 
 **webapi**
   Handles end user API requests
