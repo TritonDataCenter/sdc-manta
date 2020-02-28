@@ -32,8 +32,12 @@ function usage () {
 	echo "    $(basename $0) [OPTIONS] coal|lab"
 	echo ""
 	echo "Options:"
-	echo "    -h          Show this help and exit."
-	echo "    -y          Skip confirmations."
+	echo "    -h            Show this help and exit."
+	echo "    -y            Skip confirmations."
+	echo ""
+	echo "  Buckets metadata tier options:"
+	echo "    -b NUM        The number of buckets vnodes. By default this is"
+	echo "                  4 for 'coal' size and 16 for 'lab' size."
 	echo ""
 	echo "  'lab' options:"
 	echo "    -s SERVERS    Comma-separated list of server UUIDs to use for"
@@ -84,8 +88,9 @@ mdl_size=			# manta-adm genconfig 'SIZE' arg
 mdl_servers=			# manta-adm genconfig '-s SERVERS' opt
 mdl_storage_servers=		# manta-adm genconfig '-S SERVERS' opt
 mdl_one_on_headnode=		# manta-adm genconfig '-1 SVCNAMES' opt
+mdl_buckets_topo_size=		# The number of Buckets metadata tier vnodes
 
-while getopts "hys:S:1:" opt; do
+while getopts "hys:S:1:b:" opt; do
 	case "$opt" in
 	h)
 		usage
@@ -103,6 +108,9 @@ while getopts "hys:S:1:" opt; do
 	1)
 		mdl_one_on_headnode=$OPTARG
 		;;
+	b)
+		mdl_buckets_topo_size=$OPTARG
+		;;
 	*)
 		echo "error: invalid option '-$opt'" >&2
 		usage
@@ -118,14 +126,18 @@ case "$1" in
 		mdl_dir_index_shards="1.moray"
 		mdl_dir_topo_size=100000
 		mdl_buckets_index_shards="1.buckets-mdapi"
-		mdl_buckets_topo_size=4
+		if [[ -z "$mdl_buckets_topo_size" ]]; then
+			mdl_buckets_topo_size=4
+		fi
 		;;
 	lab)
 		mdl_size="lab"
 		mdl_dir_index_shards="1.moray 2.moray"
 		mdl_dir_topo_size=131072
 		mdl_buckets_index_shards="1.buckets-mdapi 2.buckets-mdapi"
-		mdl_buckets_topo_size=16
+		if [[ -z "$mdl_buckets_topo_size" ]]; then
+			mdl_buckets_topo_size=16
+		fi
 		;;
 	*)
 		echo "error: invalid genconfig size: must be one of 'coal' or 'lab'" >&2
