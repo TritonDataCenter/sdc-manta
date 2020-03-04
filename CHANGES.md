@@ -1,5 +1,9 @@
 # sdc-manta changelog
 
+# 1.5.2
+
+- MANTA-4708 create tools for cleaning up snaplinks
+
 # 1.5.1
 
 - MANTA-5072 'picker' is missing from mLegacySvcNames
