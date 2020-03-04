@@ -1,5 +1,9 @@
 # sdc-manta changelog
 
+# 1.5.1
+
+- MANTA-5072 'picker' is missing from mLegacySvcNames
+
 # 1.5.0
 
 - MANTA-4965 manta-deploy-lab should support multiple servers
