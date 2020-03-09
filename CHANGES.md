@@ -1,5 +1,9 @@
 # sdc-manta changelog
 
+# 1.5.2
+
+- XXX timf Add capability to deploy mantav2-minio instances
+
 # 1.5.1
 
 - MANTA-5072 'picker' is missing from mLegacySvcNames
