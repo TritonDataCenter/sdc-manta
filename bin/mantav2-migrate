@@ -1,0 +1,16 @@
+#!/usr/bin/env node
+/*
+ * Copyright 2020 Joyent, Inc.
+ */
+
+/*
+ * The `mantav2-migrate` CLI command.
+ */
+
+process.stdout.on('error', function onStdoutError(err) {
+    if (err.code === 'EPIPE') {
+        process.exit(0);
+    }
+});
+
+require('../lib/mantav2-migrate').main();
