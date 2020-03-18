@@ -1,5 +1,10 @@
 # sdc-manta changelog
 
+# 1.6.0
+
+- MANTA-5113 Add garbage-collector to developer coal/lab deployments using
+  `manta-deploy-dev`.
+
 # 1.5.2
 
 - MANTA-4708 create tools for cleaning up snaplinks
