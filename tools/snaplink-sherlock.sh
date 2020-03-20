@@ -21,7 +21,7 @@
 #  * waits for completion of user-script
 #  * outputs a summary of the results
 #  * copies the result files to the $PWD:
-#       {region}_{shard}_sherlock.tsv.gz
+#       {shard}_sherlock.tsv.gz
 #
 # Once the program is complete, the resulting dump file can be collected and the
 # both the zone and snapshot should be deleted (otherwise they will be holding a
@@ -50,20 +50,19 @@ exec 4>>$xtrace_log
 BASH_XTRACEFD=4
 set -o xtrace
 
-# Parse the shard and region out of the postgres zone alias.
+# Parse the full moray shard out of the postgres zone alias.
 # E.g.:
 #       1.postgres.coalregion.joyent.us-f8bd09a5
 #       {shardnum}.postgres.{region}.{dns_domain}-{instance_prefix}
 # from which (assuming always that shard="{shardnum}.moray"):
-#       shard=1.moray
-#       region=coalregion
+#       shard=1.moray.{region}.{dns_domain}
 targetAlias=$(vmadm get ${TARGET} | json -H alias)
-[[ ${targetAlias} =~ ^[0-9]+\.postgres\.[a-z-]+\. ]] \
+[[ ${targetAlias} =~ ^[0-9]+\.postgres\.[a-z\.-]+-[0-9a-f]+ ]] \
     || fatal "VM '${targetAlias}' does not look like a Manta postgres zone."
-shard=$(cut -d'.' -f1 <<<${targetAlias}).moray
-region=$(cut -d'.' -f3 <<<${targetAlias})
+shard=${targetAlias%-*}             # drop the trailing "-{instance_prefix}"
+shard=${shard/.postgres./.moray.}
 
-echo "Target is ${TARGET} (alias=${targetAlias}, shard=${shard}, region=${region})"
+echo "Target is ${TARGET} (alias=${targetAlias}, shard=${shard})"
 
 shortId=$(cut -d'-' -f1 <<<${TARGET})
 vmJson=$(vmadm get ${TARGET})
@@ -240,17 +239,17 @@ echo "--"
 
 echo ""
 echo "Copying snaplink listing to PWD ($PWD):"
-echo " - ${PWD}/${region}_${shard}_sherlock.tsv.gz"
-cp $zoneRoot/root/${shard}.manta_dump.gz ${region}_${shard}_sherlock.tsv.gz
+echo " - ${PWD}/${shard}_sherlock.tsv.gz"
+cp $zoneRoot/root/${shard}.manta_dump.gz ${shard}_sherlock.tsv.gz
 
 echo ""
 echo "* * *"
 echo "Successfully completed snaplink discovery."
 
 echo ""
-echo "Sherlock leftovers should eventually be removed (now or later):"
+echo "Sherlock leftovers the will be removed later in Step 3.6:"
 echo " - vmadm delete ${newVmUuid}"
 echo " - zfs destroy ${newSnapshotName}"
 
 echo ""
-echo "Copy '${region}_${shard}_sherlock.tsv.gz' back to '/var/db/snaplink-cleanup/discovery/' on the driver DC."
+echo "You should now copy '${shard}_sherlock.tsv.gz' back to '/var/db/snaplink-cleanup/discovery/' on the driver DC."
