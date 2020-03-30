@@ -224,5 +224,9 @@ confirm "Are you ready to proceed? (y/N) " || fail "aborted by user"
 
 
 # Deploy the rest
-
 manta-adm update --skip-verify-channel -y $mdl_conffile
+
+
+# Configure GC
+manta-adm gc gen-shard-assignment > $mdl_tmpdir/gc-shard-assignment.json
+manta-adm gc update $mdl_tmpdir/gc-shard-assignment.json

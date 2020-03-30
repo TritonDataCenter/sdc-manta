@@ -1,8 +1,17 @@
 # sdc-manta changelog
 
+# 1.7.0
+
+- Minio POC
+
+# 1.6.0
+
+- MANTA-5113 Add garbage-collector to developer coal/lab deployments using
+  `manta-deploy-dev`.
+
 # 1.5.2
 
-- XXX timf Add capability to deploy mantav2-minio instances
+- MANTA-4708 create tools for cleaning up snaplinks
 
 # 1.5.1
 
