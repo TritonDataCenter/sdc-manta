@@ -1,7 +1,7 @@
 {
     "name": "manta-deployment",
     "description": "Manta deployment configuration",
-    "version": "1.6.0",
+    "version": "1.6.1",
     "author": "Joyent (joyent.com)",
     "license": "MPL-2.0",
     "private": true,

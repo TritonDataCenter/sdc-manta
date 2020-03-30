@@ -1,5 +1,9 @@
 # sdc-manta changelog
 
+# 1.6.1
+
+- MANTA-5127 manta-init should check its command line arguments
+
 # 1.6.0
 
 - MANTA-5113 Add garbage-collector to developer coal/lab deployments using
