@@ -554,6 +554,8 @@ var pipelineFuncs = [
                 )
             );
         }
+        // Check that all of the user-supplied options are actually valid.
+        // optimist doesn't do this out of the box, which is a little sad.
         var providedOptions = Object.keys(ARGV);
         var unknownOptions = [];
         providedOptions.forEach(function(opt) {
