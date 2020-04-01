@@ -7,7 +7,7 @@
  */
 
 /*
- * Copyright 2019 Joyent, Inc.
+ * Copyright 2020 Joyent, Inc.
  */
 
 /*
@@ -30,7 +30,7 @@ var verror = require('verror');
 
 var Logger = require('bunyan');
 
-var sprintf = require('util').format;
+var sprints = require('util').format;
 
 var VError = verror.VError;
 
@@ -56,7 +56,7 @@ var state = {};
 
 optimist.usage('Usage:\tmanta-init -e <email>');
 
-var ARGV = optimist.options({
+var OPTIMIST_OPTIONS = {
     B: {
         alias: 'branch',
         describe:
@@ -91,7 +91,14 @@ var ARGV = optimist.options({
         describe: 'deployment size (i.e. coal, lab, production)',
         demand: false
     }
-}).argv;
+};
+var ARGV = optimist.options(OPTIMIST_OPTIONS).argv;
+
+var KNOWN_OPTIONS = [];
+Object.keys(OPTIMIST_OPTIONS).forEach(function(item) {
+    KNOWN_OPTIONS.push(item);
+    KNOWN_OPTIONS.push(OPTIMIST_OPTIONS[item].alias);
+});
 
 function usage(message) {
     if (message) {
@@ -261,7 +268,7 @@ function findLatestImage(service, cb) {
             return;
         }
         if (image === undefined) {
-            var msg = sprintf(
+            var msg = sprints(
                 'Unable to find an image (matching %s) for %s ' +
                     'on channel "%s"',
                 image_names.join(', '),
@@ -547,6 +554,24 @@ var pipelineFuncs = [
                 )
             );
         }
+        // Check that all of the user-supplied options are actually valid.
+        // optimist doesn't do this out of the box, which is a little sad.
+        var providedOptions = Object.keys(ARGV);
+        var unknownOptions = [];
+        providedOptions.forEach(function(opt) {
+            if (opt === '_') {
+                return;
+            } else if (opt.indexOf('$') === 0) {
+                return;
+            } else if (KNOWN_OPTIONS.indexOf(opt) === -1) {
+                unknownOptions.push(opt);
+            }
+        });
+        if (unknownOptions.length > 0) {
+            return cb(
+                new Error('unknown option(s): ' + unknownOptions.join(', '))
+            );
+        }
         return cb(null);
     },
 
@@ -743,36 +768,36 @@ var pipelineFuncs = [
         extra.metadata['SIZE'] = ARGV.s || 'lab';
 
         extra.metadata['DNS_DOMAIN'] = state.config.dns_domain;
-        extra.metadata['DOMAIN_NAME'] = sprintf(
+        extra.metadata['DOMAIN_NAME'] = sprints(
             '%s.%s',
             extra.metadata['REGION'],
             extra.metadata['DNS_DOMAIN']
         );
 
-        extra.metadata['MANTA_SERVICE'] = sprintf(
+        extra.metadata['MANTA_SERVICE'] = sprints(
             'manta.%s',
             extra.metadata['DOMAIN_NAME']
         );
-        extra.metadata['AUTH_SERVICE'] = sprintf(
+        extra.metadata['AUTH_SERVICE'] = sprints(
             'authcache.%s',
             extra.metadata['DOMAIN_NAME']
         );
-        extra.metadata['ELECTRIC_MORAY'] = sprintf(
+        extra.metadata['ELECTRIC_MORAY'] = sprints(
             'electric-moray.%s',
             extra.metadata['DOMAIN_NAME']
         );
-        extra.metadata['BUCKETS_MDPLACEMENT'] = sprintf(
+        extra.metadata['BUCKETS_MDPLACEMENT'] = sprints(
             'buckets-mdplacement.%s',
             extra.metadata['DOMAIN_NAME']
         );
         extra.metadata['POSEIDON_UUID'] = POSEIDON.uuid;
         extra.metadata['IMGAPI_SERVICE'] = url.format(state.IMGAPI.client.url);
-        extra.metadata['WORKFLOW_SERVICE'] = sprintf(
+        extra.metadata['WORKFLOW_SERVICE'] = sprints(
             'workflow.%s',
             extra.metadata['DOMAIN_NAME']
         );
 
-        extra.metadata['MANTA_URL'] = sprintf(
+        extra.metadata['MANTA_URL'] = sprints(
             'https://%s',
             extra.metadata['MANTA_SERVICE']
         );
@@ -837,7 +862,7 @@ var pipelineFuncs = [
             return;
         }
 
-        var keyfile = sprintf('/tmp/key.%d.rsa', process.pid);
+        var keyfile = sprints('/tmp/key.%d.rsa', process.pid);
         var pubfile = keyfile + '.pub';
 
         async.waterfall(
@@ -1125,7 +1150,7 @@ var pipelineFuncs = [
         vasync.forEachParallel(
             {
                 func: function(svcname, subcb) {
-                    var file = sprintf(
+                    var file = sprints(
                         '%s/../config/services/%s/service.json',
                         path.dirname(__filename),
                         svcname
