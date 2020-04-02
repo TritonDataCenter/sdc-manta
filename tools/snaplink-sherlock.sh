@@ -247,7 +247,7 @@ echo "* * *"
 echo "Successfully completed snaplink discovery."
 
 echo ""
-echo "Sherlock leftovers the will be removed later in Step 3.6:"
+echo "Sherlock leftovers the will be removed later in Step 3.7:"
 echo " - vmadm delete ${newVmUuid}"
 echo " - zfs destroy ${newSnapshotName}"
 
