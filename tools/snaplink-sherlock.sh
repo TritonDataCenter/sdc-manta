@@ -57,7 +57,7 @@ set -o xtrace
 # from which (assuming always that shard="{shardnum}.moray"):
 #       shard=1.moray.{region}.{dns_domain}
 targetAlias=$(vmadm get ${TARGET} | json -H alias)
-[[ ${targetAlias} =~ ^[0-9]+\.postgres\.[a-z\.-]+-[0-9a-f]+ ]] \
+[[ ${targetAlias} =~ ^[0-9]+\.postgres\.[a-z0-9\.-]+-[0-9a-f]+ ]] \
     || fatal "VM '${targetAlias}' does not look like a Manta postgres zone."
 shard=${targetAlias%-*}             # drop the trailing "-{instance_prefix}"
 shard=${shard/.postgres./.moray.}
