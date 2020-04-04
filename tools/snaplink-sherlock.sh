@@ -3,7 +3,7 @@
 # Copyright 2020 Joyent, Inc.
 #
 #
-# This program runs against a manatee VM
+# This program runs against a Manta postgres VM
 #
 #   snaplink-sherlock.sh <manatee VM UUID>
 #
@@ -20,7 +20,8 @@
 #      * reports the total number of lines, objects and SnapLinks seen
 #  * waits for completion of user-script
 #  * outputs a summary of the results
-#  * copies the result files to the $PWD
+#  * copies the result files to the $PWD:
+#       {shard}_sherlock.tsv.gz
 #
 # Once the program is complete, the resulting dump file can be collected and the
 # both the zone and snapshot should be deleted (otherwise they will be holding a
@@ -49,11 +50,19 @@ exec 4>>$xtrace_log
 BASH_XTRACEFD=4
 set -o xtrace
 
+# Parse the full moray shard out of the postgres zone alias.
+# E.g.:
+#       1.postgres.coalregion.joyent.us-f8bd09a5
+#       {shardnum}.postgres.{region}.{dns_domain}-{instance_prefix}
+# from which (assuming always that shard="{shardnum}.moray"):
+#       shard=1.moray.{region}.{dns_domain}
 targetAlias=$(vmadm get ${TARGET} | json -H alias)
-[[ ${targetAlias} =~ ^[0-9]+\.postgres\. ]] || fatal "VM '${targetAlias}' does not look like a Manta manatee zone."
-shard=$(cut -d'.' -f1 <<<${targetAlias})
+[[ ${targetAlias} =~ ^[0-9]+\.postgres\.[a-z0-9\.-]+-[0-9a-f]+ ]] \
+    || fatal "VM '${targetAlias}' does not look like a Manta postgres zone."
+shard=${targetAlias%-*}             # drop the trailing "-{instance_prefix}"
+shard=${shard/.postgres./.moray.}
 
-echo "Target is ${TARGET} (shard ${shard})..."
+echo "Target is ${TARGET} (alias=${targetAlias}, shard=${shard})"
 
 shortId=$(cut -d'-' -f1 <<<${TARGET})
 vmJson=$(vmadm get ${TARGET})
@@ -173,7 +182,7 @@ EOF
     "brand": "joyent-minimal",
     "cpu_cap": ${SURROGATE_CPU_CAP},
     "customer_metadata": {
-        "morayShard": "${shard}.moray"
+        "morayShard": "${shard}"
     },
     "delegate_dataset": true,
     "do_not_inventory": true,
@@ -220,21 +229,27 @@ echo "Waiting for user-script to complete..."
 while [[ ! -f ${zoneRoot}/root/manta_dump.done ]]; do
     sleep 1
 done
+echo "DONE (${zoneRoot}/root/manta_dump.done)"
 
-echo "Completed execution. Results:"
-
+echo ""
+echo "-- Results:"
 cat ${zoneRoot}/root/manta_dump.stderr
 ls -l ${zoneRoot}/root/
+echo "--"
 
 echo ""
-echo "Copying files to PWD ($PWD)"
-for file in $(find $zoneRoot/root/ -maxdepth 1 -type f -not -name "\.*"); do
-    filename=$(basename ${file})
-    echo " - ${file} => ${newVmUuid}.${filename}"
-    cp ${file} ${newVmUuid}.${filename}
-done
-echo ""
+echo "Copying snaplink listing to PWD ($PWD):"
+echo " - ${PWD}/${shard}_sherlock.tsv.gz"
+cp $zoneRoot/root/${shard}.manta_dump.gz ${shard}_sherlock.tsv.gz
 
-echo "When you're convinced this ran correctly, it is important that you do:"
-echo "  - vmadm delete ${newVmUuid}"
-echo "  - zfs destroy ${newSnapshotName}"
+echo ""
+echo "* * *"
+echo "Successfully completed snaplink discovery."
+
+echo ""
+echo "Sherlock leftovers the will be removed later in Step 3.7:"
+echo " - vmadm delete ${newVmUuid}"
+echo " - zfs destroy ${newSnapshotName}"
+
+echo ""
+echo "You should now copy '${shard}_sherlock.tsv.gz' back to '/var/db/snaplink-cleanup/discovery/' on the driver DC."
