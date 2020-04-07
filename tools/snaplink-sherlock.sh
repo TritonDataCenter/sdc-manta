@@ -44,7 +44,7 @@ function fatal {
 
 [[ -n ${TARGET} ]] || fatal "Usage: $0 <vm UUID>"
 
-xtrace_log="/tmp/snaplink-sherlock.$(date -u +%Y%m%dT%H%M%S).xtrace.log"
+xtrace_log="/var/tmp/snaplink-sherlock.$(date -u +%Y%m%dT%H%M%S).xtrace.log"
 echo "Writing xtrace output to: ${xtrace_log}" >&2
 exec 4>>$xtrace_log
 BASH_XTRACEFD=4
