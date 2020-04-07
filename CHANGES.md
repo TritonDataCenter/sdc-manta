@@ -1,5 +1,11 @@
 # sdc-manta changelog
 
+# 1.7.0
+
+- MANTA-5142, MANTA-5154 mantav2-migrate fixes.
+- MANTA-4874 Add 'mantav2-migrate snaplink-cleanup' command for driving
+  snaplink removal, a major part of mantav2 migration.
+
 # 1.6.1
 
 - MANTA-5127 manta-init should check its command line arguments
