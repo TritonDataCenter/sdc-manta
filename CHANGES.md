@@ -1,5 +1,10 @@
 # sdc-manta changelog
 
+# 1.7.1
+
+- MANTA-5154 'mantav2-migrate snaplink-cleanup' fix when there is a moray
+  index shard with no snaplinks.
+
 # 1.7.0
 
 - MANTA-5142, MANTA-5154 mantav2-migrate fixes.
