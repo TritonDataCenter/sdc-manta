@@ -195,12 +195,7 @@ esac
 set -o errexit
 
 
-# Deploy nameservice first
-#
-# Dev Note: I'm not sure this is required or helpful. `manta-adm update` will
-# ensure nameservice is setup first. Perhaps it should also wait to ensure
-# nameservice is up and working before proceeding.
-
+# Deploy nameservice first.
 genconfig_opts=
 if [[ -n "$mdl_servers" ]]; then
     genconfig_opts+=" -s $mdl_servers"
@@ -214,13 +209,45 @@ fi
 manta-adm genconfig $genconfig_opts $mdl_size > $mdl_conffile
 manta-adm update --skip-verify-channel -y $mdl_conffile nameservice
 
-set +o xtrace
-cat <<-EOF
-Nameservice zones deployed.  You should check that they came up properly
-by running "svcs -Zxv" in the global zone.  You should only proceed once
-those zones are up and running.
-EOF
-confirm "Are you ready to proceed? (y/N) " || fail "aborted by user"
+
+# Almost every other Manta service, unfortunately, depends on the Manta
+# nameservers to be working to setup. To test that the nameservice is "up", we
+# will attempt to resolve the nameservice instance(s) themselves via the
+# nameservice.
+#
+# Dev Note: Ideally, given this limitation, `manta-adm update ...` itself would
+# know to wait for the Manta nameservice to be online and happy before
+# proceeding with non-nameservice deployments.
+region_name=$(bash /lib/sdc/config.sh -json | json region_name)
+dns_domain=$(bash /lib/sdc/config.sh -json | json dns_domain)
+ns_domain=nameservice.$region_name.$dns_domain
+echo ""
+echo "Wait up to ~5 minutes for $ns_domain to come online"
+
+ns_ips=$(sdc-sapi /applications?name=manta | json -H 0.metadata.ZK_SERVERS | json -a host | sort)
+if [[ -n "$ns_ips" ]]; then
+    fail "could not determine nameservice IPs from metadata.ZK_SERVERS"
+fi
+ns_online=
+for i in {60..1}; do
+    sleep 5
+
+    # Every nameservice inst should resolve all nameservice IPs.
+    ns_failing=""
+    for ip in "$ns_ips"; do
+        resolved=$(dig +short @$ip $ns_domain | sort)
+        if [[ "$resolved" != "$ns_ips" ]]; then
+            echo "    [$(date -u "+%Y%m%dT%H%M%S")] 'dig +short @$ip $ns_domain' did not return all nameserver IPs: $resolved"
+            continue
+        fi
+    done
+
+    ns_online=yes
+    break
+done
+if [[ -z "$ns_online" ]]; then
+    fail "$ns_domain instances did not come online"
+fi
 
 
 # Deploy the rest
