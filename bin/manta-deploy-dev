@@ -214,13 +214,18 @@ fi
 manta-adm genconfig $genconfig_opts $mdl_size > $mdl_conffile
 manta-adm update --skip-verify-channel -y $mdl_conffile nameservice
 
-set +o xtrace
-cat <<-EOF
+if [[ "$mdl_override" == "true" ]]; then
+    echo "Wait 3m for the nameservice instances to come online."
+    sleep 180
+else
+    set +o xtrace
+    cat <<-EOF
 Nameservice zones deployed.  You should check that they came up properly
 by running "svcs -Zxv" in the global zone.  You should only proceed once
 those zones are up and running.
 EOF
-confirm "Are you ready to proceed? (y/N) " || fail "aborted by user"
+    confirm "Are you ready to proceed? (y/N) " || fail "aborted by user"
+fi
 
 
 # Deploy the rest
