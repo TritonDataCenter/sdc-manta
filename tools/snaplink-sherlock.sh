@@ -106,6 +106,7 @@ done
 
 cat > /var/tmp/filter.$$.js <<'EOFILTER'
 var assert = require('assert');
+var fs = require('fs');
 var readline = require('readline');
 var util = require('util');
 
@@ -115,7 +116,9 @@ var lineReader = readline.createInterface({
     terminal: false
 });
 
+var badObjectFile = '/root/manta_dump.badObjects';
 var inCopy = false;
+var numBadObjects = 0;
 var numLines = 0;
 var numSnapLinks = 0;
 var numObjects = 0;
@@ -144,7 +147,13 @@ lineReader.on('line', function _onLine(rawLine) {
                if (fields.length !== 12) {
                    assert.equal(fields.length, 13, 'Must have 12 or 13 fields');
                }
-               _value = JSON.parse(fields[3]);
+               try {
+                   _value = JSON.parse(fields[3]);
+               } catch (e) {
+                   numBadObjects++;
+                   fs.appendFileSync(badObjectFile, line + '\n');
+                   return;
+               }
 
                console.log(JSON.stringify({
                    storageIds: _value.sharks.map(function _m(obj) { return (obj.manta_storage_id); }),
@@ -157,7 +166,11 @@ lineReader.on('line', function _onLine(rawLine) {
        }
     }
 }).on('close', function() {
-    console.error(util.format('Lines: %d, SnapLinks: %d, Objects: %d', numLines, numSnapLinks, numObjects));
+    console.error(util.format('Lines: %d, SnapLinks: %d, Objects: %d, Bad Objects: %d', numLines, numSnapLinks, numObjects, numBadObjects));
+    if (numBadObjects > 0) {
+        console.error("Found bad SnapLink objects. You'll want to investigate those before you use the remaining data.");
+        console.error('Bad objects saved to: ' + badObjectFile);
+    }
     process.exit(0);
 });
 EOFILTER
@@ -166,6 +179,11 @@ EOFILTER
     | /usr/node/bin/node /var/tmp/filter.$$.js \
     | gzip > /root/${morayShard}.manta_dump.gz) 2>/root/manta_dump.stderr
 
+if [[ -f /root/manta_dump.badObjects ]]; then
+    echo "FAIL" > /root/manta_dump.fail
+    echo "Bad objects found. Manual investigation required before continuing." >&2
+    exit 1
+fi
 echo "DONE" > /root/manta_dump.done
 
 (sleep 2; halt -q) &
@@ -226,9 +244,15 @@ vmadm start ${newVmUuid}
 zoneRoot="/zones/${newVmUuid}/root"
 
 echo "Waiting for user-script to complete..."
-while [[ ! -f ${zoneRoot}/root/manta_dump.done ]]; do
+while [[ ! -f ${zoneRoot}/root/manta_dump.done && ! -f ${zoneRoot}/root/manta_dump.fail ]]; do
     sleep 1
 done
+
+if [[ -f ${zoneRoot}/root/manta_dump.fail ]]; then
+    echo "FAILED Manual investigation required."
+    exit 1
+fi
+
 echo "DONE (${zoneRoot}/root/manta_dump.done)"
 
 echo ""
