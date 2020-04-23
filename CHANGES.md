@@ -1,5 +1,11 @@
 # sdc-manta changelog
 
+# 1.7.2
+
+- MANTA-5206 On Manta's more than 7 years old, it is possible to have
+  snaplinks that surprised "delink" script generation in the
+  'mantav2-migrate snaplink-cleanup' command. This is fixed now.
+
 # 1.7.1
 
 - MANTA-5154 'mantav2-migrate snaplink-cleanup' fix when there is a moray
