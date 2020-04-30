@@ -1,6 +1,6 @@
 {
 	"params": {
 		"ram": 16384,
-                "quota": 100
+		"quota": 100
 	}
 }
