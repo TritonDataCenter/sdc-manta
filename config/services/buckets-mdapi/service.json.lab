@@ -1,5 +1,8 @@
 {
 	"params": {
 		"ram": 1024
+	},
+	"metadata": {
+		"BUCKETS_MDAPI_CUEBALL_MAX_CONNECTIONS": 16
 	}
 }
