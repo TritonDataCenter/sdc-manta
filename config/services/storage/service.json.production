@@ -2,8 +2,5 @@
 	"params": {
 		"cpu_shares": 2048,
 		"ram": 8192
-	},
-	"metadata": {
-		"STORAGE_MAX_TOMBSTONE_DIRECTORIES": 21
 	}
 }
