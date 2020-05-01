@@ -4,6 +4,6 @@
 		"ram": 256
 	},
 	"metadata": {
-		"MORAY_MAX_PG_CONNS": 16
+		"BUCKETS_MDAPI_CUEBALL_MAX_CONNECTIONS": 32
 	}
 }

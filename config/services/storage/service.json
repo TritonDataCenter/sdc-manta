@@ -1,11 +1,8 @@
 {
 	"params": {
 		"networks": [ "manta", "admin" ],
-		"ram": 256,
+		"ram": 512,
 		"quota": 0,
 		"zfs_io_priority": 0
-	},
-	"metadata": {
-		"STORAGE_MAX_TOMBSTONE_DIRECTORIES": 21
 	}
 }
