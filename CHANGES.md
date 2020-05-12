@@ -1,5 +1,10 @@
 # sdc-manta changelog
 
+# 1.7.3
+
+- MANTA-5252 Fix `mantav2-migrate snaplink-cleanup` to work with rack-aware
+  networking (RAN) usage on webapi instances.
+
 # 1.7.2
 
 - MANTA-5206 On Manta's more than 7 years old, it is possible to have
