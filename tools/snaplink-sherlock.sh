@@ -88,15 +88,22 @@ set -o pipefail
 
 export PATH=/usr/local/sbin:/usr/local/bin:/opt/local/sbin:/opt/local/bin:/usr/sbin:/usr/bin:/sbin
 
-svccfg delete svc:/network/physical:default
+[[ -n $(svcs -a | grep svc:/network/physical:default) ]] && svccfg delete svc:/network/physical:default
 hostname $(mdata-get sdc:alias)
 
 morayShard=$(mdata-get morayShard)
 dataDir=/zones/$(zonename)/data
 pgVersion=$(json current < ${dataDir}/manatee-config.json)
-groupadd -g 907 postgres && useradd -u 907 -g postgres postgres
+[[ -z $(grep "postgres::907" /etc/group) ]] && groupadd -g 907 postgres && useradd -u 907 -g postgres postgres
+
 mkdir -p /var/pg
 chown -R postgres:postgres /var/pg
+
+# disable autovacuum and ensure we're not going to try to recover from a sync
+grep -v "^autovacuum = " ${dataDir}/data/postgresql.conf > ${dataDir}/data/postgresql.conf.new
+echo "autovacuum = off" >> ${dataDir}/data/postgresql.conf
+[[ -f ${dataDir}/data/recovery.conf ]] && mv ${dataDir}/data/recovery.conf ${dataDir}/data/recovery.conf.disabled
+
 sudo -u postgres -g postgres /opt/postgresql/${pgVersion}/bin/postgres -D ${dataDir}/data &
 
 # XXX forever?!
