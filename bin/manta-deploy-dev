@@ -211,36 +211,46 @@ manta-adm update --skip-verify-channel -y $mdl_conffile nameservice
 
 
 # Almost every other Manta service, unfortunately, depends on the Manta
-# nameservers to be working to setup. To test that the nameservice is "up", we
-# will attempt to resolve the nameservice instance(s) themselves via the
-# nameservice.
+# nameservers to be working to setup.
+#
+# To test that the nameservice is "up", we will attempt to resolve the
+# nameservice instance(s) themselves via the nameservice. We do this by
+# running:
+#   dig +short @$(mdata-get sdc:nics | json 0.ip) nameservice.$region.$domain
+# in each nameservice zone. We run in the nameservice zones, because those are
+# currently the only VMs with a nic on the "manta" network.
 #
 # Dev Note: Ideally, given this limitation, `manta-adm update ...` itself would
 # know to wait for the Manta nameservice to be online and happy before
 # proceeding with non-nameservice deployments.
-region_name=$(bash /lib/sdc/config.sh -json | json region_name)
-dns_domain=$(bash /lib/sdc/config.sh -json | json dns_domain)
+region_name=$(json -f /opt/smartdc/manta-deployment/etc/config.json region_name)
+dns_domain=$(json -f /opt/smartdc/manta-deployment/etc/config.json dns_domain)
 ns_domain=nameservice.$region_name.$dns_domain
 echo ""
 echo "Wait up to ~5 minutes for $ns_domain to come online"
 
-ns_ips=$(sdc-sapi /applications?name=manta | json -H 0.metadata.ZK_SERVERS | json -a host | sort)
-if [[ -n "$ns_ips" ]]; then
+sapi_url=$(json -f /opt/smartdc/manta-deployment/etc/config.json sapi.url)
+ns_ips=$(curl -sS --connect-timeout 5 -H accept:application/json $sapi_url/applications?name=manta | json -H 0.metadata.ZK_SERVERS | json -a host | sort | tr "\n" ",")
+if [[ -z "$ns_ips" ]]; then
     fail "could not determine nameservice IPs from metadata.ZK_SERVERS"
 fi
 ns_online=
-for i in {60..1}; do
-    sleep 5
+for i in {0..59}; do
+    resolutions=$(manta-oneach -J -s nameservice \
+        "dig +short @\$(mdata-get sdc:nics | json 0.ip) $ns_domain | sort | tr '\n' ','" \
+        | json -ga zonename result.stdout)
 
-    # Every nameservice inst should resolve all nameservice IPs.
-    ns_failing=""
-    for ip in "$ns_ips"; do
-        resolved=$(dig +short @$ip $ns_domain | sort)
-        if [[ "$resolved" != "$ns_ips" ]]; then
-            echo "    [$(date -u "+%Y%m%dT%H%M%S")] 'dig +short @$ip $ns_domain' did not return all nameserver IPs: $resolved"
-            continue
+    incorrect_insts=$(echo "$resolutions" | while read inst result; do
+        if [[ "$result" != "$ns_ips" ]]; then
+            echo "    [$(date -u "+%Y%m%dT%H%M%S")] 'dig +short @MANTA_IP $ns_domain' on nameservice $inst did not return all nameserver IPs: $result != $ns_ips" >&2
+            echo "$inst"
         fi
-    done
+    done)
+    if [[ -n "$incorrect_insts" ]]; then
+        echo "    Retrying in 5s (attempt $i)"
+        sleep 5
+        continue
+    fi
 
     ns_online=yes
     break
