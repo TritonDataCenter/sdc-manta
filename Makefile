@@ -97,6 +97,9 @@ BUILDIMAGE_DESC	= Manta deployment tools
 BUILDIMAGE_PKGSRC = openldap-client-2.4.44nb2
 AGENTS		= amon config
 
+# For mantav1, specify the branch to compare copyrights with
+ENGBLD_CHECK_COPYRIGHT_ARGS = -b mantav1
+
 #
 # Packaging variables
 #
