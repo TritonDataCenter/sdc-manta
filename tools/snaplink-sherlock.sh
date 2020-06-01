@@ -34,7 +34,10 @@ set -o errexit
 set -o pipefail
 
 SURROGATE_CPU_CAP=400
-SURROGATE_QUOTA=100
+# Disk quota: 100G proved insufficient in SPC, use 1000G.
+# Warning: If this exceeds available disk on this server, this process could
+# potentially run the zpool out of space.
+SURROGATE_QUOTA=1000
 TARGET=$1
 
 function fatal {
