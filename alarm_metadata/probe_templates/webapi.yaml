@@ -26,7 +26,7 @@
             config:
                 path: "/var/log/muskie.log"
                 fields:
-                    level: ERROR
+                    res.statusCode: 500
                 threshold: 1
                 period: 60
     ka:

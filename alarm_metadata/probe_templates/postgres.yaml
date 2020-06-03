@@ -25,7 +25,7 @@
             type: disk-usage
             config:
                 path: "/manatee/pg"
-                threshold: "20%"
+                threshold: "10%"
                 interval: 3600
     ka:
         title: Database filesystem almost full
@@ -116,33 +116,6 @@
             There is no immediate impact, but this service is required for
             Manatee rebuilds, which are necessary to restore fault tolerance
             after a takeover event.
-        action: >-
-            Determine the scope of the problem based on the log message and
-            resolve the underlying issue.
-
--
-    event: upset.manta.postgres.pg_dump.log_error
-    legacyName: "pg_dump-logscan"
-    scope:
-        service: postgres
-    checks:
-        -
-            type: log-scan
-            config:
-                path: "/var/log/manatee/pgdump.log"
-                match:
-                    pattern: fatal
-                threshold: 1
-                period: 60
-    ka:
-        title: '"pg_dump" logged an error'
-        description: The "pg_dump" service has logged an error.
-        severity: major
-        response: No automated response will be taken.
-        impact: >-
-            The daily backup for this metadata shard may be missing.  As a
-            result, the garbage collection, auditing, and metering pipelines may
-            not have completed.
         action: >-
             Determine the scope of the problem based on the log message and
             resolve the underlying issue.
