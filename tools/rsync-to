@@ -54,7 +54,8 @@ rsync -av ${TOP}/ \
     --exclude .git/ \
     --exclude .history/ \
     --exclude /boot/ \
-    --exclude /deps/
+    --exclude /deps/ \
+    --exclude /tmp/
 
 # Getting catest and test/ into the manta-deployment zone allows us to
 # run the test suite there.
