@@ -24,7 +24,7 @@
         -
             type: bunyan-log-scan
             config:
-                path: "/var/log/muskie.log"
+                smfServiceName: muskie
                 fields:
                     res.statusCode: 500
                 threshold: 1
