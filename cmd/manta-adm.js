@@ -2645,4 +2645,5 @@ function fatal(msg) {
 }
 
 cmdutil.exitOnEpipe();
-cmdln.main(MantaAdm);
+var cli = new MantaAdm();
+cmdln.main(cli, {finale: 'exit'});

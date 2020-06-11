@@ -1,5 +1,9 @@
 # sdc-manta changelog
 
+# 1.8.0
+
+- MANTA-5293 Add `manta-hotpatch-rebalancer-agent` tool.
+
 # 1.7.3
 
 - MANTA-5252 Fix `mantav2-migrate snaplink-cleanup` to work with rack-aware
