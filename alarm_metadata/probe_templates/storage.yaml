@@ -5,7 +5,7 @@
 #
 
 #
-# Copyright 2019 Joyent, Inc.
+# Copyright 2020 Joyent, Inc.
 #
 
 #
@@ -26,7 +26,7 @@
             config:
                 smfServiceName: minnow
                 fields:
-                    level: ERROR
+                    res.statusCode: 500
                 threshold: 1
                 period: 60
     ka:
@@ -53,7 +53,7 @@
             config:
                 cmd: "/bin/bash -c 'if [[ -f /opt/smartdc/minnow/bin/check-minnow ]]; then /opt/smartdc/minnow/bin/check-minnow; exit $?; fi; let delta=$(date +%s)-$(PATH=/opt/smartdc/minnow/build/node/bin:/opt/smartdc/minnow/node_modules/.bin:$PATH findobjects -h $(cat /opt/smartdc/minnow/etc/config.json | json moray.host) manta_storage hostname=$(hostname)* | json -e _mtime=_mtime/1000 -e _mtime=~~_mtime _mtime) ; test $delta -lt 900'"
                 threshold: 3
-                period: 300
+                period: 1500
                 timeout: 30
     ka:
         title: Storage zone heartbeat is too old
@@ -119,7 +119,7 @@
             type: disk-usage
             config:
                 path: "/manta"
-                threshold: "15%"
+                threshold: "3%"
                 interval: 3600
     ka:
         title: Storage filesystem almost full
