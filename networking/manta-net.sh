@@ -824,11 +824,14 @@ function handle_manta_nics
 #
 function update_headnode_netboot_config
 {
+	local usbkey_status
+
 	if /usr/lib/sdc/net-boot-config --enabled; then
-		sdc-usbkey mount
+		usbkey_status=$(sdc-usbkey status)
+		[[ "$usbkey_status" == "mounted" ]] || sdc-usbkey mount
 		sdc-login -l dhcpd /opt/smartdc/booter/bin/hn-netfile \
 		    > /mnt/usbkey/boot/networking.json
-		sdc-usbkey unmount
+		[[ "$usbkey_status" == "mounted" ]] || sdc-usbkey unmount
 		warn "Successfully updated /mnt/usbkey/boot/networking.json"
 	else
 		warn "No need to update networking.json (not using fabrics)"
