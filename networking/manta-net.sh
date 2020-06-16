@@ -6,7 +6,7 @@
 #
 
 #
-# Copyright 2019 Joyent, Inc.
+# Copyright 2020 Joyent, Inc.
 #
 
 #
@@ -818,6 +818,27 @@ function handle_manta_nics
 }
 
 #
+# If this Triton is setup to use net-boot config (i.e. networking.json, fabics)
+# then we must update /mnt/usbkey/boot/networking.json with the manta
+# nic tag info.
+#
+function update_headnode_netboot_config
+{
+	local usbkey_status
+
+	if /usr/lib/sdc/net-boot-config --enabled; then
+		usbkey_status=$(sdc-usbkey status)
+		[[ "$usbkey_status" == "mounted" ]] || sdc-usbkey mount
+		sdc-login -l dhcpd /opt/smartdc/booter/bin/hn-netfile \
+		    > /mnt/usbkey/boot/networking.json
+		[[ "$usbkey_status" == "mounted" ]] || sdc-usbkey unmount
+		warn "Successfully updated /mnt/usbkey/boot/networking.json"
+	else
+		warn "No need to update networking.json (not using fabrics)"
+	fi
+}
+
+#
 # resolve_path: given a relative path name, resolve it to a full path.
 #
 function resolve_path
@@ -914,6 +935,9 @@ add_tags 'manta' 'manta_nodes' || fatal "failed to add manta nic tag to CNs"
 
 setup_output_dir || fatal "failed to setup output directory"
 allocate_manta_ips || fatal "failed to allocate ips for manta nics for GZs"
+
+update_headnode_netboot_config \
+    || fatal "failed to update headnode networking.json"
 
 if [[ "$mn_distribute_svcs" == "true" ]]; then
 	handle_manta_nics || fatal "failed to create and setup manta nics" \
