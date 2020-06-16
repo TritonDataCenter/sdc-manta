@@ -5,7 +5,7 @@
 #
 
 #
-# Copyright 2019 Joyent, Inc.
+# Copyright 2020 Joyent, Inc.
 #
 
 #
@@ -56,6 +56,7 @@ PROBE_FILES	 = $(wildcard alarm_metadata/probe_templates/*.yaml)
 SMF_MANIFESTS	= networking/smf/manta-nic.xml \
 		  networking/smf/xdc-route.xml
 
+ENGBLD_CHECK_COPYRIGHT_ARGS = -b mantav1
 ENGBLD_USE_BUILDIMAGE	= true
 ENGBLD_REQUIRE		:= $(shell git submodule update --init deps/eng)
 include ./deps/eng/tools/mk/Makefile.defs
