@@ -6,11 +6,7 @@
  */
 
 /*
- * Copyright 2019 Joyent, Inc.
- */
-
-/*
- * manta-shardadm.js: CLI tool for SAPI
+ * Copyright 2020 Joyent, Inc.
  */
 
 var cmdln = require('cmdln');
@@ -243,4 +239,4 @@ function addSuffix(str, suffix) {
 }
 
 var cli = new Shardadm();
-cmdln.main(cli);
+cmdln.main(cli, {finale: 'exit'});

@@ -5,7 +5,7 @@
 -->
 
 <!--
-    Copyright 2019 Joyent, Inc.
+    Copyright 2020 Joyent, Inc.
 -->
 
 # sdc-manta
@@ -61,23 +61,27 @@ Directories specific to this repo include:
 
 # Development
 
-It's convenient during development and testing to set up your PATH to include
-the Node.js executables and other commands provided by this repository.  You can
-do that with:
-
-    source env.sh
-
 Before committing and pushing a change, run:
 
     make prepush
 
-and if warranted, get a code review.
+`make prepush` will run the test suite, which requires (a) being on SmartOS
+and (b) having a filled in "etc/config.json" (manually created from
+"sapi\_manifests/manta/template" or copied from a deployed manta0 zone).
 
-`make prepush` will run the test suite.  For this to work, you'll need to have a
-configuration file in etc/config.json.  The easiest way to create one is to copy
-the template in sapi\_manifests/manta/template and fill in the details for your
-environment, or else copy the configuration file directly out of a deployed
-sdc-manta zone in your environment.
+An alternative to run the test suite is to:
+
+1. run `make prepush` on your Mac (ignoring the test failures); and
+
+2. sync your local changes to a deployed `manta0` zone (e.g. in COAL) and test
+   there. This can be done as follows:
+
+        ./tools/rsync-to $HEADNODE   # e.g. ./tools/rsync-to root@10.99.99.7
+        ssh $HEADNODE
+        sdc-login -l manta
+        cd /opt/smartdc/manta-deployment
+        pkgin in -y make
+        make test
 
 
 ## Adding a new Manta service

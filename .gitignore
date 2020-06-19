@@ -12,3 +12,4 @@ proto/
 manta-deployment-pkg-*
 /webrev
 abandoned
+.DS_Store

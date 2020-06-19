@@ -4,7 +4,7 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 #
-# Copyright 2019 Joyent, Inc.
+# Copyright 2020 Joyent, Inc.
 #
 
 #
@@ -54,7 +54,8 @@ rsync -av ${TOP}/ \
     --exclude .git/ \
     --exclude .history/ \
     --exclude /boot/ \
-    --exclude /deps/
+    --exclude /deps/ \
+    --exclude /tmp/
 
 # Getting catest and test/ into the manta-deployment zone allows us to
 # run the test suite there.
