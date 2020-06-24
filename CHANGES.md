@@ -1,5 +1,9 @@
 # sdc-manta changelog
 
+# 1.8.1
+
+- MANTA-5325 Fix `manta-hotpatch-rebalancer-agent` to work in a multi-DC Manta.
+
 # 1.8.0
 
 - MANTA-5293 Add `manta-hotpatch-rebalancer-agent` tool.
