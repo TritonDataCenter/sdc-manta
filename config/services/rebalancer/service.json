@@ -2,6 +2,6 @@
 	"params": {
 		"networks": [ "manta", "admin" ],
 		"ram": 1024,
-		"delegated_dataset": true
+		"delegate_dataset": true
 	}
 }
