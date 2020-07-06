@@ -1,6 +1,6 @@
 {
 	"params": {
 		"networks": [ "manta", "admin" ],
-		"ram": 512
+		"ram": 1024
 	}
 }
