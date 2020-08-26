@@ -1,6 +1,7 @@
 {
 	"params": {
-		"ram": 4096,
-		"max_lwps": 10000
+		"ram": 65536,
+		"quota": 1000,
+		"max_lwps": 65536
 	}
 }
