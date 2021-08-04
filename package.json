@@ -29,7 +29,7 @@
         "sdc-clients": "13.0.1",
         "strsplit": "^1.0.0",
         "tab": "1.0.0",
-        "tar": "2.2.2",
+        "tar": "4.4.15",
         "triton-netconfig": "1.4.0",
         "ufds": "1.6.0",
         "urclient": "1.2.1",
