@@ -67,8 +67,8 @@ NODE_PREBUILT_VERSION=v0.10.48
 # that it ships are often executed from the GZ, so we need to ship a runtime
 # that is able to run in the GZ.
 NODE_PREBUILT_TAG=gz
-# sdc-minimal-multiarch-lts 15.4.1
-NODE_PREBUILT_IMAGE=18b094b0-eb01-11e5-80c1-175dac7ddf02
+# sdc-minimal-multiarch-lts 18.4.0
+NODE_PREBUILT_IMAGE=c2c31b00-1d60-11e9-9a77-ff9f06554b0f
 
 ifeq ($(shell uname -s),SunOS)
 	include ./deps/eng/tools/mk/Makefile.node_prebuilt.defs
