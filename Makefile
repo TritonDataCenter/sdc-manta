@@ -5,7 +5,7 @@
 #
 
 #
-# Copyright 2019 Joyent, Inc.
+# Copyright 2021 Joyent, Inc.
 #
 
 #
@@ -57,6 +57,7 @@ SMF_MANIFESTS	= networking/smf/manta-nic.xml \
 		  networking/smf/xdc-route.xml
 
 ENGBLD_USE_BUILDIMAGE	= true
+ENGBLD_CHECK_COPYRIGHT_ARGS = -b mantav1
 ENGBLD_REQUIRE		:= $(shell git submodule update --init deps/eng)
 include ./deps/eng/tools/mk/Makefile.defs
 TOP ?= $(error Unable to access eng.git submodule Makefiles.)
