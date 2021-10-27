@@ -32,7 +32,7 @@ pipeline {
 
     post {
         always {
-            joyMattermostNotification()
+            joySlackNotifications(channel: 'jenkins')
         }
     }
 }
