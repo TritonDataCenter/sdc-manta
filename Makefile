@@ -94,7 +94,7 @@ RELEASE_TARBALL := $(NAME)-pkg-$(STAMP).tar.gz
 BASE_IMAGE_UUID = 502eeef2-8267-489f-b19c-a206906f57ef
 BUILDIMAGE_NAME = mantav2-deployment
 BUILDIMAGE_DESC	= Manta deployment tools
-BUILDIMAGE_PKGSRC = openldap-client-2.4.47
+BUILDIMAGE_PKGSRC = openldap-client-2.6.0
 AGENTS		= amon config
 
 #
