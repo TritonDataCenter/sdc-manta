@@ -5,7 +5,7 @@
  */
 
 /*
- * Copyright 2019 Joyent, Inc.
+ * Copyright 2022 Joyent, Inc.
  */
 
 /*
@@ -536,9 +536,9 @@ function generateTestCases() {
             objtype: 'alarm',
             input: input,
             errmsg: new RegExp(
-                'property \"faults\\[0\\].event.' +
+                'property "faults\\[0\\].event.' +
                     prop +
-                    '\": \\[object object\\] - object value found, but .* required'
+                    '": \\[object object\\] - object value found, but .* required'
             )
         });
     });
@@ -660,7 +660,9 @@ function generateTestCases() {
             objtype: 'probegroup',
             input: input,
             errmsg: new RegExp(
-                'property "' + prop + '": 37 - number value found, but.* is required'
+                'property "' +
+                    prop +
+                    '": 37 - number value found, but.* is required'
             )
         });
     });
