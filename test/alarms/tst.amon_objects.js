@@ -5,7 +5,7 @@
  */
 
 /*
- * Copyright 2019 Joyent, Inc.
+ * Copyright 2022 Joyent, Inc.
  */
 
 /*
@@ -367,7 +367,7 @@ function generateTestCases() {
         name: 'alarm: bad "id"',
         objtype: 'alarm',
         input: input,
-        errmsg: /^property "id": string value found.*integer.*required$/
+        errmsg: /^property "id": one-two-three - string value found.*integer.*required$/
     });
 
     input = jsprim.deepCopy(validAlarm);
@@ -514,7 +514,7 @@ function generateTestCases() {
             errmsg: new RegExp(
                 'property "faults\\[0\\].' +
                     prop +
-                    '": number value found.*required'
+                    '": 17 - number value found.*required'
             )
         });
     });
@@ -538,7 +538,7 @@ function generateTestCases() {
             errmsg: new RegExp(
                 'property "faults\\[0\\].event.' +
                     prop +
-                    '": object value found, but .* required'
+                    '": \\[object object\\] - object value found, but .* required'
             )
         });
     });
@@ -660,7 +660,9 @@ function generateTestCases() {
             objtype: 'probegroup',
             input: input,
             errmsg: new RegExp(
-                'property "' + prop + '": number value found, but.* is required'
+                'property "' +
+                    prop +
+                    '": 37 - number value found, but.* is required'
             )
         });
     });
@@ -763,7 +765,7 @@ function generateTestCases() {
             objtype: 'probe',
             input: input,
             errmsg: new RegExp(
-                'property "' + prop + '": number.*found.*required'
+                'property "' + prop + '": 37 - number.*found.*required'
             )
         });
     });
@@ -916,7 +918,7 @@ function generateTestCases() {
             objtype: 'window',
             input: input,
             errmsg: new RegExp(
-                'property "' + prop + '": string value found.*required'
+                'property "' + prop + '": asdf - string value found.*required'
             )
         });
     });

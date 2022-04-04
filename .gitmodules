@@ -1,6 +1,6 @@
 [submodule "deps/restdown"]
 	path = deps/restdown
-	url = https://github.com/trentm/restdown.git
+	url = https://github.com/joyent/restdown.git
 [submodule "deps/sdc-scripts"]
 	path = deps/sdc-scripts
 	url = https://github.com/joyent/sdc-scripts.git

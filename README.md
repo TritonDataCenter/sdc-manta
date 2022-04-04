@@ -5,7 +5,7 @@
 -->
 
 <!--
-    Copyright 2020 Joyent, Inc.
+    Copyright 2022 Joyent, Inc.
 -->
 
 # sdc-manta
@@ -80,9 +80,7 @@ An alternative to run the test suite is to:
         ssh $HEADNODE
         sdc-login -l manta
         cd /opt/smartdc/manta-deployment
-        pkgin in -y make
-        make test
-
+        ./deps/catest -a
 
 ## Adding a new Manta service
 
