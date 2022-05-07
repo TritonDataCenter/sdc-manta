@@ -1,6 +1,0 @@
-{
-	"params": {
-		"networks": [ "manta", "admin" ],
-		"ram": 2048
-	}
-}

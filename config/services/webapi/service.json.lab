@@ -1,8 +1,0 @@
-{
-	"params": {
-		"ram": 1536
-	},
-	"metadata": {
-		"MUSKIE_DEFAULT_MAX_STREAMING_SIZE_MB": 5120
-	}
-}

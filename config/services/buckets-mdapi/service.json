@@ -1,9 +1,0 @@
-{
-	"params": {
-		"networks": [ "manta", "admin" ],
-		"ram": 256
-	},
-	"metadata": {
-		"BUCKETS_MDAPI_CUEBALL_MAX_CONNECTIONS": 32
-	}
-}
