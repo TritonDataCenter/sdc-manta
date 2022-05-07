@@ -1,1 +1,0 @@
-manta-deploy-dev.md
