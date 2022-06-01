@@ -12,7 +12,7 @@
                 "url": "http://{{{IMGAPI_SERVICE}}}"
         },
         "remote_imgapi": {
-                "url": "https://updates.joyent.com"
+                "url": "https://updates.tritondatacenter.com"
         },
         "napi": {
                 "url": "http://{{{NAPI_SERVICE}}}"

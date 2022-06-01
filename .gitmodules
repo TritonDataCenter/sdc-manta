@@ -1,12 +1,12 @@
 [submodule "deps/restdown"]
 	path = deps/restdown
-	url = https://github.com/joyent/restdown.git
+	url = https://github.com/TritonDataCenter/restdown.git
 [submodule "deps/sdc-scripts"]
 	path = deps/sdc-scripts
-	url = https://github.com/joyent/sdc-scripts.git
+	url = https://github.com/TritonDataCenter/sdc-scripts.git
 [submodule "deps/catest"]
 	path = deps/catest
-	url = https://github.com/joyent/catest
+	url = https://github.com/TritonDataCenter/catest
 [submodule "deps/eng"]
 	path = deps/eng
-	url = https://github.com/joyent/eng.git
+	url = https://github.com/TritonDataCenter/eng.git

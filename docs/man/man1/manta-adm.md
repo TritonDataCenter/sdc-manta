@@ -1,4 +1,4 @@
-# MANTA-ADM 1 "2020" Manta "Manta Operator Commands"
+# MANTA-ADM 1 "2022" Manta "Manta Operator Commands"
 
 ## NAME
 
@@ -25,7 +25,6 @@ manta-adm - administer a Manta deployment
 `manta-adm zk list [-l LOG_FILE] [-H] [-o FIELD...]`
 
 `manta-adm zk fixup [-l LOG_FILE] [-n] [-y]`
-
 
 ## DESCRIPTION
 
@@ -116,11 +115,10 @@ Services that are part of the Manta application include:
   Stores actual object data
 
 **storinfo**
-  Service that provides view of storage node utilization. 
+  Service that provides view of storage node utilization.
 
 **webapi**
   Handles end user API requests
-
 
 These services are described in much more detail in the Manta Operator's Guide.
 
@@ -171,7 +169,6 @@ The output for any other commands may change at any time.  The `manta-adm alarm`
 subcommand is still considered an experimental interface.  All other documented
 subcommands, options, and arguments are committed, and you can use the exit
 status of the program to determine success or failure.
-
 
 ## SUBCOMMANDS
 
@@ -315,7 +312,6 @@ As mentioned above, this command attempts to separately close each of the
 specified alarms.  It's possible for some of the specified alarms to be closed
 even if others were not.
 
-
 `manta-adm alarm config probegroup list [-H] [-o FIELD...]`
 
 List configured probe groups in tabular form.  This is primarily useful in
@@ -343,12 +339,12 @@ groups.
 This is the primary tool for updating the set of deployed probes and probe
 groups.  Operators would typically use this command:
 
-- during initial deployment to deploy probes and probe groups
-- after deploying (or undeploying) any Manta components to deploy (or remove)
+* during initial deployment to deploy probes and probe groups
+* after deploying (or undeploying) any Manta components to deploy (or remove)
   probes related to the affected components
-- after updating the `manta-adm` tool itself, which bundles the probe
+* after updating the `manta-adm` tool itself, which bundles the probe
   definitions, to deploy any new or updated probes
-- at any time to verify that the configuration matches what's expected
+* at any time to verify that the configuration matches what's expected
 
 This operation is idempotent.
 
@@ -504,7 +500,6 @@ command controls whether notifications are enabled for the specified alarms.
 Summarize open alarms.  For each alarm, use the `manta-adm alarm details`
 subcommand to view more information about it.
 
-
 ### "cn" subcommand
 
 `manta-adm cn [-l LOG_FILE] [-H] [-o FIELD...] [-n] [-s] [CN_FILTER]`
@@ -628,7 +623,6 @@ Each element of `servers` is an object with properties:
 See the Manta Operator's Guide for a more complete discussion of sizing and
 laying out Manta services.
 
-
 ### "show" subcommand
 
 `manta-adm show [-l LOG_FILE] [-a] [-c] [-H] [-o FIELD...] [-s] SERVICE`
@@ -712,7 +706,6 @@ Example: show only postgres zones in the current datacenter
 
     # manta-adm show postgres
 
-
 ### "update" subcommand
 
 `manta-adm update [-l LOG_FILE] [-n] [-y] [-C CHANNEL] [--no-reprovision] [--skip-verify-channel] FILE [SERVICE]`
@@ -743,9 +736,10 @@ options described above, plus:
 
 `-C CHANNEL, --channel CHANNEL`
   When upgrading, verify that the images being provisioned or reprovisioned
-  are present on the "remote" (usually https://updates.joyent.com) imgapi
-  channel passed as the `CHANNEL` argument. The default is to use the imgapi
-  channel that was set on the headnode using the `sdcadm channel` command.
+  are present on the "remote" (usually <https://updates.tritondatacenter.com>)
+  imgapi   channel passed as the `CHANNEL` argument. The default is to use the
+  imgapi   channel that was set on the headnode using the `sdcadm channel`
+  command.
 
 `--no-reprovision`
   When upgrading a zone, always provision a new zone and deprovision the
@@ -823,7 +817,6 @@ Example: update only "moray" instances to the configuration in `newconfig.json`:
 
     # manta-adm update newconfig.json moray
 
-
 ### "zk" subcommand
 
 `manta-adm zk list [-l LOG_FILE] [-H] [-o FIELD...]`
@@ -850,7 +843,6 @@ ordinal number of each server), "datacenter", "zoneabbr", "zonename", "ip", and
 The `manta-adm zk fixup` command supports the `-l/--log_file`, `-n/--dryrun`,
 and `-y/--confirm` options described above.
 
-
 ## EXIT STATUS
 
 `0`
@@ -862,10 +854,9 @@ and `-y/--confirm` options described above.
 `2`
   The command-line options were not valid.
 
-
 ## COPYRIGHT
 
-Copyright 2020 Joyent, Inc.
+Copyright 2022 MNX Cloud, Inc.
 
 ## SEE ALSO
 

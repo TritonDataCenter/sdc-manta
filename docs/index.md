@@ -10,16 +10,17 @@ markdown2extras: tables, code-friendly
 
 <!--
     Copyright (c) 2014, Joyent, Inc.
+    Copyright 2022 MNX Cloud, Inc.
 -->
 
 # Manta Deployment
 
 This repository contains the manta deployment tools.  These tools use SAPI (see
-http://github.com/joyent/sdc-sapi) to deploy and configure the manta object
-storage service.  This document assumes familiarity with the SAPI object model,
-so go read the SAPI docs if you haven't already.
+http://github.com/TritonDataCenter/sdc-sapi) to deploy and configure the manta
+object storage service.  This document assumes familiarity with the SAPI object
+model, so go read the SAPI docs if you haven't already.
 
-# Deploying Manta
+## Deploying Manta
 
 The Manta deployment documentation has moved to
-[manta](http://github.com/joyent/manta).
+[manta](http://github.com/TritonDataCenter/manta).

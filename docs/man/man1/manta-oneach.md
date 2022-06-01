@@ -1,4 +1,4 @@
-# MANTA-ONEACH 1 "2019" Manta "Manta Operator Commands"
+# MANTA-ONEACH 1 "2022" Manta "Manta Operator Commands"
 
 ## NAME
 
@@ -28,7 +28,6 @@ arbitrary set of Manta components.  Manta components include:
 When you use this command, you specify a **scope** (which identifies the
 components to operate on) and a **command** (which either represents a shell
 script to execute or else describes a file to transfer).
-
 
 ### Selecting a scope
 
@@ -70,7 +69,6 @@ You may also specify:
   `--global-zones --service webapi` executes the command once for each global
   zone where a "webapi" zone is running.
 
-
 ### Executing commands
 
 To execute a shell command in each of the selected zones, simply pass a single
@@ -79,7 +77,6 @@ to be quoted on the command-line.  The string is executed as a script with
 bash(1) in a login shell.  It may contain any valid bash input, including
 redirects, pipes, and other special characters (`>`, `<`, `|`, `&&`, and the
 like).
-
 
 ### Transferring files
 
@@ -116,7 +113,6 @@ and you may also specify:
 expected to be under the full control of trusted operators.  The mechanism used
 for per-zone file transfers is not safe when untrusted users have access to the
 selected zones.
-
 
 ## OTHER OPTIONS
 
@@ -171,7 +167,6 @@ following options may be specified:
   automatically configured based on the current SDC installation.  The default
   connect timeout is 5 seconds.
 
-
 ### Streaming JSON format
 
 If the `-J/--jsonstream` option is used, then the output consists of one line
@@ -197,7 +192,6 @@ properties:
   `-T/--exectimeout`) or the system failed to determine the result.  If the
   command was executed but it failed, that will not produce an error.  Callers
   should use `exit_status` to identify that case.
-
 
 ## EXAMPLES
 
@@ -226,7 +220,7 @@ display:
     storage          4ecda097 online
     storage          b150f995 online
 
-**Running commands in global zones**: report disk usage from zpool(1M) on each
+**Running commands in global zones**: report disk usage from zpool(8) on each
 of the compute nodes running at least one "postgres" instance:
 
     $ manta-oneach --global-zones --service postgres 'zpool list'
@@ -234,7 +228,7 @@ of the compute nodes running at least one "postgres" instance:
     NAME    SIZE  ALLOC   FREE  EXPANDSZ   FRAG    CAP  DEDUP  HEALTH  ALTROOT
     zones  1.62T   565G  1.07T         -    42%    33%  1.00x  ONLINE  -
 
-Similarly, the zpool(1M) command can provide more concise output:
+Similarly, the zpool(8) command can provide more concise output:
 
     $ manta-oneach -G -s postgres 'zpool list -H -o cap'
     HOSTNAME              OUTPUT
@@ -279,7 +273,6 @@ current directory to `/root` in each "postgres" zone:
     postgres         a5223321 ok
     postgres         ef318383 ok
 
-
 ## EXIT STATUS
 
 `0`
@@ -294,7 +287,6 @@ current directory to `/root` in each "postgres" zone:
 Programs that want to determine the precise result of each operation should use
 the `-J/--jsonstream` output format.
 
-
 ## ENVIRONMENT
 
 `LOG_LEVEL`
@@ -302,10 +294,9 @@ the `-J/--jsonstream` output format.
   The internal logger will use this log level and emit output to `stderr`.  This
   option is subject to change at any time.
 
-
 ## COPYRIGHT
 
-Copyright 2019 Joyent, Inc.
+Copyright 2022 MNX Cloud, Inc.
 
 ## SEE ALSO
 

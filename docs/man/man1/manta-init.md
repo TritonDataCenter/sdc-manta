@@ -1,14 +1,12 @@
-# MANTA-INIT 1 "2019" Manta "Manta Operator Commands"
+# MANTA-INIT 1 "2022" Manta "Manta Operator Commands"
 
 ## NAME
 
 manta-init - initialize or update a Manta deployment
 
-
 ## SYNOPSIS
 
 `manta-init [OPTIONS] -e|--email EMAIL`
-
 
 ## DESCRIPTION
 
@@ -21,7 +19,6 @@ newer Manta component images.
 Both of these use cases are described in the Manta Operator's Guide.  **Do not
 run this command except as documented in the Manta Operator's Guide.**
 
-
 ## OPTIONS
 
 `-B, --branch BRANCH`
@@ -31,7 +28,7 @@ run this command except as documented in the Manta Operator's Guide.**
   of their branch.
 
 `-C, --channel CHANNEL`
-  Specifies the updates.joyent.com channel from which images should be
+  Specifies the updates.tritondatacenter.com channel from which images should be
   downloaded unless `-n` is used. By default, this value is set to the current
   value of `update_channel` in this data-center, obtained from the `sdc`
   application in SAPI. Use the `sdcadm channel` command to view or change
@@ -63,11 +60,9 @@ run this command except as documented in the Manta Operator's Guide.**
   fact that `manta-factoryreset` will refuse to operate on "production"
   deployments.
 
-
 ## EXAMPLES
 
 See the Manta Operator's Guide.
-
 
 ## EXIT STATUS
 
@@ -77,10 +72,9 @@ See the Manta Operator's Guide.
 Non-zero
   Generic failure.
 
-
 ## COPYRIGHT
 
-Copyright 2019 Joyent, Inc.
+Copyright 2022 MNX Cloud, Inc.
 
 ## SEE ALSO
 
