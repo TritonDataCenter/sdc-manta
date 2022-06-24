@@ -8,6 +8,7 @@
 
 /*
  * Copyright 2020 Joyent, Inc.
+ * Copyright 2022 MNX Cloud, Inc.
  */
 
 /*
@@ -1078,8 +1079,12 @@ var pipelineFuncs = [
         assert.arrayOfObject(images, 'images');
         assert.func(cb, 'cb');
 
+        if (ARGV.channel) {
+            remote_url = remote_url + '?channel=' + ARGV.channel;
+        }
+
         log.info(
-            {images: images, remote_url: remote_url},
+            {images: images, remote_url: remote_url, channel: ARGV.channel},
             'downloading images'
         );
 
