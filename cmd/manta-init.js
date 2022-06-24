@@ -1084,7 +1084,7 @@ var pipelineFuncs = [
         }
 
         log.info(
-            {images: images, remote_url: remote_url, channel: state.channel},
+            {images: images, remote_url: remote_url, channel: ARGV.channel},
             'downloading images'
         );
 
