@@ -1,6 +1,17 @@
 {
 	"params": {
-		"networks": [ "external", "manta", "admin"],
+		"networks": [
+			{
+				"name": "admin"
+			},
+			{
+				"name": "manta"
+			},
+			{
+				"name": "external",
+				"primary": true
+			}
+		],
 		"ram": 1024,
 		"firewall_enabled": true
 	},
