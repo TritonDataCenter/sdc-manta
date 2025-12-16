@@ -1,5 +1,9 @@
 # sdc-manta changelog
 
+# 1.8.7
+
+- MANTA-5226: pgstatsmon probes time out on buckets deployment.
+
 # 1.8.1
 
 - MANTA-5325 Fix `manta-hotpatch-rebalancer-agent` to work in a multi-DC Manta.
