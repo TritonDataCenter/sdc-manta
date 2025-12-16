@@ -1,8 +1,8 @@
 {
     "name": "manta-deployment",
     "description": "Manta deployment configuration",
-    "version": "1.8.6",
-    "author": "MNX Cloud (mnx.io)",
+    "version": "1.8.7",
+    "author": "Edgecast Cloud (edgecast.io)",
     "license": "MPL-2.0",
     "private": true,
     "dependencies": {

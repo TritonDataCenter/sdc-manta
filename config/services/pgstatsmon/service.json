@@ -9,6 +9,7 @@
 		"VM_TAG_VALUE": "*postgres",
 		"NIC_TAG": "manta",
 		"VMAPI_POLL_INTERVAL": "60000",
+		"QUERY_TIMEOUT": "10000",
 		"SCRAPE_INTERVAL": "60000",
 		"VM_ROLES": [ {
 			"name": "postgres",
