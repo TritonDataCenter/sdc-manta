@@ -2,7 +2,7 @@
 
 # 1.8.7
 
-- MANTA-5226: pgstatsmon probes time out on buckets deployment.
+- MANTA-5226: pgstatsmon probes time out on buckets deployment. Changes the default pgstatsmon query timeout from 1s to 10s. This is can now be changed via the `QUERY_TIMEOUT` in SAPI.
 
 # 1.8.1
 
