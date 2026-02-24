@@ -120,6 +120,14 @@ function printShards(metadata, cb) {
         }
     }
 
+    if (metadata[common.BUCKETS_MDAPI_ENDPOINTS]) {
+        for (i = 0; i < metadata[common.BUCKETS_MDAPI_ENDPOINTS].length; i++) {
+            console.log(
+                sprintf(fmt, 'Mdapi', metadata[common.BUCKETS_MDAPI_ENDPOINTS][i].host)
+            );
+        }
+    }
+
     cb(null);
 }
 
@@ -161,6 +169,10 @@ Shardadm.prototype.do_set = function(subcmd, opts, args, cb) {
 
         if (opts.b) {
             addIndexShards(opts.b, common.BUCKETS_SHARDS);
+        }
+
+        if (opts.m) {
+            addIndexShards(opts.m, common.BUCKETS_MDAPI_ENDPOINTS);
         }
 
         if (Object.keys(metadata).length === 0) {
@@ -214,6 +226,11 @@ Shardadm.prototype.do_set.options = [
         names: ['b'],
         type: 'string',
         help: 'shards for manta buckets subsystem indexing tier'
+    },
+    {
+        names: ['m'],
+        type: 'string',
+        help: 'endpoints for buckets-mdapi metadata tier'
     },
     {
         names: ['s'],

@@ -179,6 +179,7 @@ set -o errexit
 # Buckets API shard/topology setup
 
 manta-shardadm set -b "$mdl_buckets_index_shards"
+manta-shardadm set -m "$mdl_buckets_index_shards"
 
 set +o errexit
 manta-adm create-topology -t buckets -v $mdl_buckets_topo_size -p 2030
