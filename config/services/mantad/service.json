@@ -1,0 +1,19 @@
+{
+	"params": {
+		"networks": [ "manta", "admin" ],
+		"ram": 16384,
+		"quota": 1024,
+		"zfs_io_priority": 100
+	},
+	"metadata": {
+		"SERVICE_NAME": "mantad",
+		"MANTAD_META_PLANE": "raft",
+		"MANTAD_REPLICATION": 3,
+		"MANTAD_REGION": "us-east-1",
+		"MANTAD_DATA_FSYNC": false,
+		"MANTAD_ADMIN_TOKEN": "",
+		"MANTAD_ROOT_ACCESS_KEY_ID": "",
+		"MANTAD_ROOT_SECRET_ACCESS_KEY": "",
+		"FDB_COORDINATORS": ""
+	}
+}
