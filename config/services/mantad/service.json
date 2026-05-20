@@ -1,7 +1,7 @@
 {
 	"params": {
 		"networks": [ "manta", "admin" ],
-		"ram": 16384,
+		"ram": 4096,
 		"quota": 1024,
 		"zfs_io_priority": 100
 	},
